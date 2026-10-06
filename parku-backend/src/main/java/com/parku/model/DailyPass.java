@@ -28,10 +28,11 @@ public class DailyPass {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "vehicle_id", nullable = false)
-    private UUID vehicleId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "vehicle_id", nullable = false)
+    private Vehicle vehicle;
 
-    @Column(name = "qr_token", nullable = false, unique = true, length = 100)
+    @Column(name = "qr_token", nullable = false, unique = true)
     private String qrToken;
 
     @Column(name = "amount_paid", nullable = false, precision = 12, scale = 2)
