@@ -124,4 +124,21 @@ public class WalletService {
                 transaction.getCreatedAt()
         );
     }
+
+    @Transactional
+    public void payParking(UUID userId, BigDecimal amount) {
+
+        Wallet wallet = getWalletByUserId(userId);
+
+        wallet.debit(amount);
+        walletRepository.save(wallet);
+
+        WalletTransaction transaction = new WalletTransaction();
+        transaction.setWallet(wallet);
+        transaction.setAmount(amount);
+        transaction.setType(TransactionType.PARKING_PAYMENT);
+        transaction.setDescription("Daily parking pass payment");
+
+        transactionRepository.save(transaction);
+    }
 }
