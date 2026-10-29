@@ -1,0 +1,13 @@
+.env
+.local/
+**/target/
+**/.dart_tool/
+**/build/
+**/.flutter-plugins-dependencies
+**/.idea/
+**/local.properties
+**/android/.gradle/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/gradle/wrapper/gradle-wrapper.jar
+*.log
