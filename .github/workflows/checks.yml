@@ -1,0 +1,50 @@
+name: Verificaciones
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: parku_test
+          POSTGRES_USER: parku
+          POSTGRES_PASSWORD: test_local
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U parku -d parku_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_URL: jdbc:postgresql://localhost:5432/parku_test
+      DB_USER: parku
+      DB_PASSWORD: test_local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - run: chmod +x mvnw && ./mvnw -B spotless:check test
+        working-directory: backend
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.8'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: mobile
+      - run: dart format --output=none --set-exit-if-changed lib test
+        working-directory: mobile
+      - run: flutter analyze
+        working-directory: mobile
+      - run: flutter test
+        working-directory: mobile
+      - run: flutter build web
+        working-directory: mobile
