@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: parku
+      POSTGRES_USER: parku
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-parku_local}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - parku_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parku -d parku"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  parku_data:
