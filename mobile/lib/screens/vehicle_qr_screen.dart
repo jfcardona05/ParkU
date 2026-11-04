@@ -52,12 +52,13 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
       }
       if (mounted) setState(() => _qr = qr);
     } catch (error) {
-      if (mounted)
+      if (mounted) {
         setState(
           () => _error = error is ApiException
               ? error.message
               : 'No se pudo cargar el QR. Intenta nuevamente.',
         );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
