@@ -371,8 +371,9 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                 ActionChip(
                   label: const Text('\$4.000'),
                   onPressed: () => _amountController.text = '4000',
-                  backgroundColor: const Color(0xFF1E3A8A)
-                      .withValues(alpha: 0.4),
+                  backgroundColor: const Color(
+                    0xFF1E3A8A,
+                  ).withValues(alpha: 0.4),
                   labelStyle: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -381,8 +382,9 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                 ActionChip(
                   label: const Text('\$5.000'),
                   onPressed: () => _amountController.text = '5000',
-                  backgroundColor: const Color(0xFF1E3A8A)
-                      .withValues(alpha: 0.4),
+                  backgroundColor: const Color(
+                    0xFF1E3A8A,
+                  ).withValues(alpha: 0.4),
                   labelStyle: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -391,8 +393,9 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                 ActionChip(
                   label: const Text('\$20.000'),
                   onPressed: () => _amountController.text = '20000',
-                  backgroundColor: const Color(0xFF1E3A8A)
-                      .withValues(alpha: 0.4),
+                  backgroundColor: const Color(
+                    0xFF1E3A8A,
+                  ).withValues(alpha: 0.4),
                   labelStyle: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,

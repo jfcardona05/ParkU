@@ -173,12 +173,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.all(10),
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEF4444)
-                              .withValues(alpha: 0.12),
+                          color: const Color(
+                            0xFFEF4444,
+                          ).withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: const Color(0xFFEF4444)
-                                .withValues(alpha: 0.4),
+                            color: const Color(
+                              0xFFEF4444,
+                            ).withValues(alpha: 0.4),
                           ),
                         ),
                         child: Row(
@@ -323,8 +325,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 alignment: WrapAlignment.center,
                 children: [
                   ActionChip(
-                    backgroundColor: const Color(0xFF1E3A8A)
-                        .withValues(alpha: 0.3),
+                    backgroundColor: const Color(
+                      0xFF1E3A8A,
+                    ).withValues(alpha: 0.3),
                     label: const Text(
                       'Ronaldo Mosquera (\$15.000)',
                       style: TextStyle(color: Colors.white, fontSize: 11),
@@ -335,8 +338,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   ActionChip(
-                    backgroundColor: const Color(0xFF1E3A8A)
-                        .withValues(alpha: 0.3),
+                    backgroundColor: const Color(
+                      0xFF1E3A8A,
+                    ).withValues(alpha: 0.3),
                     label: const Text(
                       'Juan Felipe Cardona (Moto)',
                       style: TextStyle(color: Colors.white, fontSize: 11),
@@ -345,8 +349,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         _fillDemo('juan.cardona@usantotomas.edu.co', 'pass123'),
                   ),
                   ActionChip(
-                    backgroundColor: const Color(0xFF1E3A8A)
-                        .withValues(alpha: 0.3),
+                    backgroundColor: const Color(
+                      0xFF1E3A8A,
+                    ).withValues(alpha: 0.3),
                     label: const Text(
                       'María Gómez (\$0)',
                       style: TextStyle(color: Colors.white, fontSize: 11),
@@ -355,8 +360,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         _fillDemo('maria.gomez@usantotomas.edu.co', 'usta2026'),
                   ),
                   ActionChip(
-                    backgroundColor: const Color(0xFFF59E0B)
-                        .withValues(alpha: 0.2),
+                    backgroundColor: const Color(
+                      0xFFF59E0B,
+                    ).withValues(alpha: 0.2),
                     label: const Text(
                       '🏢 Operador Taquilla USTA',
                       style: TextStyle(

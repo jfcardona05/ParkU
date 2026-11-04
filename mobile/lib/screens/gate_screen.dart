@@ -148,7 +148,8 @@ class _GateScreenState extends State<GateScreen> {
                 enabled: !_busy && _preview == null,
                 decoration: const InputDecoration(
                   labelText: 'Código QR',
-                  helperText: 'También puedes introducir el código con un lector externo.',
+                  helperText:
+                      'También puedes introducir el código con un lector externo.',
                 ),
               ),
               TextButton(
