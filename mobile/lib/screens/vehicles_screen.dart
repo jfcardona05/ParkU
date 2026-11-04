@@ -110,8 +110,9 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
         }
       } on ApiException catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     }
   }
@@ -251,8 +252,9 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                                         width: 44,
                                         height: 44,
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF1E3A8A)
-                                              .withValues(alpha: 0.3),
+                                          color: const Color(
+                                            0xFF1E3A8A,
+                                          ).withValues(alpha: 0.3),
                                           borderRadius: BorderRadius.circular(
                                             10,
                                           ),
