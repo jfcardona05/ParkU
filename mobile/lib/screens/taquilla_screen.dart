@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
 import '../models/user_model.dart';
 import 'login_screen.dart';
+import 'gate_screen.dart';
+import '../services/gate_service.dart';
 
 class TaquillaScreen extends StatefulWidget {
   final ApiService apiService;
@@ -143,6 +146,21 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
           ],
         ),
         actions: [
+          if (const bool.fromEnvironment('PARKU_QR_DEMO'))
+            IconButton(
+              tooltip: 'Demo portería',
+              icon: const Icon(Icons.qr_code_scanner),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => GateScreen(
+                    apiService: widget.apiService,
+                    gateway: DemoGateGateway(),
+                  ),
+                ),
+              ),
+            ),
+
           IconButton(
             icon: const Icon(Icons.logout, color: Color(0xFFF87171)),
             onPressed: _handleLogout,
@@ -353,9 +371,8 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                 ActionChip(
                   label: const Text('\$4.000'),
                   onPressed: () => _amountController.text = '4000',
-                  backgroundColor: const Color(
-                    0xFF1E3A8A,
-                  ).withValues(alpha: 0.4),
+                  backgroundColor: const Color(0xFF1E3A8A)
+                      .withValues(alpha: 0.4),
                   labelStyle: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -364,9 +381,8 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                 ActionChip(
                   label: const Text('\$5.000'),
                   onPressed: () => _amountController.text = '5000',
-                  backgroundColor: const Color(
-                    0xFF1E3A8A,
-                  ).withValues(alpha: 0.4),
+                  backgroundColor: const Color(0xFF1E3A8A)
+                      .withValues(alpha: 0.4),
                   labelStyle: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -375,9 +391,8 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                 ActionChip(
                   label: const Text('\$20.000'),
                   onPressed: () => _amountController.text = '20000',
-                  backgroundColor: const Color(
-                    0xFF1E3A8A,
-                  ).withValues(alpha: 0.4),
+                  backgroundColor: const Color(0xFF1E3A8A)
+                      .withValues(alpha: 0.4),
                   labelStyle: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,

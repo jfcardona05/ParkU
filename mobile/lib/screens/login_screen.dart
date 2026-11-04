@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
 import 'dashboard_screen.dart';
 import 'taquilla_screen.dart';
+import 'gate_screen.dart';
+import '../services/gate_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final ApiService apiService;
@@ -56,7 +59,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // REGLA: Si el usuario es el Operador de Taquilla, se abre el módulo de Taquilla
       // Si es un conductor/estudiante, se abre el Dashboard sin opción de recarga propia
-      final destination = (user?.role == 'operador')
+      final destination = (user?.role == 'guard' || user?.role == 'admin')
+          ? GateScreen(
+              apiService: widget.apiService,
+              gateway: const UnavailableGateGateway(),
+            )
+          : (user?.role == 'operador')
           ? TaquillaScreen(apiService: widget.apiService)
           : DashboardScreen(apiService: widget.apiService);
 
@@ -165,14 +173,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.all(10),
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
-                          color: const Color(
-                            0xFFEF4444,
-                          ).withValues(alpha: 0.12),
+                          color: const Color(0xFFEF4444)
+                              .withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: const Color(
-                              0xFFEF4444,
-                            ).withValues(alpha: 0.4),
+                            color: const Color(0xFFEF4444)
+                                .withValues(alpha: 0.4),
                           ),
                         ),
                         child: Row(
@@ -317,9 +323,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 alignment: WrapAlignment.center,
                 children: [
                   ActionChip(
-                    backgroundColor: const Color(
-                      0xFF1E3A8A,
-                    ).withValues(alpha: 0.3),
+                    backgroundColor: const Color(0xFF1E3A8A)
+                        .withValues(alpha: 0.3),
                     label: const Text(
                       'Ronaldo Mosquera (\$15.000)',
                       style: TextStyle(color: Colors.white, fontSize: 11),
@@ -330,9 +335,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   ActionChip(
-                    backgroundColor: const Color(
-                      0xFF1E3A8A,
-                    ).withValues(alpha: 0.3),
+                    backgroundColor: const Color(0xFF1E3A8A)
+                        .withValues(alpha: 0.3),
                     label: const Text(
                       'Juan Felipe Cardona (Moto)',
                       style: TextStyle(color: Colors.white, fontSize: 11),
@@ -341,9 +345,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         _fillDemo('juan.cardona@usantotomas.edu.co', 'pass123'),
                   ),
                   ActionChip(
-                    backgroundColor: const Color(
-                      0xFF1E3A8A,
-                    ).withValues(alpha: 0.3),
+                    backgroundColor: const Color(0xFF1E3A8A)
+                        .withValues(alpha: 0.3),
                     label: const Text(
                       'María Gómez (\$0)',
                       style: TextStyle(color: Colors.white, fontSize: 11),
@@ -352,9 +355,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         _fillDemo('maria.gomez@usantotomas.edu.co', 'usta2026'),
                   ),
                   ActionChip(
-                    backgroundColor: const Color(
-                      0xFFF59E0B,
-                    ).withValues(alpha: 0.2),
+                    backgroundColor: const Color(0xFFF59E0B)
+                        .withValues(alpha: 0.2),
                     label: const Text(
                       '🏢 Operador Taquilla USTA',
                       style: TextStyle(
