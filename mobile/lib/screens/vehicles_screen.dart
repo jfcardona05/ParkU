@@ -1,9 +1,13 @@
 import '../widgets/load_error.dart';
+
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
 import '../models/vehicle_model.dart';
 import '../widgets/license_plate_widget.dart';
 import 'add_vehicle_screen.dart';
+import 'vehicle_qr_screen.dart';
+import '../services/vehicle_qr_service.dart';
 
 class VehiclesScreen extends StatefulWidget {
   final ApiService apiService;
@@ -106,9 +110,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
         }
       } on ApiException catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
       }
     }
   }
@@ -248,9 +251,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                                         width: 44,
                                         height: 44,
                                         decoration: BoxDecoration(
-                                          color: const Color(
-                                            0xFF1E3A8A,
-                                          ).withValues(alpha: 0.3),
+                                          color: const Color(0xFF1E3A8A)
+                                              .withValues(alpha: 0.3),
                                           borderRadius: BorderRadius.circular(
                                             10,
                                           ),
@@ -320,6 +322,24 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                                               ),
                                             ),
                                           ],
+                                        ),
+                                      ),
+                                      IconButton(
+                                        tooltip: 'Mostrar QR',
+                                        icon: const Icon(Icons.qr_code),
+                                        onPressed: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => VehicleQrScreen(
+                                              vehicle: v,
+                                              source:
+                                                  const bool.fromEnvironment(
+                                                    'PARKU_QR_DEMO',
+                                                  )
+                                                  ? DemoVehicleQrSource()
+                                                  : const UnavailableVehicleQrSource(),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                       IconButton(
