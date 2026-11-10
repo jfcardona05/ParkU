@@ -1,4 +1,9 @@
 class TransactionModel {
+  static const inPersonRechargeType = 'RECARGA_PRESENCIAL';
+
+  // Category used by Flutter adapters for a confirmed parking debit.
+  static const parkingChargeType = 'COBRO_ESTACIONAMIENTO';
+
   final int id;
   final String type;
   final int amount;
@@ -6,6 +11,9 @@ class TransactionModel {
   final String reference;
   final int balanceAfter;
   final String createdAt;
+
+  // Display value supplied by the parking adapter once its contract is agreed.
+  final String? parkingRateLabel;
 
   TransactionModel({
     required this.id,
@@ -15,12 +23,13 @@ class TransactionModel {
     required this.reference,
     required this.balanceAfter,
     required this.createdAt,
+    this.parkingRateLabel,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
     return TransactionModel(
       id: json['id'] as int? ?? 0,
-      type: json['type'] as String? ?? 'RECARGA_PRESENCIAL',
+      type: json['type'] as String? ?? inPersonRechargeType,
       amount: json['amount'] as int? ?? 0,
       pointName:
           json['point_name'] as String? ?? 'Punto 1 - Portería Principal USTA',

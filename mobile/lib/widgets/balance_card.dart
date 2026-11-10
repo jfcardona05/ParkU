@@ -12,10 +12,6 @@ class BalanceCard extends StatelessWidget {
     final currencyFormatter = NumberFormat('#,###', 'es_CO');
     final formattedBalance = currencyFormatter.format(balance);
 
-    // Tarifas USTA: Moto $4.000, Carro $5.000
-    final motoExits = balance ~/ 4000;
-    final carExits = balance ~/ 5000;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -104,33 +100,6 @@ class BalanceCard extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.directions_car,
-                  color: Color(0xFFF59E0B),
-                  size: 16,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '~ $carExits salidas auto o ~ $motoExits moto',
-                  style: const TextStyle(
-                    color: Color(0xFFE2E8F0),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
           ),
           const SizedBox(height: 14),
           Container(
