@@ -193,13 +193,16 @@ No borrar ni recalcular recargas existentes.
 | --- | --- |
 | VehicleQrSource.issue(vehicle) | POST QR, vehicle_id → vehicleId, expires_at → expiresAt; isDemo=false |
 | GateGateway.inspect(token) | POST inspect, conservar token local y mapear plate/expires_at |
-| GateGateway.confirm(preview,action,requestId) | POST operations; entry/exit en minúscula; devolver message y actualizar saldo/estado |
+| GateGateway.confirm(preview,action,requestId) | POST operations; entry/exit en minúscula; generar UUID en lugar de UniqueKey().toString(); devolver message y actualizar saldo/estado |
 | ApiService.getBalance/getHistory | Conservar rutas; refrescar tras salida y recarga |
 | TransactionModel | Leer parking_rate_label opcional; hoy fromJson no lo asigna |
 | WalletScreen.loadParkingStatus | Adaptador de estado por vehículo; acordar selección cuando hay varios vehículos |
 
 ApiService._request es privado a su biblioteca Dart; Juan deberá exponer un método
 autenticado reutilizable o colocar los adaptadores dentro de ApiService.
+GateScreen actualmente usa UniqueKey().toString(), que no es UUID; Juan debe reemplazarlo
+por un UUID persistido durante el intento y conservarlo en cada reintento, o acordar otro
+formato de clave antes de conectar. No enviar la clave actual a una API que exija UUID.
 No duplicar credenciales ni usar el QR como Bearer. Agregar lectura de code sin perder message.
 La cámara no se prueba con widgets; registrar dispositivo y permiso real.
 No se modifican archivos Flutter como parte de S2-00.
