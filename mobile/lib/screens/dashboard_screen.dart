@@ -1,10 +1,13 @@
 import '../widgets/load_error.dart';
+
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
 import '../models/vehicle_model.dart';
 import '../models/transaction_model.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/license_plate_widget.dart';
+import '../widgets/wallet_movement_tile.dart';
 import 'vehicles_screen.dart';
 import 'wallet_screen.dart';
 import 'login_screen.dart';
@@ -196,7 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             BalanceCard(balance: _balance),
             const SizedBox(height: 16),
 
-            // Tarifas Oficiales USTA
+            // Valores del prototipo, sujetos a confirmación.
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
@@ -212,7 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Column(
                     children: [
                       Text(
-                        'Tarifa Moto USTA',
+                        'Tarifa de referencia · Moto',
                         style: TextStyle(color: Colors.white60, fontSize: 11),
                       ),
                       SizedBox(height: 2),
@@ -233,7 +236,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Column(
                     children: [
                       Text(
-                        'Tarifa Automóvil USTA',
+                        'Tarifa de referencia · Automóvil',
                         style: TextStyle(color: Colors.white60, fontSize: 11),
                       ),
                       SizedBox(height: 2),
@@ -369,9 +372,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
 
             const SizedBox(height: 24),
-            // Últimas recargas presenciales
             const Text(
-              'Últimas Recargas Presenciales (HU-02)',
+              'Últimos movimientos',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -379,78 +381,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             const SizedBox(height: 10),
-
             if (_recentTx.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Text(
-                  'Aún no tienes recargas registradas.',
-                  style: TextStyle(color: Colors.white38, fontSize: 13),
+                  'Aún no tienes movimientos registrados.',
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
               )
             else
-              ..._recentTx
-                  .take(3)
-                  .map(
-                    (tx) => Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF111827),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.06),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const CircleAvatar(
-                                radius: 16,
-                                backgroundColor: Color(0xFF064E3B),
-                                child: Icon(
-                                  Icons.check,
-                                  color: Color(0xFF10B981),
-                                  size: 16,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    tx.pointName,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Ref: ${tx.reference}',
-                                    style: const TextStyle(
-                                      color: Colors.white38,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Text(
-                            '+ \$${tx.amount} COP',
-                            style: const TextStyle(
-                              color: Color(0xFF10B981),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+              for (final movement in _recentTx.take(3))
+                WalletMovementTile(movement: movement),
           ],
         ),
       ),

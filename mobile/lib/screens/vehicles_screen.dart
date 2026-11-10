@@ -317,7 +317,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                                               ),
                                             ),
                                             Text(
-                                              'Tarifa USTA: \$${v.defaultRate} COP / día',
+                                              'Tarifa de referencia: \$${v.defaultRate} COP / día',
                                               style: const TextStyle(
                                                 color: Color(0xFF93C5FD),
                                                 fontSize: 11,

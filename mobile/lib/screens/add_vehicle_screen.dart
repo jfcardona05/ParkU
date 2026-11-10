@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
 
 class AddVehicleScreen extends StatefulWidget {
@@ -149,11 +150,13 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                   items: const [
                     DropdownMenuItem(
                       value: 'automovil',
-                      child: Text('Automóvil (Tarifa USTA: \$5.000 COP)'),
+                      child: Text(
+                        'Automóvil (Tarifa de referencia: \$5.000 COP)',
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'moto',
-                      child: Text('Moto (Tarifa USTA: \$4.000 COP)'),
+                      child: Text('Moto (Tarifa de referencia: \$4.000 COP)'),
                     ),
                   ],
                   onChanged: (val) {
