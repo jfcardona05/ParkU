@@ -24,11 +24,17 @@ public class ApiErrors {
             Map.of(
                 "success",
                 false,
+                "code",
+                ex.getStatusCode().value() == 401 ? "UNAUTHORIZED" : "REQUEST_REJECTED",
                 "message",
                 ex.getReason() == null ? "Solicitud rechazada" : ex.getReason()));
   }
 
-  @ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
+  @ExceptionHandler({
+    MethodArgumentNotValidException.class,
+    HttpMessageNotReadableException.class,
+    org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class
+  })
   public ResponseEntity<?> validation(Exception ex) {
     return ResponseEntity.badRequest()
         .body(
@@ -36,7 +42,9 @@ public class ApiErrors {
                 "success",
                 false,
                 "message",
-                "Datos inválidos: revise los campos obligatorios y sus valores"));
+                "Datos inválidos: revise los campos obligatorios y sus valores",
+                "code",
+                "INVALID_REQUEST"));
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)
