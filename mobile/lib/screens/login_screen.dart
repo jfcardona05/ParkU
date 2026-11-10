@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
 import 'dashboard_screen.dart';
 import 'taquilla_screen.dart';
+import 'gate_screen.dart';
+import '../services/gate_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final ApiService apiService;
@@ -56,7 +59,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // REGLA: Si el usuario es el Operador de Taquilla, se abre el módulo de Taquilla
       // Si es un conductor/estudiante, se abre el Dashboard sin opción de recarga propia
-      final destination = (user?.role == 'operador')
+      final destination = (user?.role == 'guard' || user?.role == 'admin')
+          ? GateScreen(
+              apiService: widget.apiService,
+              gateway: const UnavailableGateGateway(),
+            )
+          : (user?.role == 'operador')
           ? TaquillaScreen(apiService: widget.apiService)
           : DashboardScreen(apiService: widget.apiService);
 

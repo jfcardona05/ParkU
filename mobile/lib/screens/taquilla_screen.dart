@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
 import '../models/user_model.dart';
 import 'login_screen.dart';
+import 'gate_screen.dart';
+import '../services/gate_service.dart';
 
 class TaquillaScreen extends StatefulWidget {
   final ApiService apiService;
@@ -143,6 +146,21 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
           ],
         ),
         actions: [
+          if (const bool.fromEnvironment('PARKU_QR_DEMO'))
+            IconButton(
+              tooltip: 'Demo portería',
+              icon: const Icon(Icons.qr_code_scanner),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => GateScreen(
+                    apiService: widget.apiService,
+                    gateway: DemoGateGateway(),
+                  ),
+                ),
+              ),
+            ),
+
           IconButton(
             icon: const Icon(Icons.logout, color: Color(0xFFF87171)),
             onPressed: _handleLogout,
