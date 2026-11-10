@@ -105,4 +105,72 @@ class SprintTwoApiTest {
             .toList();
     assertThat(results).containsExactlyInAnyOrder(200, 409);
   }
+
+  Map<String, Object> operation(String token, String action, String key) {
+    return Map.of("token", token, "action", action, "request_id", key);
+  }
+
+  @Test
+  void entryIsAuthorizedIdempotentAndRejectsDuplicateVehicle() {
+    db.update("UPDATE parking_settings SET capacity=10 WHERE id=1");
+    String token = qr(1, "estudiante");
+    var body = operation(token, "entry", "[#flutter-key]");
+    error(post("/api/gate/operations", body, "estudiante"), 403, "FORBIDDEN");
+    var entered = post("/api/gate/operations", body, "guard");
+    assertThat(entered.getStatusCode().value()).isEqualTo(201);
+    var retry = post("/api/gate/operations", body, "guard");
+    assertThat(retry.getStatusCode().value()).isEqualTo(200);
+    assertThat(retry.getBody())
+        .containsEntry("operation_id", entered.getBody().get("operation_id"))
+        .containsEntry("replayed", true);
+    error(
+        post("/api/gate/operations", operation(token, "exit", "[#flutter-key]"), "guard"),
+        409,
+        "IDEMPOTENCY_CONFLICT");
+    error(
+        post("/api/gate/operations", operation(token, "entry", "new-key"), "guard"),
+        409,
+        "QR_USED");
+    error(
+        post("/api/gate/operations", operation(qr(1, "estudiante"), "entry", "another"), "guard"),
+        409,
+        "ALREADY_INSIDE");
+    error(call(HttpMethod.DELETE, "/api/vehicles/1", null, "estudiante"), 409, "VEHICLE_IN_USE");
+    error(
+        post("/api/gate/operations", operation(qr(2, "docente"), "exit", "no-entry"), "guard"),
+        409,
+        "NOT_INSIDE");
+    assertThat(db.queryForObject("SELECT count(*) FROM parking_operations", Integer.class))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void simultaneousEntryAndCapacityDoNotOverbook() {
+    db.update("UPDATE parking_settings SET capacity=1 WHERE id=1");
+    String one = qr(1, "estudiante"), two = qr(2, "docente");
+    var a =
+        CompletableFuture.supplyAsync(
+            () -> post("/api/gate/operations", operation(one, "entry", "a"), "guard"));
+    var b =
+        CompletableFuture.supplyAsync(
+            () -> post("/api/gate/operations", operation(two, "entry", "b"), "guard"));
+    assertThat(List.of(a.join().getStatusCode().value(), b.join().getStatusCode().value()))
+        .containsExactlyInAnyOrder(201, 409);
+    assertThat(
+            db.queryForObject(
+                "SELECT count(*) FROM parking_visits WHERE exited_at IS NULL", Integer.class))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void simultaneousSameRequestProducesOneReceipt() {
+    db.update("UPDATE parking_settings SET capacity=10 WHERE id=1");
+    var body = operation(qr(1, "estudiante"), "entry", "same");
+    var a = CompletableFuture.supplyAsync(() -> post("/api/gate/operations", body, "guard"));
+    var b = CompletableFuture.supplyAsync(() -> post("/api/gate/operations", body, "guard"));
+    assertThat(List.of(a.join().getStatusCode().value(), b.join().getStatusCode().value()))
+        .containsExactlyInAnyOrder(201, 200);
+    assertThat(a.join().getBody().get("operation_id"))
+        .isEqualTo(b.join().getBody().get("operation_id"));
+  }
 }

@@ -79,6 +79,11 @@ public class VehicleQrService {
   public Map<String, Object> inspect(String auth, String token) {
     identity.requireRole(auth, "guard", "admin");
     var qr = inspectToken(token);
+    boolean inside =
+        !db.queryForList(
+                "SELECT id FROM parking_visits WHERE vehicle_id=? AND exited_at IS NULL",
+                qr.get("vehicle_id"))
+            .isEmpty();
     return Map.of(
         "success",
         true,
@@ -87,6 +92,10 @@ public class VehicleQrService {
         "plate",
         qr.get("plate"),
         "expires_at",
-        ((java.sql.Timestamp) qr.get("expires_at")).toInstant());
+        ((java.sql.Timestamp) qr.get("expires_at")).toInstant(),
+        "parking_state",
+        inside ? "INSIDE" : "OUTSIDE",
+        "allowed_action",
+        inside ? "exit" : "entry");
   }
 }
