@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,9 @@ class SprintTwoApiTest {
           VehicleQrService.digest(role),
           id);
     }
+    db.update(
+        "INSERT INTO parking_rates(vehicle_type,amount,block_seconds,minimum_blocks) VALUES('moto',4000,3600,1),('automovil',5000,3600,1)");
+    db.update("UPDATE parking_settings SET capacity=NULL WHERE id=1");
     db.update(
         "INSERT INTO vehicles(user_id,plate,type) VALUES (1,'ABC123','moto'),(2,'XYZ789','automovil')");
   }
@@ -172,5 +176,174 @@ class SprintTwoApiTest {
         .containsExactlyInAnyOrder(201, 200);
     assertThat(a.join().getBody().get("operation_id"))
         .isEqualTo(b.join().getBody().get("operation_id"));
+  }
+
+  void capacity(int value) {
+    assertThat(
+            post("/api/admin/parking/settings", Map.of("capacity", value), "admin")
+                .getStatusCode()
+                .value())
+        .isEqualTo(200);
+  }
+
+  ResponseEntity<Map> enter(long id, String user) {
+    return post(
+        "/api/gate/operations",
+        operation(qr(id, user), "entry", UUID.randomUUID().toString()),
+        "guard");
+  }
+
+  ResponseEntity<Map> exit(long id, String user) {
+    return post(
+        "/api/gate/operations",
+        operation(qr(id, user), "exit", UUID.randomUUID().toString()),
+        "guard");
+  }
+
+  @Test
+  void adminCanChangeRatesButCannotRepriceAnActiveVisit() {
+    capacity(10);
+    assertThat(enter(1, "estudiante").getStatusCode().value()).isEqualTo(201);
+    var rate =
+        Map.of("vehicle_type", "moto", "amount", 6000, "block_seconds", 3600, "minimum_blocks", 1);
+    error(post("/api/admin/parking/rates", rate, "guard"), 403, "FORBIDDEN");
+    error(post("/api/admin/parking/rates", rate, "operador"), 403, "FORBIDDEN");
+    assertThat(post("/api/admin/parking/rates", rate, "admin").getStatusCode().value())
+        .isEqualTo(201);
+    assertThat(((Map) exit(1, "estudiante").getBody().get("charge")).get("amount")).isEqualTo(4000);
+    assertThat(enter(1, "estudiante").getStatusCode().value()).isEqualTo(201);
+    assertThat(((Map) exit(1, "estudiante").getBody().get("charge")).get("amount")).isEqualTo(6000);
+    assertThat(db.queryForObject("SELECT balance FROM users WHERE id=1", Long.class)).isZero();
+    assertThat(
+            db.queryForObject(
+                "SELECT count(*) FROM transactions WHERE type='COBRO_ESTACIONAMIENTO'",
+                Integer.class))
+        .isEqualTo(2);
+  }
+
+  @Test
+  void insufficientFundsRollBackAndRechargeAllowsRetryWithoutDoubleDebit() {
+    capacity(10);
+    enter(2, "docente");
+    db.update("UPDATE users SET balance=1000 WHERE id=2");
+    String token = qr(2, "docente");
+    var body = operation(token, "exit", "exit-retry");
+    error(post("/api/gate/operations", body, "guard"), 409, "INSUFFICIENT_BALANCE");
+    assertThat(db.queryForObject("SELECT count(*) FROM transactions", Integer.class)).isZero();
+    assertThat(
+            db.queryForObject(
+                "SELECT count(*) FROM parking_visits WHERE exited_at IS NULL", Integer.class))
+        .isEqualTo(1);
+    assertThat(post("/api/gate/inspect", Map.of("token", token), "guard").getStatusCode().value())
+        .isEqualTo(200);
+    assertThat(
+            post(
+                    "/api/wallet/recharge",
+                    Map.of(
+                        "amount",
+                        5000,
+                        "point_name",
+                        "Punto 1 - Portería Principal USTA",
+                        "user_id",
+                        2),
+                    "operador")
+                .getStatusCode()
+                .value())
+        .isEqualTo(200);
+    var paid = post("/api/gate/operations", body, "guard");
+    assertThat(paid.getStatusCode().value()).isEqualTo(201);
+    assertThat(((Map) paid.getBody().get("charge")).get("amount")).isEqualTo(5000);
+    db.update("UPDATE vehicle_qr SET expires_at=clock_timestamp()-INTERVAL '1 minute'");
+    assertThat(post("/api/gate/operations", body, "guard").getStatusCode().value()).isEqualTo(200);
+    assertThat(db.queryForObject("SELECT balance FROM users WHERE id=2", Long.class))
+        .isEqualTo(1000);
+  }
+
+  @Test
+  void concurrentExitsOnSameWalletCannotOverdraw() {
+    capacity(10);
+    db.update("INSERT INTO vehicles(user_id,plate,type) VALUES(1,'AAA999','moto')");
+    db.update("UPDATE users SET balance=6000 WHERE id=1");
+    enter(1, "estudiante");
+    enter(3, "estudiante");
+    String aToken = qr(1, "estudiante"), bToken = qr(3, "estudiante");
+    var a =
+        CompletableFuture.supplyAsync(
+            () -> post("/api/gate/operations", operation(aToken, "exit", "a"), "guard"));
+    var b =
+        CompletableFuture.supplyAsync(
+            () -> post("/api/gate/operations", operation(bToken, "exit", "b"), "guard"));
+    assertThat(List.of(a.join().getStatusCode().value(), b.join().getStatusCode().value()))
+        .containsExactlyInAnyOrder(201, 409);
+    assertThat(db.queryForObject("SELECT balance FROM users WHERE id=1", Long.class))
+        .isEqualTo(2000);
+    assertThat(db.queryForObject("SELECT count(*) FROM transactions", Integer.class)).isEqualTo(1);
+  }
+
+  @Test
+  void repeatedConcurrentExitAndRechargeAreConsistent() {
+    capacity(10);
+    enter(1, "estudiante");
+    var body = operation(qr(1, "estudiante"), "exit", "same-exit");
+    var a = CompletableFuture.supplyAsync(() -> post("/api/gate/operations", body, "guard"));
+    var b = CompletableFuture.supplyAsync(() -> post("/api/gate/operations", body, "guard"));
+    var c =
+        CompletableFuture.supplyAsync(
+            () ->
+                post(
+                    "/api/wallet/recharge",
+                    Map.of(
+                        "amount",
+                        2000,
+                        "point_name",
+                        "Punto 1 - Portería Principal USTA",
+                        "user_id",
+                        1),
+                    "operador"));
+    assertThat(List.of(a.join().getStatusCode().value(), b.join().getStatusCode().value()))
+        .containsExactlyInAnyOrder(201, 200);
+    assertThat(c.join().getStatusCode().value()).isEqualTo(200);
+    assertThat(db.queryForObject("SELECT balance FROM users WHERE id=1", Long.class))
+        .isEqualTo(8000);
+    assertThat(db.queryForObject("SELECT count(*) FROM transactions", Integer.class)).isEqualTo(2);
+  }
+
+  @Test
+  void configurationAndCapacityAreValidated() {
+    error(
+        post(
+            "/api/gate/operations",
+            operation(qr(1, "estudiante"), "entry", "not-configured"),
+            "guard"),
+        503,
+        "PARKING_NOT_CONFIGURED");
+    capacity(2);
+    enter(1, "estudiante");
+    enter(2, "docente");
+    error(
+        post("/api/admin/parking/settings", Map.of("capacity", 1), "admin"),
+        409,
+        "CAPACITY_BELOW_OCCUPANCY");
+    assertThat(
+            post(
+                    "/api/admin/parking/rates",
+                    Map.of(
+                        "vehicle_type",
+                        "moto",
+                        "amount",
+                        -1,
+                        "block_seconds",
+                        0,
+                        "minimum_blocks",
+                        0),
+                    "admin")
+                .getStatusCode()
+                .value())
+        .isEqualTo(400);
+    assertThat(
+            post("/api/admin/parking/settings", Map.of("capacity", 0), "admin")
+                .getStatusCode()
+                .value())
+        .isEqualTo(400);
   }
 }
