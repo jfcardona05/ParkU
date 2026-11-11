@@ -67,7 +67,23 @@ Las pruebas de integración Flutter crean una cuenta y una recarga reales en la 
 - `docs/revision.md`: pasos para revisar e integrar los cuatro commits nuevos.
 
 Repositorio: https://github.com/jfcardona05/ParkU
-Tablero: https://trello.com/b/sYfs1JCN/parku
+Tablero Sprint 2: https://github.com/users/jfcardona05/projects/2
+
+## Revisión y cierre del Sprint 2
+
+El backend de los PR #31–35 está integrado. La conexión real de Flutter se entrega
+en el [PR #36](https://github.com/jfcardona05/ParkU/pull/36), pendiente de revisión de
+Ronaldo y merge en el corte documental del 10/11/2026. Para probarla antes de integrar,
+usar su rama `feature/s2-08-live-integration`; el modo real predeterminado corresponde
+a esa rama, no al Flutter anterior de `main`.
+
+- [Compatibilidad de Flutter con el contrato S2-00](docs/s2-00-compatibilidad-flutter.md).
+- [Matriz de pruebas, trazabilidad y revisiones](docs/s2-09-cierre-y-evidencias.md).
+- [Guion de demo, pruebas físicas y borrador de acta](docs/s2-09-demo-y-acta.md).
+
+El PR #36 pasó los checks de backend y Flutter y una prueba local contra API/PostgreSQL
+reales. Cámara física, permisos, APK y aceptación conjunta siguen pendientes.
+S2-00 y S2-09 no se declaran terminadas por publicar estos documentos.
 ## Backend del Sprint 2
 
 Las API de Sprint 2 se entregan para revisión cruzada; revisar estado de los PR antes de
