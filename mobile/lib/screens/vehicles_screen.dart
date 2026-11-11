@@ -316,9 +316,9 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                                                 fontSize: 12,
                                               ),
                                             ),
-                                            Text(
-                                              'Tarifa de referencia: \$${v.defaultRate} COP / día',
-                                              style: const TextStyle(
+                                            const Text(
+                                              'Consulta la tarifa vigente en Parqueadero.',
+                                              style: TextStyle(
                                                 color: Color(0xFF93C5FD),
                                                 fontSize: 11,
                                               ),
@@ -339,7 +339,9 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                                                     'PARKU_QR_DEMO',
                                                   )
                                                   ? DemoVehicleQrSource()
-                                                  : const UnavailableVehicleQrSource(),
+                                                  : ApiVehicleQrSource(
+                                                      widget.apiService,
+                                                    ),
                                             ),
                                           ),
                                         ),

@@ -1,6 +1,6 @@
 # ParkU
 
-Prototipo del Sprint 1: aplicación Flutter/Dart, API Java 21 con Spring Boot y PostgreSQL 17. Incluye HU-01 (autenticación), HU-06 (vehículos propios) y HU-02 (saldo y recargas presenciales). Los QR y los descuentos en portería corresponden al Sprint 2.
+Prototipo del Sprint 1: aplicación Flutter/Dart, API Java 21 con Spring Boot y PostgreSQL 17. Incluye HU-01 (autenticación), HU-06 (vehículos propios) y HU-02 (saldo y recargas presenciales). El Sprint 2 incorpora QR, portería y cobros con conexión Flutter/API.
 
 ## Ejecutar
 
@@ -83,4 +83,6 @@ antes de registrar ingresos. Registro público nunca concede admin/guard.
 
 El backend permite administrar tarifas por API; integrar una pantalla de administración
 Flutter corresponde a Juan. Se mantienen autenticación, vehículos, saldo y recargas del
-Sprint 1. El modo QR de demostración Flutter no constituye integración real.
+Sprint 1. La conexión real es el modo predeterminado. Guía de revisión y prueba con PostgreSQL:
+`docs/s2-08-integracion-real.md`. La demostración explícita se conserva con
+`PARKU_QR_DEMO=true`.

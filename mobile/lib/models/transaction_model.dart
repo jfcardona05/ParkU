@@ -36,6 +36,7 @@ class TransactionModel {
       reference: json['reference'] as String? ?? '',
       balanceAfter: json['balance_after'] as int? ?? 0,
       createdAt: json['created_at'] as String? ?? '',
+      parkingRateLabel: json['parking_rate_label'] as String?,
     );
   }
 
@@ -48,6 +49,7 @@ class TransactionModel {
       'reference': reference,
       'balance_after': balanceAfter,
       'created_at': createdAt,
+      if (parkingRateLabel != null) 'parking_rate_label': parkingRateLabel,
     };
   }
 }

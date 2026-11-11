@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
+import '../services/parking_service.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/load_error.dart';
 import '../widgets/wallet_movement_tile.dart';
@@ -40,10 +41,17 @@ class _WalletScreenState extends State<WalletScreen> {
 
   void _startLoad() {
     _wallet = _loadWallet();
-    final loadParkingStatus = widget.loadParkingStatus;
-    _parkingStatus = loadParkingStatus == null
-        ? null
-        : _loadParkingStatus(loadParkingStatus);
+    final loadParkingStatus =
+        widget.loadParkingStatus ??
+        () async {
+          final vehicles = await ParkingService(
+            widget.apiService,
+          ).getVehicles();
+          return vehicles.any((vehicle) => vehicle.inside)
+              ? ParkingStatus.inside
+              : ParkingStatus.outside;
+        };
+    _parkingStatus = _loadParkingStatus(loadParkingStatus);
   }
 
   Future<ParkingStatus?> _loadParkingStatus(

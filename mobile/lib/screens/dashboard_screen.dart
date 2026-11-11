@@ -11,6 +11,7 @@ import '../widgets/wallet_movement_tile.dart';
 import 'vehicles_screen.dart';
 import 'wallet_screen.dart';
 import 'login_screen.dart';
+import 'parking_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final ApiService apiService;
@@ -23,6 +24,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
+  int _refreshVersion = 0;
   String? _loadError;
   bool _isLoading = true;
   int _balance = 0;
@@ -50,6 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _balance = bal;
         _vehicles = vehs;
         _recentTx = txs;
+        _refreshVersion++;
         _isLoading = false;
       });
     } on ApiException catch (e) {
@@ -78,7 +81,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final pages = [
       _buildHomeTab(user?.name ?? 'Usuario'),
-      WalletScreen(apiService: widget.apiService),
+      WalletScreen(
+        key: ValueKey(_refreshVersion),
+        apiService: widget.apiService,
+      ),
       VehiclesScreen(apiService: widget.apiService),
     ];
 
@@ -199,59 +205,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             BalanceCard(balance: _balance),
             const SizedBox(height: 16),
 
-            // Valores del prototipo, sujetos a confirmación.
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E3A8A).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
-                ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    children: [
-                      Text(
-                        'Tarifa de referencia · Moto',
-                        style: TextStyle(color: Colors.white60, fontSize: 11),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        '\$4.000 COP / día',
-                        style: TextStyle(
-                          color: Color(0xFFF59E0B),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
+            OutlinedButton.icon(
+              icon: const Icon(Icons.local_parking),
+              label: const Text('Consultar cupos, tarifas y accesos'),
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ParkingScreen(apiService: widget.apiService),
                   ),
-                  SizedBox(
-                    height: 24,
-                    child: VerticalDivider(color: Colors.white24),
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        'Tarifa de referencia · Automóvil',
-                        style: TextStyle(color: Colors.white60, fontSize: 11),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        '\$5.000 COP / día',
-                        style: TextStyle(
-                          color: Color(0xFFF59E0B),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                );
+                await _loadData();
+              },
             ),
             const SizedBox(height: 20),
 

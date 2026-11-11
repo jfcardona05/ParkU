@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final destination = (user?.role == 'guard' || user?.role == 'admin')
           ? GateScreen(
               apiService: widget.apiService,
-              gateway: const UnavailableGateGateway(),
+              gateway: ApiGateGateway(widget.apiService),
             )
           : (user?.role == 'operador')
           ? TaquillaScreen(apiService: widget.apiService)
