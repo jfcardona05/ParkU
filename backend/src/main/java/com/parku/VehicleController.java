@@ -56,11 +56,19 @@ public class VehicleController {
     return Map.of("success", true, "vehicle", vehicle, "message", "Vehículo registrado");
   }
 
+  @org.springframework.transaction.annotation.Transactional
   @DeleteMapping("/{id}")
   public Map<String, Object> delete(
       @RequestHeader(value = "Authorization", required = false) String auth,
       @PathVariable long id) {
     var user = identity.current(auth);
+    var own =
+        db.queryForList(
+            "SELECT id FROM vehicles WHERE id=? AND user_id=? FOR UPDATE", id, user.get("id"));
+    if (own.isEmpty()) throw new ApiProblem(404, "VEHICLE_NOT_FOUND", "Vehículo no encontrado");
+    if (!db.queryForList(
+            "SELECT id FROM parking_visits WHERE vehicle_id=? AND exited_at IS NULL", id)
+        .isEmpty()) throw new ApiProblem(409, "VEHICLE_IN_USE", "El vehículo tiene ingreso activo");
     if (db.update("DELETE FROM vehicles WHERE id=? AND user_id=?", id, user.get("id")) == 0)
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehículo no encontrado");
     return Map.of("success", true);
