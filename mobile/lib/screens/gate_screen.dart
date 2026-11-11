@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../services/api_service.dart';
 import '../services/gate_service.dart';
+import 'login_screen.dart';
 
 class GateScreen extends StatefulWidget {
   final ApiService apiService;
@@ -24,6 +25,7 @@ class _GateScreenState extends State<GateScreen> {
   String? _receipt;
   String? _requestId;
   bool _busy = false;
+  bool _confirmationAttempted = false;
   bool get _allowed =>
       widget.gateway.isDemo ||
       ['guard', 'admin'].contains(widget.apiService.currentUser?.role);
@@ -41,6 +43,7 @@ class _GateScreenState extends State<GateScreen> {
       _receipt = null;
       _error = null;
       _requestId = null;
+      _confirmationAttempted = false;
     });
     try {
       if (raw.trim().isEmpty) {
@@ -50,7 +53,8 @@ class _GateScreenState extends State<GateScreen> {
       if (mounted) {
         setState(() {
           _preview = preview;
-          _requestId = UniqueKey().toString();
+          _action = preview.allowedAction ?? _action;
+          _requestId = newGateRequestId();
         });
       }
     } catch (error) {
@@ -74,9 +78,11 @@ class _GateScreenState extends State<GateScreen> {
       _error = null;
     });
     try {
-      if (!DateTime.now().toUtc().isBefore(preview.expiresAt)) {
+      if (!_confirmationAttempted &&
+          !DateTime.now().toUtc().isBefore(preview.expiresAt)) {
         throw const ApiException('QR vencido. Solicita uno nuevo.');
       }
+      _confirmationAttempted = true;
       final receipt = await widget.gateway.confirm(
         preview,
         _action,
@@ -91,11 +97,22 @@ class _GateScreenState extends State<GateScreen> {
       }
     } catch (error) {
       if (mounted) {
-        setState(
-          () => _error = error is ApiException
+        setState(() {
+          _error = error is ApiException
               ? error.message
-              : 'No se pudo confirmar. Reintenta la misma operación.',
-        );
+              : 'No se pudo confirmar. Reintenta la misma operación.';
+          if (error is ApiException &&
+              [
+                'QR_EXPIRED',
+                'QR_USED',
+                'QR_REVOKED',
+                'QR_INVALID',
+              ].contains(error.code)) {
+            _preview = null;
+            _requestId = null;
+            _confirmationAttempted = false;
+          }
+        });
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -113,11 +130,43 @@ class _GateScreenState extends State<GateScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    await widget.apiService.logout();
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(apiService: widget.apiService),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Portería')),
+    appBar: AppBar(
+      title: const Text('Portería'),
+      actions: [
+        IconButton(
+          tooltip: 'Cerrar sesión',
+          onPressed: _busy ? null : _logout,
+          icon: const Icon(Icons.logout),
+        ),
+      ],
+    ),
     body: !_allowed
-        ? const Center(child: Text('No tienes permiso para operar portería.'))
+        ? Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('No tienes permiso para operar portería.'),
+                if (_error != null) Text(_error!),
+                TextButton(
+                  onPressed: _logout,
+                  child: const Text('Iniciar sesión'),
+                ),
+              ],
+            ),
+          )
         : ListView(
             padding: const EdgeInsets.all(24),
             children: [

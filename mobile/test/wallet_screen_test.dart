@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:parku_mobile/models/transaction_model.dart';
+import 'package:parku_mobile/models/vehicle_model.dart';
 import 'package:parku_mobile/screens/wallet_screen.dart';
 import 'package:parku_mobile/services/api_service.dart';
 import 'package:parku_mobile/widgets/balance_card.dart';
@@ -10,6 +11,10 @@ import 'package:parku_mobile/widgets/balance_card.dart';
 class WalletFixture extends ApiService {
   Future<int> balance = Future.value(10000);
   List<TransactionModel> history = [];
+
+  @override
+  Future<List<VehicleModel>> getVehicles() async =>
+      throw const ApiException('Estado no disponible');
 
   @override
   Future<int> getBalance() => balance;

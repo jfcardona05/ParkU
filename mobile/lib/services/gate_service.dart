@@ -1,15 +1,27 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'api_service.dart';
 
 enum GateAction { entry, exit }
+
+String newGateRequestId() {
+  final random = Random.secure();
+  return base64UrlEncode(List.generate(24, (_) => random.nextInt(256)));
+}
 
 class GatePreview {
   final String token;
   final String plate;
   final DateTime expiresAt;
+  final int? vehicleId;
+  final GateAction? allowedAction;
   const GatePreview({
     required this.token,
     required this.plate,
     required this.expiresAt,
+    this.vehicleId,
+    this.allowedAction,
   });
 }
 
@@ -97,5 +109,83 @@ class DemoGateGateway implements GateGateway {
         'DEMOSTRACIÓN: ${action == GateAction.entry ? 'Ingreso' : 'Salida'} registrado para ${preview.plate}. Sin cobro real.';
     _receipts[requestId] = receipt;
     return receipt;
+  }
+}
+
+class ApiGateGateway implements GateGateway {
+  final ApiService api;
+  ApiGateGateway(this.api);
+
+  @override
+  bool get isDemo => false;
+
+  @override
+  Future<GatePreview> inspect(String token) async {
+    final data = await api.request('POST', '/api/gate/inspect', {
+      'token': token,
+    });
+    try {
+      final action = switch (data['allowed_action']) {
+        'entry' => GateAction.entry,
+        'exit' => GateAction.exit,
+        _ => throw const FormatException(),
+      };
+      if (data['success'] != true ||
+          data['parking_state'] !=
+              (action == GateAction.entry ? 'OUTSIDE' : 'INSIDE')) {
+        throw const FormatException();
+      }
+      return GatePreview(
+        token: token,
+        plate: data['plate'] as String,
+        vehicleId: data['vehicle_id'] as int,
+        expiresAt: DateTime.parse(data['expires_at'] as String).toUtc(),
+        allowedAction: action,
+      );
+    } on Object {
+      throw const ApiException(
+        'No se pudo interpretar la validación de portería.',
+      );
+    }
+  }
+
+  @override
+  Future<String> confirm(
+    GatePreview preview,
+    GateAction action,
+    String requestId,
+  ) async {
+    final data = await api.request('POST', '/api/gate/operations', {
+      'token': preview.token,
+      'action': action.name,
+      'request_id': requestId,
+    });
+    try {
+      if (data['success'] != true ||
+          data['operation_id'] is! int ||
+          data['action'] != action.name ||
+          data['vehicle_id'] != preview.vehicleId ||
+          data['parking_state'] !=
+              (action == GateAction.entry ? 'INSIDE' : 'OUTSIDE')) {
+        throw const FormatException();
+      }
+      final message = data['message'] as String;
+      if (action == GateAction.entry) return message;
+      final charge = data['charge'] as Map<String, dynamic>;
+      final amount = charge['amount'] as int;
+      final balance = charge['balance_after'] as int;
+      final rate = charge['parking_rate_label'] as String;
+      return [
+        message,
+        'Cobro: \$$amount COP',
+        'Saldo posterior: \$$balance COP',
+        'Tarifa aplicada: $rate',
+      ].join('\n');
+    } on Object {
+      // Keeping requestId lets a retry recover the server's persisted receipt.
+      throw const ApiException(
+        'Respuesta incompleta. Reintenta la misma confirmación.',
+      );
+    }
   }
 }

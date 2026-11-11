@@ -1,12 +1,16 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
+
 import '../models/user_model.dart';
 import '../models/vehicle_model.dart';
 import '../models/transaction_model.dart';
 
 class ApiException implements Exception {
   final String message;
-  const ApiException(this.message);
+  final String? code;
+  final int? statusCode;
+  const ApiException(this.message, {this.code, this.statusCode});
   @override
   String toString() => message;
 }
@@ -28,6 +32,13 @@ class ApiService {
   void setToken(String? token) => _token = token;
   void setCurrentUser(UserModel? user) => _currentUser = user;
 
+  // Reuses this session and client for feature-specific API adapters.
+  Future<Map<String, dynamic>> request(
+    String method,
+    String path, [
+    Map<String, dynamic>? body,
+  ]) => _request(method, path, body);
+
   Future<Map<String, dynamic>> _request(
     String method,
     String path, [
@@ -48,7 +59,11 @@ class ApiService {
           _token = null;
           _currentUser = null;
         }
-        throw ApiException(data['message'] as String? ?? 'Solicitud rechazada');
+        throw ApiException(
+          data['message'] as String? ?? 'Solicitud rechazada',
+          code: data['code'] as String?,
+          statusCode: response.statusCode,
+        );
       }
       return data;
     } on ApiException {

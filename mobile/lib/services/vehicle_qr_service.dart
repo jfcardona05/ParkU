@@ -13,7 +13,7 @@ class VehicleQr {
   bool isExpired(DateTime now) => !now.isBefore(expiresAt);
 }
 
-/// S2-00 must agree the server contract before implementing a live adapter.
+/// QR sources share the same screen for the API and explicit demonstration.
 abstract class VehicleQrSource {
   bool get isDemo;
   Future<VehicleQr> issue(VehicleModel vehicle);
@@ -43,5 +43,32 @@ class DemoVehicleQrSource implements VehicleQrSource {
       token: 'PARKU-DEMO:${vehicle.id}:${expiry.millisecondsSinceEpoch}',
       expiresAt: expiry,
     );
+  }
+}
+
+class ApiVehicleQrSource implements VehicleQrSource {
+  final ApiService api;
+  ApiVehicleQrSource(this.api);
+  @override
+  bool get isDemo => false;
+
+  @override
+  Future<VehicleQr> issue(VehicleModel vehicle) async {
+    final data = await api.request('POST', '/api/vehicles/${vehicle.id}/qr');
+    try {
+      final qr = VehicleQr(
+        vehicleId: data['vehicle_id'] as int,
+        token: data['token'] as String,
+        expiresAt: DateTime.parse(data['expires_at'] as String).toUtc(),
+      );
+      if (qr.vehicleId != vehicle.id || qr.token.isEmpty) {
+        throw const FormatException();
+      }
+      return qr;
+    } on Object {
+      throw const ApiException(
+        'El servicio devolvió un QR inválido. Intenta nuevamente.',
+      );
+    }
   }
 }
