@@ -76,14 +76,21 @@ public class GateService {
       if (count >= ((Number) settings.get("capacity")).longValue())
         throw new ApiProblem(409, "PARKING_FULL", "Parqueadero lleno");
       var vehicle = vehicles.getFirst();
+      var rates =
+          db.queryForList(
+              "SELECT id FROM parking_rates WHERE vehicle_type=? ORDER BY id DESC LIMIT 1",
+              vehicle.get("type"));
+      if (rates.isEmpty())
+        throw new ApiProblem(503, "PARKING_NOT_CONFIGURED", "Tarifa no configurada");
       visit =
           db.queryForMap(
-              "INSERT INTO parking_visits(vehicle_id,user_id,plate,vehicle_type,entered_at) VALUES(?,?,?,?,?) RETURNING *",
+              "INSERT INTO parking_visits(vehicle_id,user_id,plate,vehicle_type,entered_at,rate_id) VALUES(?,?,?,?,?,?) RETURNING *",
               vehicleId,
               valid.get("user_id"),
               vehicle.get("plate"),
               vehicle.get("type"),
-              now);
+              now,
+              rates.getFirst().get("id"));
     } else {
       if (active.isEmpty())
         throw new ApiProblem(409, "NOT_INSIDE", "El vehículo no tiene ingreso activo");
@@ -126,7 +133,61 @@ public class GateService {
 
   private Map<String, Object> completeExit(
       Map<String, Object> visit, Map<String, Object> operator, OffsetDateTime now) {
-    throw new ApiProblem(503, "BILLING_NOT_READY", "Salida pendiente del servicio de cobro S2-03");
+    if (visit.get("rate_id") == null)
+      throw new ApiProblem(
+          503,
+          "PARKING_NOT_CONFIGURED",
+          "Estancia sin tarifa: requiere conciliación administrativa");
+    var rate = db.queryForMap("SELECT * FROM parking_rates WHERE id=?", visit.get("rate_id"));
+    var user =
+        db.queryForMap("SELECT balance FROM users WHERE id=? FOR UPDATE", visit.get("user_id"));
+    long before = ((Number) user.get("balance")).longValue();
+    var quote =
+        ParkingPrice.quote(
+            ((java.sql.Timestamp) visit.get("entered_at")).toInstant(),
+            now.toInstant(),
+            ((Number) rate.get("block_seconds")).longValue(),
+            ((Number) rate.get("minimum_blocks")).longValue(),
+            ((Number) rate.get("amount")).longValue());
+    long blocks = quote.blocks();
+    long amount = quote.amount();
+    if (before < amount)
+      throw new ApiProblem(
+          409, "INSUFFICIENT_BALANCE", "Saldo insuficiente para completar la salida");
+    long after = before - amount;
+    db.update("UPDATE users SET balance=? WHERE id=?", after, visit.get("user_id"));
+    String label =
+        rate.get("amount")
+            + " COP / "
+            + rate.get("block_seconds")
+            + " s iniciados; mínimo "
+            + rate.get("minimum_blocks");
+    long movement =
+        db.queryForObject(
+            "INSERT INTO transactions(user_id,operator_id,type,amount,point_name,reference,balance_after,visit_id,parking_rate_label) VALUES(?,?,'COBRO_ESTACIONAMIENTO',?,'Portería',?,?,?,?) RETURNING id",
+            Long.class,
+            visit.get("user_id"),
+            operator.get("id"),
+            amount,
+            java.util.UUID.randomUUID(),
+            after,
+            visit.get("id"),
+            label);
+    return Map.of(
+        "amount",
+        amount,
+        "currency",
+        "COP",
+        "balance_after",
+        after,
+        "transaction_id",
+        movement,
+        "rate_version",
+        rate.get("id"),
+        "blocks",
+        blocks,
+        "parking_rate_label",
+        label);
   }
 
   public record Result(boolean replayed, Map<String, Object> receipt) {}

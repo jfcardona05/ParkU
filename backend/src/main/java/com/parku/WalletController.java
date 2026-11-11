@@ -44,7 +44,7 @@ public class WalletController {
         true,
         "transactions",
         db.queryForList(
-            "SELECT id,type,amount,point_name,reference,balance_after,created_at FROM transactions WHERE user_id=? ORDER BY id DESC",
+            "SELECT id,type,amount,point_name,reference,balance_after,created_at,visit_id,parking_rate_label FROM transactions WHERE user_id=? ORDER BY id DESC",
             user.get("id")));
   }
 
@@ -57,7 +57,7 @@ public class WalletController {
         true,
         "users",
         db.queryForList(
-            "SELECT id,name,email,role,balance FROM users WHERE role<>'operador' ORDER BY name"));
+            "SELECT id,name,email,role,balance FROM users WHERE role IN ('estudiante','docente') ORDER BY name"));
   }
 
   @PostMapping("/wallet/recharge")
@@ -71,7 +71,8 @@ public class WalletController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Punto físico inválido");
     var balances =
         db.queryForList(
-            "SELECT balance FROM users WHERE id=? AND role<>'operador' FOR UPDATE", body.user_id());
+            "SELECT balance FROM users WHERE id=? AND role IN ('estudiante','docente') FOR UPDATE",
+            body.user_id());
     if (balances.isEmpty())
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
     long before = ((Number) balances.getFirst().get("balance")).longValue();
