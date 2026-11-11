@@ -68,3 +68,19 @@ Las pruebas de integración Flutter crean una cuenta y una recarga reales en la 
 
 Repositorio: https://github.com/jfcardona05/ParkU
 Tablero: https://trello.com/b/sYfs1JCN/parku
+## Backend del Sprint 2
+
+Las API de Sprint 2 se entregan para revisión cruzada; revisar estado de los PR antes de
+considerarlas integradas. Contrato operativo: `docs/s2-00-acuerdos-v0.2.md` en el PR S2-00.
+Guías de conexión: `docs/s2-01-api.md`, `docs/s2-02-api.md`, `docs/s2-03-api.md` y
+`docs/s2-07-api-y-pruebas.md`.
+
+Precios iniciales confirmados por Ronaldo: moto **4000 COP**, automóvil **5000 COP**.
+Supuesto configurable: hora iniciada con mínimo un bloque. Solo el rol `admin` puede
+crear nuevas versiones de tarifa y configurar capacidad; estancias en curso conservan
+la versión de ingreso. La capacidad no tiene valor inventado: debe configurarla admin
+antes de registrar ingresos. Registro público nunca concede admin/guard.
+
+El backend permite administrar tarifas por API; integrar una pantalla de administración
+Flutter corresponde a Juan. Se mantienen autenticación, vehículos, saldo y recargas del
+Sprint 1. El modo QR de demostración Flutter no constituye integración real.

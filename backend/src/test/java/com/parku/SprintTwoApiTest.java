@@ -346,4 +346,134 @@ class SprintTwoApiTest {
                 .value())
         .isEqualTo(400);
   }
+
+  @Test
+  void queriesAreIsolatedPaginatedAndConsistent() {
+    capacity(10);
+    enter(1, "estudiante");
+    exit(1, "estudiante");
+    enter(1, "estudiante");
+    var occupancy = call(HttpMethod.GET, "/api/parking/occupancy", null, "docente");
+    assertThat(occupancy.getBody()).containsEntry("occupied", 1).containsEntry("available", 9);
+    error(
+        call(HttpMethod.GET, "/api/vehicles/1/parking", null, "docente"), 404, "VEHICLE_NOT_FOUND");
+    assertThat(call(HttpMethod.GET, "/api/vehicles/1/parking", null, "estudiante").getBody())
+        .containsEntry("parking_state", "INSIDE");
+    assertThat(call(HttpMethod.GET, "/api/vehicles/2/parking", null, "docente").getBody())
+        .containsEntry("parking_state", "OUTSIDE")
+        .containsEntry("visit_id", null);
+    var first = call(HttpMethod.GET, "/api/parking/history?limit=2", null, "estudiante").getBody();
+    assertThat((List) first.get("operations")).hasSize(2);
+    var second =
+        call(
+                HttpMethod.GET,
+                "/api/parking/history?limit=2&before_id=" + first.get("next_before_id"),
+                null,
+                "estudiante")
+            .getBody();
+    assertThat((List) second.get("operations")).hasSize(1);
+    assertThat(second.get("next_before_id")).isNull();
+    assertThat(
+            (List)
+                call(HttpMethod.GET, "/api/parking/history?before_id=999999", null, "docente")
+                    .getBody()
+                    .get("operations"))
+        .isEmpty();
+    assertThat(
+            (List)
+                call(HttpMethod.GET, "/api/wallet/history", null, "docente")
+                    .getBody()
+                    .get("transactions"))
+        .isEmpty();
+    assertThat(
+            (List)
+                call(HttpMethod.GET, "/api/wallet/history", null, "estudiante")
+                    .getBody()
+                    .get("transactions"))
+        .hasSize(1);
+    error(
+        call(HttpMethod.GET, "/api/parking/history?limit=101", null, "estudiante"),
+        400,
+        "INVALID_REQUEST");
+    error(
+        call(HttpMethod.GET, "/api/parking/history?before_id=invalid", null, "estudiante"),
+        400,
+        "INVALID_REQUEST");
+    assertThat(call(HttpMethod.GET, "/api/parking/occupancy", null, null).getStatusCode().value())
+        .isEqualTo(401);
+  }
+
+  @Test
+  void failureAfterDebitRollsBackTheWholeOperation() {
+    capacity(10);
+    enter(1, "estudiante");
+    var body = operation(qr(1, "estudiante"), "exit", "rollback");
+    db.execute(
+        "CREATE FUNCTION test_reject_exit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.action='exit' THEN RAISE EXCEPTION 'test rollback'; END IF; RETURN NEW; END $$");
+    db.execute(
+        "CREATE TRIGGER test_exit_failure BEFORE INSERT ON parking_operations FOR EACH ROW EXECUTE FUNCTION test_reject_exit()");
+    try {
+      assertThat(post("/api/gate/operations", body, "guard").getStatusCode().value())
+          .isEqualTo(500);
+      assertThat(db.queryForObject("SELECT balance FROM users WHERE id=1", Long.class))
+          .isEqualTo(10000);
+      assertThat(db.queryForObject("SELECT count(*) FROM transactions", Integer.class)).isZero();
+      assertThat(db.queryForObject("SELECT count(*) FROM parking_operations", Integer.class))
+          .isEqualTo(1);
+      assertThat(
+              db.queryForObject(
+                  "SELECT count(*) FROM parking_visits WHERE exited_at IS NULL", Integer.class))
+          .isEqualTo(1);
+      assertThat(
+              post("/api/gate/inspect", Map.of("token", body.get("token")), "guard")
+                  .getStatusCode()
+                  .value())
+          .isEqualTo(200);
+    } finally {
+      db.execute("DROP TRIGGER test_exit_failure ON parking_operations");
+      db.execute("DROP FUNCTION test_reject_exit()");
+    }
+    assertThat(post("/api/gate/operations", body, "guard").getStatusCode().value()).isEqualTo(201);
+  }
+
+  @Test
+  void confirmationRechecksExpiryAfterWaitingForLock() throws Exception {
+    capacity(10);
+    String token = qr(1, "estudiante");
+    try (var connection = db.getDataSource().getConnection()) {
+      connection.setAutoCommit(false);
+      try (var statement = connection.createStatement()) {
+        statement.executeQuery("SELECT id FROM parking_settings WHERE id=1 FOR UPDATE").close();
+      }
+      var response =
+          CompletableFuture.supplyAsync(
+              () -> post("/api/gate/operations", operation(token, "entry", "wait"), "guard"));
+      db.update(
+          "UPDATE vehicle_qr SET expires_at=clock_timestamp()-INTERVAL '1 second' WHERE token_hash=?",
+          VehicleQrService.digest(token));
+      connection.commit();
+      error(response.get(10, java.util.concurrent.TimeUnit.SECONDS), 410, "QR_EXPIRED");
+      assertThat(db.queryForObject("SELECT count(*) FROM parking_operations", Integer.class))
+          .isZero();
+    }
+  }
+
+  @Test
+  void deletionRetainsOwnHistoryAndQrIsInvalidAfterRemoval() {
+    capacity(10);
+    enter(1, "estudiante");
+    exit(1, "estudiante");
+    String token = qr(1, "estudiante");
+    assertThat(
+            call(HttpMethod.DELETE, "/api/vehicles/1", null, "estudiante").getStatusCode().value())
+        .isEqualTo(200);
+    error(post("/api/gate/inspect", Map.of("token", token), "guard"), 422, "QR_INVALID");
+    var operations =
+        (List<Map>)
+            call(HttpMethod.GET, "/api/parking/history", null, "estudiante")
+                .getBody()
+                .get("operations");
+    assertThat(operations).hasSize(2);
+    assertThat(operations.getFirst()).containsEntry("plate", "ABC123");
+  }
 }
