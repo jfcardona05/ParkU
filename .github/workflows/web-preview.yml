@@ -1,0 +1,25 @@
+name: Compilar vista web
+on:
+  push:
+    branches: [chore/parku-web-preview]
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.8'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: mobile
+      - run: flutter build web --dart-define=API_BASE_URL=
+        working-directory: mobile
+      - uses: actions/upload-artifact@v4
+        with:
+          name: parku-web-preview
+          path: mobile/build/web
+          retention-days: 3
