@@ -11,6 +11,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class ApiErrors {
+  @ExceptionHandler(ApiProblem.class)
+  public ResponseEntity<?> problem(ApiProblem ex) {
+    return ResponseEntity.status(ex.status)
+        .body(Map.of("success", false, "code", ex.code, "message", ex.getMessage()));
+  }
+
   @ExceptionHandler(ResponseStatusException.class)
   public ResponseEntity<?> status(ResponseStatusException ex) {
     return ResponseEntity.status(ex.getStatusCode())

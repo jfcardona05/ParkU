@@ -82,6 +82,13 @@ public class IdentityService {
     return user;
   }
 
+  public Map<String, Object> requireRole(String authorization, String... roles) {
+    var user = current(authorization);
+    if (!java.util.Arrays.asList(roles).contains(user.get("role")))
+      throw new ApiProblem(403, "FORBIDDEN", "No tienes permiso para esta operación");
+    return user;
+  }
+
   public Map<String, Object> user(long id) {
     var rows = db.queryForList("SELECT id,name,email,role,balance FROM users WHERE id=?", id);
     if (rows.isEmpty())
