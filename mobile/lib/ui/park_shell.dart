@@ -255,7 +255,7 @@ class ParkShell extends StatelessWidget {
                         if (rail)
                           Expanded(
                             child: Text(
-                              'ParkU / ' + breadcrumb,
+                              'ParkU / $breadcrumb',
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: ParkColors.muted,
@@ -294,7 +294,7 @@ class ParkShell extends StatelessWidget {
                         if (refresh != null)
                           IconButton(
                             onPressed: busy ? null : refresh,
-                            tooltip: 'Actualizar ' + breadcrumb,
+                            tooltip: 'Actualizar $breadcrumb',
                             icon: const Icon(Icons.refresh, size: 20),
                           ),
                         if (api?.currentUser != null)

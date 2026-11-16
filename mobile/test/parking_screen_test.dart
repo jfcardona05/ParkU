@@ -67,7 +67,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Capacidad pendiente'), findsOneWidget);
       expect(find.text('Moto'), findsOneWidget);
-      await tester.scrollUntilVisible(find.text('Cargar más accesos'), 150);
+      await tester.ensureVisible(find.text('Cargar más accesos'));
       await tester.tap(find.text('Cargar más accesos'));
       await tester.pumpAndSettle();
       expect(find.text('Sin red'), findsOneWidget);

@@ -285,15 +285,12 @@ class _GateScreenState extends State<GateScreen> {
                         ],
                         if (_preview != null) ...[
                           Text(
-                            'Vehículo: ' + _preview!.plate,
+                            'Vehículo: ${_preview!.plate}',
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            'Operación: ' +
-                                (_action == GateAction.entry
-                                    ? 'Ingreso'
-                                    : 'Salida'),
+                            'Operación: ${_action == GateAction.entry ? 'Ingreso' : 'Salida'}',
                           ),
                           const SizedBox(height: 16),
                           const Text('Confirma los datos antes de registrar.'),

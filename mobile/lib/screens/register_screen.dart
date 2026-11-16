@@ -54,12 +54,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       Navigator.pop(context);
     } catch (error) {
-      if (mounted)
+      if (mounted) {
         setState(
           () => _error = error is ApiException
               ? error.message
               : 'No se pudo crear la cuenta.',
         );
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }

@@ -77,9 +77,7 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
         : _qr!.expiresAt.difference(DateTime.now().toUtc());
     final seconds = remaining.inSeconds.clamp(0, 99999);
     final countdown =
-        (seconds ~/ 60).toString().padLeft(2, '0') +
-        ':' +
-        (seconds % 60).toString().padLeft(2, '0');
+        '${(seconds ~/ 60).toString().padLeft(2, '0')}:${(seconds % 60).toString().padLeft(2, '0')}';
     return ParkShell(
       api: widget.apiService,
       selected: 1,
@@ -114,7 +112,7 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'QR · ' + widget.vehicle.plate,
+                      'QR · ${widget.vehicle.plate}',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     Text(
@@ -133,7 +131,7 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
                       const Text('QR vencido. Genera uno nuevo.')
                     else if (_qr != null) ...[
                       Semantics(
-                        label: 'QR del vehículo ' + widget.vehicle.plate,
+                        label: 'QR del vehículo ${widget.vehicle.plate}',
                         child: QrImageView(
                           data: _qr!.token,
                           size: 220,
@@ -142,7 +140,7 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
                       ),
                       const SizedBox(height: 22),
                       Text(
-                        'Vence en ' + countdown,
+                        'Vence en $countdown',
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 12),

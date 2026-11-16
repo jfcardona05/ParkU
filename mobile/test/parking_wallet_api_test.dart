@@ -62,10 +62,7 @@ void main() {
         5000,
       );
       expect(find.text('Sin ingreso activo.'), findsOneWidget);
-      await tester.scrollUntilVisible(
-        find.text('Tarifa aplicada: 5000 COP por hora iniciada'),
-        100,
-      );
+      await tester.ensureVisible(find.text('Tarifa aplicada: 5000 COP por hora iniciada'));
       expect(find.text('−\$5.000 COP'), findsOneWidget);
     },
   );

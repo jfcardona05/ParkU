@@ -97,15 +97,17 @@ class _WalletScreenState extends State<WalletScreen> {
         FutureBuilder(
           future: _wallet,
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done)
+            if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
-            if (snapshot.hasError)
+            }
+            if (snapshot.hasError) {
               return LoadError(
                 message: snapshot.error is ApiException
                     ? (snapshot.error as ApiException).message
                     : 'No se pudo cargar el saldo y los movimientos.',
                 retry: _refresh,
               );
+            }
             final (balance, movements) = snapshot.requireData;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

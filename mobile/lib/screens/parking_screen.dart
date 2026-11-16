@@ -83,9 +83,10 @@ class _ParkingScreenState extends State<ParkingScreen> {
         FutureBuilder<T>(
           future: future,
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done)
+            if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
-            if (snapshot.hasError)
+            }
+            if (snapshot.hasError) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -96,6 +97,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                   ),
                 ],
               );
+            }
             return content(snapshot.requireData);
           },
         ),
@@ -150,15 +152,12 @@ class _ParkingScreenState extends State<ParkingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    data['available'].toString() +
-                        ' de ' +
-                        data['capacity'].toString(),
+                    '${data['available']} de ${data['capacity']}',
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   const SizedBox(height: 34),
                   Text(
-                    data['occupied'].toString() +
-                        ' ocupados · datos del servidor',
+                    '${data['occupied']} ocupados · datos del servidor',
                     style: const TextStyle(fontSize: 12),
                   ),
                 ],
@@ -186,17 +185,10 @@ class _ParkingScreenState extends State<ParkingScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            rate['amount'].toString() +
-                                ' COP / ' +
-                                (rate['block_seconds'] == 3600
-                                    ? 'hora iniciada'
-                                    : rate['block_seconds'].toString() +
-                                          ' s iniciados'),
+                            '${rate['amount']} COP / ${rate['block_seconds'] == 3600 ? 'hora iniciada' : '${rate['block_seconds']} s iniciados'}',
                           ),
                           Text(
-                            'Mínimo ' +
-                                rate['minimum_blocks'].toString() +
-                                ' bloque(s).',
+                            'Mínimo ${rate['minimum_blocks']} bloque(s).',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -231,11 +223,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        (operation['action'] == 'entry'
-                                ? 'Ingreso'
-                                : 'Salida') +
-                            ' · ' +
-                            operation['plate'].toString(),
+                        '${operation['action'] == 'entry' ? 'Ingreso' : 'Salida'} · ${operation['plate']}',
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 6),
@@ -246,11 +234,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                       if (operation['charge']
                           case final Map<String, dynamic> charge) ...[
                         Text(
-                          'Cobro ' +
-                              charge['amount'].toString() +
-                              ' COP · Saldo posterior ' +
-                              charge['balance_after'].toString() +
-                              ' COP',
+                          'Cobro ${charge['amount']} COP · Saldo posterior ${charge['balance_after']} COP',
                         ),
                         Text(
                           charge['parking_rate_label'].toString(),

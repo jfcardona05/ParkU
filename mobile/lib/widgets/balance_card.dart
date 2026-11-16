@@ -19,7 +19,7 @@ class BalanceCard extends StatelessWidget {
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: Text(
-            '\$' + NumberFormat.decimalPattern('es_CO').format(balance),
+            '\$${NumberFormat.decimalPattern('es_CO').format(balance)}',
             style: const TextStyle(
               fontSize: 38,
               fontWeight: FontWeight.w700,

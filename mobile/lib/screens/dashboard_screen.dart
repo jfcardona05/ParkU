@@ -75,22 +75,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ParkHeading(
-            'Hola, ' + name + ' 👋',
-            'Todo listo para tu próxima entrada.',
-          ),
+          ParkHeading('Hola, $name 👋', 'Todo listo para tu próxima entrada.'),
           FutureBuilder(
             future: _data,
             builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done)
+              if (snapshot.connectionState != ConnectionState.done) {
                 return const Center(child: CircularProgressIndicator());
-              if (snapshot.hasError)
+              }
+              if (snapshot.hasError) {
                 return LoadError(
                   message: snapshot.error is ApiException
                       ? (snapshot.error as ApiException).message
                       : 'No se pudo cargar el inicio.',
                   retry: _refresh,
                 );
+              }
               final (balance, vehicles, history) = snapshot.requireData;
               final narrow = MediaQuery.sizeOf(context).width < 760;
               final balanceAndSpaces = ParkColumns(
@@ -108,15 +107,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         FutureBuilder(
                           future: _occupancy,
                           builder: (context, spaces) {
-                            if (spaces.connectionState != ConnectionState.done)
+                            if (spaces.connectionState !=
+                                ConnectionState.done) {
                               return const Text('Consultando…');
-                            if (spaces.hasError)
+                            }
+                            if (spaces.hasError) {
                               return const Text('Cupos no disponibles.');
+                            }
                             final data = spaces.requireData;
                             return Text(
-                              data['available'].toString() +
-                                  ' / ' +
-                                  data['capacity'].toString(),
+                              '${data['available']} / ${data['capacity']}',
                               style: Theme.of(context).textTheme.headlineMedium,
                             );
                           },

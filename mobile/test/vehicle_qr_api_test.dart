@@ -37,7 +37,10 @@ void main() {
         }
         if (request.url.path == '/api/vehicles/7/parking') {
           expect(request.method, 'GET');
-          return jsonResponse('{"vehicle_id":7,"parking_state":"OUTSIDE","entered_at":null}', 200);
+          return jsonResponse(
+            '{"vehicle_id":7,"parking_state":"OUTSIDE","entered_at":null}',
+            200,
+          );
         }
         expect(request.method, 'POST');
         expect(request.url.path, '/api/vehicles/7/qr');
@@ -62,7 +65,11 @@ void main() {
     expect(find.byType(QrImageView), findsOneWidget);
     expect(find.text('QR · ABC123'), findsOneWidget);
     expect(find.textContaining('DEMOSTRACIÓN'), findsNothing);
-    expect(requests.map((r) => r.url.path), ['/api/vehicles', '/api/vehicles/7/parking', '/api/vehicles/7/qr']);
+    expect(requests.map((r) => r.url.path), [
+      '/api/vehicles',
+      '/api/vehicles/7/parking',
+      '/api/vehicles/7/qr',
+    ]);
     await tester.pumpWidget(const SizedBox());
   });
 

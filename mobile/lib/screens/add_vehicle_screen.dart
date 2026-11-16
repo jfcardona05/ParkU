@@ -131,8 +131,9 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     onChanged: _isLoading
                         ? null
                         : (value) {
-                            if (value != null)
+                            if (value != null) {
                               setState(() => _selectedType = value);
+                            }
                           },
                   ),
                   const SizedBox(height: 18),

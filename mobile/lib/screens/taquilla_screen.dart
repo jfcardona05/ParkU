@@ -181,7 +181,7 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                           DropdownMenuItem(
                             value: user.id,
                             child: Text(
-                              user.name + ' · ' + user.email,
+                              '${user.name} · ${user.email}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -211,8 +211,9 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                     onChanged: _isSubmitting
                         ? null
                         : (value) {
-                            if (value != null)
+                            if (value != null) {
                               setState(() => _selectedPoint = value);
+                            }
                           },
                   ),
                   const SizedBox(height: 18),
@@ -233,7 +234,7 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                     children: [
                       for (final amount in [4000, 5000, 20000])
                         ActionChip(
-                          label: Text('\$' + amount.toString()),
+                          label: Text('\$$amount'),
                           onPressed: _isSubmitting
                               ? null
                               : () =>
@@ -295,27 +296,14 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 16),
+                        Text('Importe: +\$${_lastReceipt!['amount']} COP'),
                         Text(
-                          'Importe: +\$' +
-                              _lastReceipt!['amount'].toString() +
-                              ' COP',
-                        ),
-                        Text(
-                          'Saldo posterior: \$' +
-                              _lastReceipt!['balance_after'].toString() +
-                              ' COP',
+                          'Saldo posterior: \$${_lastReceipt!['balance_after']} COP',
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'Punto: ' + _lastReceipt!['point_name'].toString(),
-                        ),
-                        Text(
-                          'Referencia: ' +
-                              _lastReceipt!['reference'].toString(),
-                        ),
-                        Text(
-                          'Fecha: ' + _lastReceipt!['created_at'].toString(),
-                        ),
+                        Text('Punto: ${_lastReceipt!['point_name']}'),
+                        Text('Referencia: ${_lastReceipt!['reference']}'),
+                        Text('Fecha: ${_lastReceipt!['created_at']}'),
                       ],
                     ),
                   ),

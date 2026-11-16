@@ -26,7 +26,7 @@ class _ParkVehicleCardState extends State<ParkVehicleCard> {
     super.initState();
     _status = widget.api.request(
       'GET',
-      '/api/vehicles/' + widget.vehicle.id.toString() + '/parking',
+      '/api/vehicles/${widget.vehicle.id}/parking',
     );
     _status.ignore();
   }
@@ -63,7 +63,7 @@ class _ParkVehicleCardState extends State<ParkVehicleCard> {
           (widget.vehicle.isMoto ? 'Moto' : 'Automóvil') +
               (widget.vehicle.brandModel.isEmpty
                   ? ''
-                  : ' · ' + widget.vehicle.brandModel),
+                  : ' · ${widget.vehicle.brandModel}'),
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 20),

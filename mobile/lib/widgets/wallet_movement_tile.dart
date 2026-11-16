@@ -62,23 +62,21 @@ class WalletMovementTile extends StatelessWidget {
                 if (movement.parkingRateLabel case final rate?
                     when rate.isNotEmpty)
                   Text(
-                    'Tarifa aplicada: ' + rate,
+                    'Tarifa aplicada: $rate',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 if (movement.reference.isNotEmpty)
                   Text(
-                    'Ref. ' + movement.reference,
+                    'Ref. ${movement.reference}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 Text(
-                  'Saldo posterior: \$' +
-                      format.format(movement.balanceAfter) +
-                      ' COP',
+                  'Saldo posterior: \$${format.format(movement.balanceAfter)} COP',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  sign + '\$' + format.format(movement.amount.abs()) + ' COP',
+                  '$sign\$${format.format(movement.amount.abs())} COP',
                   style: TextStyle(color: color, fontWeight: FontWeight.w600),
                 ),
               ],

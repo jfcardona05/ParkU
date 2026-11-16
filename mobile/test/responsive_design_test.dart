@@ -118,7 +118,7 @@ ApiService fixture({String role = 'estudiante'}) {
           ],
         },
         _ => throw StateError(
-          'Unexpected preview endpoint: ' + request.url.path,
+          'Unexpected preview endpoint: ${request.url.path}',
         ),
       };
       return http.Response(
@@ -167,9 +167,7 @@ void main() {
       'gate',
       'cash',
     ]) {
-      testWidgets('responsive ' + page + ' at ' + size.$1.toString(), (
-        tester,
-      ) async {
+      testWidgets('responsive $page at ${size.$1}', (tester) async {
         tester.view.physicalSize = Size(size.$1, size.$2);
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.resetPhysicalSize);
@@ -209,7 +207,7 @@ void main() {
         expect(
           tester.takeException(),
           isNull,
-          reason: page + ' must fit the viewport without layout exceptions',
+          reason: '$page must fit the viewport without layout exceptions',
         );
         if (const bool.fromEnvironment('CAPTURE_UI')) {
           final boundary =
@@ -223,12 +221,7 @@ void main() {
             final directory = Directory('build/ui-previews');
             await directory.create(recursive: true);
             await File(
-              directory.path +
-                  '/' +
-                  page +
-                  '-' +
-                  size.$1.toInt().toString() +
-                  '.png',
+              '${directory.path}/$page-${size.$1.toInt()}.png',
             ).writeAsBytes(bytes!.buffer.asUint8List());
             image.dispose();
           });

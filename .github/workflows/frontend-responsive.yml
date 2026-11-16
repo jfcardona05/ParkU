@@ -36,10 +36,35 @@ jobs:
       - run: flutter test --reporter expanded
       - name: Generate desktop tablet and mobile previews
         run: flutter test test/responsive_design_test.dart --dart-define=CAPTURE_UI=true --reporter expanded
+      - name: Prepare visual review sheet
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from PIL import Image, ImageOps, ImageDraw
+          import pathlib, base64, io
+          pages=['login','home','vehicles','qr','wallet','parking','gate','cash','add-vehicle','register']
+          widths=[390,834,1440]
+          sheet=Image.new('RGB',(1050,260*len(pages)), '#e8e8e5')
+          draw=ImageDraw.Draw(sheet)
+          for row,page in enumerate(pages):
+              for col,width in enumerate(widths):
+                  p=pathlib.Path('build/ui-previews')/f'{page}-{width}.png'
+                  if not p.exists(): continue
+                  original=Image.open(p).convert('RGB')
+                  preview=ImageOps.contain(original,(334,225))
+                  x=col*350+(350-preview.width)//2
+                  y=row*260+26
+                  sheet.paste(preview,(x,y))
+                  draw.text((col*350+10,row*260+8),f'{page} / {width}px',fill='#191927')
+          sheet.save('build/ui-previews/review-sheet.jpg',quality=88)
+          output=io.BytesIO()
+          sheet.save(output,format='JPEG',quality=78)
+          print('PARKU_PREVIEW '+base64.b64encode(output.getvalue()).decode())
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: parku-responsive-previews
-          path: mobile/build/ui-previews/*.png
+          path: mobile/build/ui-previews/
           if-no-files-found: warn
       - run: flutter build web
