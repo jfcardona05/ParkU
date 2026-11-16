@@ -149,7 +149,7 @@ class PreviewQr implements VehicleQrSource {
   Future<VehicleQr> issue(VehicleModel vehicle) async => VehicleQr(
     vehicleId: vehicle.id,
     token: 'VISUAL-TEST-ONLY-NOT-AN-ACCESS-TOKEN',
-    expiresAt: DateTime.utc(2099),
+    expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 2)),
   );
 }
 
