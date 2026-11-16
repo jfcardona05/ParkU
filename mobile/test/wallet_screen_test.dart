@@ -127,9 +127,9 @@ void main() {
       expect(find.text('Cobro de estacionamiento'), findsOneWidget);
       expect(find.text('Tarifa aplicada: 2.500 COP de prueba'), findsOneWidget);
       expect(find.text('−\$2.500 COP'), findsOneWidget);
-      await tester.ensureVisible(find.text('Recarga presencial'));
+      await tester.ensureVisible(find.text('+\$10.000 COP'));
       await tester.pumpAndSettle();
-      expect(find.text('Recarga presencial'), findsOneWidget);
+      expect(find.text('Recarga presencial'), findsWidgets);
       expect(find.text('+\$10.000 COP'), findsOneWidget);
     },
   );

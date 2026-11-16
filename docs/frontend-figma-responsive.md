@@ -28,8 +28,8 @@ y publica PNG y una hoja de revisión en el artefacto `parku-responsive-previews
 La hoja usa exclusivamente datos ficticios de tests; ningún código mostrado concede acceso real.
 
 Revisar el último commit del PR y los dos workflows, no resultados de versiones anteriores.
-La corrección automática de estilo en el workspace de Actions sirve para devolver el formato al repositorio;
-el workflow original mantiene su comprobación estricta de formato sobre el código publicado.
+Ambos workflows comprueban estrictamente el formato del código publicado; no se corrige ni oculta
+un fallo de formato al validar la entrega.
 
 ## Revisión humana
 

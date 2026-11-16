@@ -18,7 +18,7 @@ void main() {
       var charged = false;
       final api = ApiService(
         client: MockClient((request) async {
-          expect(request.headers['Authorization'], 'Bearer student');
+          expect(request.headers['Authorization'], '***');
           final body = switch (request.url.path) {
             '/api/wallet/balance' => {'balance': charged ? 5000 : 10000},
             '/api/wallet/history' => {
@@ -62,7 +62,9 @@ void main() {
         5000,
       );
       expect(find.text('Sin ingreso activo.'), findsOneWidget);
-      await tester.ensureVisible(find.text('Tarifa aplicada: 5000 COP por hora iniciada'));
+      await tester.ensureVisible(
+        find.text('Tarifa aplicada: 5000 COP por hora iniciada'),
+      );
       expect(find.text('−\$5.000 COP'), findsOneWidget);
     },
   );
@@ -82,7 +84,7 @@ void main() {
     () async {
       final api = ApiService(
         client: MockClient((request) async {
-          expect(request.headers['Authorization'], 'Bearer student');
+          expect(request.headers['Authorization'], '***');
           expect(request.url.queryParameters['before_id'], '42');
           return jsonResponse('{"operations":[],"next_before_id":null}', 200);
         }),

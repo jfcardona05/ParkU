@@ -20,18 +20,8 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - name: Prepare formatted source for isolated UI verification
-        run: |
-          dart fix --apply
-          dart format lib test
-          python3 - <<'PY'
-          import pathlib, subprocess, json
-          for folder in ('lib','test'):
-              for p in pathlib.Path(folder).rglob('*.dart'):
-                  original=subprocess.run(['git','show','HEAD:mobile/'+str(p)],capture_output=True,text=True)
-                  if original.returncode==0 and original.stdout!=p.read_text():
-                      print('PARKU_FORMAT '+json.dumps({'path':'mobile/'+str(p),'content':p.read_text()}))
-          PY
+      - name: Check Dart formatting
+        run: dart format --output=none --set-exit-if-changed lib test
       - run: flutter analyze
       - run: flutter test --reporter expanded
       - name: Generate desktop tablet and mobile previews
