@@ -118,76 +118,213 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
 
   @override
   Widget build(BuildContext context) => ParkShell(
-    api: widget.apiService, selected: 5, breadcrumb: 'Taquilla', busy: _isSubmitting,
-    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const ParkHeading('Tu recarga, registrada.', 'Atención presencial · Taquilla ParkU'),
-      if (const bool.fromEnvironment('PARKU_QR_DEMO')) TextButton(
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => GateScreen(apiService: widget.apiService, gateway: DemoGateGateway()))),
-        child: const Text('Demo portería'),
-      ),
-      if (_errorMessage != null) Padding(padding: const EdgeInsets.only(bottom: 20), child: ParkNotice(_errorMessage!, retry: _isSubmitting ? null : _fetchUsers)),
-      ParkColumns(flex: const [6, 5], children: [
-        ParkCard(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          const ParkIcon(Icons.point_of_sale_outlined),
-          const SizedBox(height: 20),
-          Text('Recarga presencial', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 24),
-          if (_isLoadingUsers) const Center(child: CircularProgressIndicator())
-          else if (_users.isEmpty) const Text('No hay usuarios disponibles.')
-          else DropdownButtonFormField<int>(
-            key: ValueKey(_selectedUserId),
-            initialValue: _selectedUserId,
-            isExpanded: true,
-            decoration: const InputDecoration(labelText: 'Usuario destinatario'),
-            items: [for (final user in _users) DropdownMenuItem(value: user.id, child: Text(user.name + ' · ' + user.email, maxLines: 1, overflow: TextOverflow.ellipsis))],
-            onChanged: _isSubmitting ? null : (value) => setState(() => _selectedUserId = value),
+    api: widget.apiService,
+    selected: 5,
+    breadcrumb: 'Taquilla',
+    busy: _isSubmitting,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const ParkHeading(
+          'Tu recarga, registrada.',
+          'Atención presencial · Taquilla ParkU',
+        ),
+        if (const bool.fromEnvironment('PARKU_QR_DEMO'))
+          TextButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => GateScreen(
+                  apiService: widget.apiService,
+                  gateway: DemoGateGateway(),
+                ),
+              ),
+            ),
+            child: const Text('Demo portería'),
           ),
-          const SizedBox(height: 18),
-          DropdownButtonFormField<String>(
-            initialValue: _selectedPoint, isExpanded: true,
-            decoration: const InputDecoration(labelText: 'Punto físico de atención'),
-            items: const [
-              DropdownMenuItem(value: 'Punto 1 - Portería Principal USTA', child: Text('Portería Principal')),
-              DropdownMenuItem(value: 'Punto 2 - Cafetería Central USTA', child: Text('Cafetería Central')),
-            ],
-            onChanged: _isSubmitting ? null : (value) { if (value != null) setState(() => _selectedPoint = value); },
+        if (_errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: ParkNotice(
+              _errorMessage!,
+              retry: _isSubmitting ? null : _fetchUsers,
+            ),
           ),
-          const SizedBox(height: 18),
-          TextField(controller: _amountController, enabled: !_isSubmitting, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Importe recibido en efectivo (COP)', prefixText: '\$ ', hintText: '10000')),
-          const SizedBox(height: 14),
-          Wrap(spacing: 8, runSpacing: 8, children: [
-            for (final amount in [4000, 5000, 20000]) ActionChip(label: Text('\$' + amount.toString()), onPressed: _isSubmitting ? null : () => _amountController.text = amount.toString()),
-          ]),
-          const SizedBox(height: 24),
-          FilledButton(onPressed: _isSubmitting || _isLoadingUsers || _users.isEmpty ? null : _handleRecharge, child: Text(_isSubmitting ? 'Registrando…' : 'Registrar abono en taquilla')),
-        ])),
-        Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          const ParkCard(color: ParkColors.yellow, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            ParkIcon(Icons.account_balance_wallet_outlined),
-            SizedBox(height: 24),
-            Text('Cada abono,\ncon su comprobante.', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700)),
-            SizedBox(height: 20),
-            Text('Confirma el destinatario y el efectivo recibido. La recarga se refleja en el saldo y los movimientos del usuario.'),
-            SizedBox(height: 24),
-            ParkBadge('Solo operador autorizado'),
-          ])),
-          if (_lastReceipt != null) ...[
-            const SizedBox(height: 20),
-            ParkCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const ParkBadge('Recarga registrada', success: true),
-              const SizedBox(height: 20),
-              Text('Comprobante de recarga', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 16),
-              Text('Importe: +\$' + _lastReceipt!['amount'].toString() + ' COP'),
-              Text('Saldo posterior: \$' + _lastReceipt!['balance_after'].toString() + ' COP'),
-              const SizedBox(height: 12),
-              Text('Punto: ' + _lastReceipt!['point_name'].toString()),
-              Text('Referencia: ' + _lastReceipt!['reference'].toString()),
-              Text('Fecha: ' + _lastReceipt!['created_at'].toString()),
-            ])),
+        ParkColumns(
+          flex: const [6, 5],
+          children: [
+            ParkCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const ParkIcon(Icons.point_of_sale_outlined),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Recarga presencial',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 24),
+                  if (_isLoadingUsers)
+                    const Center(child: CircularProgressIndicator())
+                  else if (_users.isEmpty)
+                    const Text('No hay usuarios disponibles.')
+                  else
+                    DropdownButtonFormField<int>(
+                      key: ValueKey(_selectedUserId),
+                      initialValue: _selectedUserId,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Usuario destinatario',
+                      ),
+                      items: [
+                        for (final user in _users)
+                          DropdownMenuItem(
+                            value: user.id,
+                            child: Text(
+                              user.name + ' · ' + user.email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                      onChanged: _isSubmitting
+                          ? null
+                          : (value) => setState(() => _selectedUserId = value),
+                    ),
+                  const SizedBox(height: 18),
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedPoint,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Punto físico de atención',
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'Punto 1 - Portería Principal USTA',
+                        child: Text('Portería Principal'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Punto 2 - Cafetería Central USTA',
+                        child: Text('Cafetería Central'),
+                      ),
+                    ],
+                    onChanged: _isSubmitting
+                        ? null
+                        : (value) {
+                            if (value != null)
+                              setState(() => _selectedPoint = value);
+                          },
+                  ),
+                  const SizedBox(height: 18),
+                  TextField(
+                    controller: _amountController,
+                    enabled: !_isSubmitting,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Importe recibido en efectivo (COP)',
+                      prefixText: '\$ ',
+                      hintText: '10000',
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final amount in [4000, 5000, 20000])
+                        ActionChip(
+                          label: Text('\$' + amount.toString()),
+                          onPressed: _isSubmitting
+                              ? null
+                              : () =>
+                                    _amountController.text = amount.toString(),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed:
+                        _isSubmitting || _isLoadingUsers || _users.isEmpty
+                        ? null
+                        : _handleRecharge,
+                    child: Text(
+                      _isSubmitting
+                          ? 'Registrando…'
+                          : 'Registrar abono en taquilla',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const ParkCard(
+                  color: ParkColors.yellow,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ParkIcon(Icons.account_balance_wallet_outlined),
+                      SizedBox(height: 24),
+                      Text(
+                        'Cada abono,\ncon su comprobante.',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Confirma el destinatario y el efectivo recibido. La recarga se refleja en el saldo y los movimientos del usuario.',
+                      ),
+                      SizedBox(height: 24),
+                      ParkBadge('Solo operador autorizado'),
+                    ],
+                  ),
+                ),
+                if (_lastReceipt != null) ...[
+                  const SizedBox(height: 20),
+                  ParkCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const ParkBadge('Recarga registrada', success: true),
+                        const SizedBox(height: 20),
+                        Text(
+                          'Comprobante de recarga',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Importe: +\$' +
+                              _lastReceipt!['amount'].toString() +
+                              ' COP',
+                        ),
+                        Text(
+                          'Saldo posterior: \$' +
+                              _lastReceipt!['balance_after'].toString() +
+                              ' COP',
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Punto: ' + _lastReceipt!['point_name'].toString(),
+                        ),
+                        Text(
+                          'Referencia: ' +
+                              _lastReceipt!['reference'].toString(),
+                        ),
+                        Text(
+                          'Fecha: ' + _lastReceipt!['created_at'].toString(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ],
-        ]),
-      ]),
-    ]),
+        ),
+      ],
+    ),
   );
 }

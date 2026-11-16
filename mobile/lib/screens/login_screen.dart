@@ -91,60 +91,153 @@ class _LoginScreenState extends State<LoginScreen> {
     final intro = ParkCard(
       color: mobile ? ParkColors.background : ParkColors.yellow,
       padding: EdgeInsets.all(mobile ? 0 : 32),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (!mobile) const Text('MENOS VUELTAS. MÁS TIEMPO.', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 22),
-        Text('Tu parqueadero,\nmás fácil.', style: mobile ? Theme.of(context).textTheme.headlineMedium : Theme.of(context).textTheme.headlineLarge),
-        const SizedBox(height: 22),
-        Text(mobile ? 'Bienvenido a ParkU' : 'Gestiona tu vehículo, consulta tu saldo\ny entra con un QR seguro.', style: mobile ? Theme.of(context).textTheme.bodySmall : Theme.of(context).textTheme.bodyLarge),
-        const SizedBox(height: 22),
-        const ParkCar(),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (!mobile)
+            const Text(
+              'MENOS VUELTAS. MÁS TIEMPO.',
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+            ),
+          const SizedBox(height: 22),
+          Text(
+            'Tu parqueadero,\nmás fácil.',
+            style: mobile
+                ? Theme.of(context).textTheme.headlineMedium
+                : Theme.of(context).textTheme.headlineLarge,
+          ),
+          const SizedBox(height: 22),
+          Text(
+            mobile
+                ? 'Bienvenido a ParkU'
+                : 'Gestiona tu vehículo, consulta tu saldo\ny entra con un QR seguro.',
+            style: mobile
+                ? Theme.of(context).textTheme.bodySmall
+                : Theme.of(context).textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 22),
+          const ParkCar(),
+        ],
+      ),
     );
     final form = ParkCard(
       padding: EdgeInsets.all(mobile ? 0 : 32),
       color: mobile ? ParkColors.background : Colors.white,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Inicia sesión', style: Theme.of(context).textTheme.headlineMedium),
-        const SizedBox(height: 14),
-        Text('Ingresa con tu cuenta de ParkU.', style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: 26),
-        if (_errorMessage != null) ...[
-          Text(_errorMessage!, style: const TextStyle(color: Color(0xFFB3261E))),
-          const SizedBox(height: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Inicia sesión',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Ingresa con tu cuenta de ParkU.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 26),
+          if (_errorMessage != null) ...[
+            Text(
+              _errorMessage!,
+              style: const TextStyle(color: Color(0xFFB3261E)),
+            ),
+            const SizedBox(height: 16),
+          ],
+          const Text(
+            'Correo electrónico',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _emailController,
+            enabled: !_isLoading,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.username],
+            decoration: const InputDecoration(
+              hintText: 'tu.correo@usantotomas.edu.co',
+            ),
+          ),
+          const SizedBox(height: 18),
+          const Text(
+            'Contraseña',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _passwordController,
+            enabled: !_isLoading,
+            obscureText: true,
+            autofillHints: const [AutofillHints.password],
+            onSubmitted: (_) => _isLoading ? null : _handleLogin(),
+            decoration: const InputDecoration(hintText: '••••••••'),
+          ),
+          const SizedBox(height: 20),
+          FilledButton(
+            onPressed: _isLoading ? null : _handleLogin,
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Ingresar a ParkU →'),
+          ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: _isLoading
+                ? null
+                : () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          RegisterScreen(apiService: widget.apiService),
+                    ),
+                  ),
+            child: const Text('¿Aún no tienes cuenta? Regístrate'),
+          ),
+          Text(
+            'Acceso de portería y taquilla según tu rol.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
-        const Text('Correo electrónico', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 10),
-        TextField(controller: _emailController, enabled: !_isLoading, keyboardType: TextInputType.emailAddress, autofillHints: const [AutofillHints.username], decoration: const InputDecoration(hintText: 'tu.correo@usantotomas.edu.co')),
-        const SizedBox(height: 18),
-        const Text('Contraseña', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 10),
-        TextField(controller: _passwordController, enabled: !_isLoading, obscureText: true, autofillHints: const [AutofillHints.password], onSubmitted: (_) => _isLoading ? null : _handleLogin(), decoration: const InputDecoration(hintText: '••••••••')),
-        const SizedBox(height: 20),
-        FilledButton(onPressed: _isLoading ? null : _handleLogin, child: _isLoading
-          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-          : const Text('Ingresar a ParkU →')),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen(apiService: widget.apiService))),
-          child: const Text('¿Aún no tienes cuenta? Regístrate'),
-        ),
-        Text('Acceso de portería y taquilla según tu rol.', style: Theme.of(context).textTheme.bodySmall),
-      ]),
+      ),
     );
     return ParkShell(
-      api: widget.apiService, selected: -1, breadcrumb: 'Iniciar sesión', busy: _isLoading,
-      child: Column(children: [
-        ParkColumns(flex: const [6, 5], breakpoint: 760, children: [intro, form]),
-        if (!mobile) ...[
-          const SizedBox(height: 20),
-          const ParkFeatures(items: [
-            (Icons.directions_car_outlined, 'Tu vehículo', 'Registra los vehículos que utilizas.'),
-            (Icons.qr_code_2_outlined, 'Tu QR seguro', 'Genera el código antes de llegar.'),
-            (Icons.account_balance_wallet_outlined, 'Tu saldo', 'Consulta tus movimientos en un lugar.'),
-          ]),
+      api: widget.apiService,
+      selected: -1,
+      breadcrumb: 'Iniciar sesión',
+      busy: _isLoading,
+      child: Column(
+        children: [
+          ParkColumns(
+            flex: const [6, 5],
+            breakpoint: 760,
+            children: [intro, form],
+          ),
+          if (!mobile) ...[
+            const SizedBox(height: 20),
+            const ParkFeatures(
+              items: [
+                (
+                  Icons.directions_car_outlined,
+                  'Tu vehículo',
+                  'Registra los vehículos que utilizas.',
+                ),
+                (
+                  Icons.qr_code_2_outlined,
+                  'Tu QR seguro',
+                  'Genera el código antes de llegar.',
+                ),
+                (
+                  Icons.account_balance_wallet_outlined,
+                  'Tu saldo',
+                  'Consulta tus movimientos en un lugar.',
+                ),
+              ],
+            ),
+          ],
         ],
-      ]),
+      ),
     );
   }
 }

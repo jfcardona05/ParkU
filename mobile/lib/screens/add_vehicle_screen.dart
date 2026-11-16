@@ -84,37 +84,105 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
   @override
   Widget build(BuildContext context) => ParkShell(
-    api: widget.apiService, selected: 1, breadcrumb: 'Agregar vehículo', busy: _isLoading,
-    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const ParkHeading('Un vehículo.\nTu próximo recorrido.', 'Registra los vehículos de tu propiedad.'),
-      ParkColumns(children: [
-        ParkCard(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text('Agregar vehículo', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 24),
-          TextField(controller: _plateController, enabled: !_isLoading, textCapitalization: TextCapitalization.characters, decoration: const InputDecoration(labelText: 'Placa *', hintText: 'ABC123')),
-          const SizedBox(height: 18),
-          DropdownButtonFormField<String>(
-            initialValue: _selectedType,
-            decoration: const InputDecoration(labelText: 'Tipo de vehículo *'),
-            items: const [DropdownMenuItem(value: 'automovil', child: Text('Automóvil')), DropdownMenuItem(value: 'moto', child: Text('Moto'))],
-            onChanged: _isLoading ? null : (value) { if (value != null) setState(() => _selectedType = value); },
-          ),
-          const SizedBox(height: 18),
-          TextField(controller: _brandController, enabled: !_isLoading, decoration: const InputDecoration(labelText: 'Marca y modelo', hintText: 'Ej. Chevrolet Onix')),
-          if (_errorMessage != null) Padding(padding: const EdgeInsets.symmetric(vertical: 16), child: Text(_errorMessage!, style: const TextStyle(color: Color(0xFFB3261E)))),
-          const SizedBox(height: 24),
-          FilledButton(onPressed: _isLoading ? null : _handleSave, child: Text(_isLoading ? 'Guardando…' : 'Guardar vehículo')),
-        ])),
-        ParkCard(color: ParkColors.yellow, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const ParkIcon(Icons.directions_car_outlined),
-          const SizedBox(height: 20),
-          Text('Listo para tu\npróxima entrada.', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 18),
-          const Text('Tu QR es personal, temporal y de un solo uso. Genéralo antes de llegar a portería.'),
-          const SizedBox(height: 24),
-          ParkCar(motorcycle: _selectedType == 'moto'),
-        ])),
-      ]),
-    ]),
+    api: widget.apiService,
+    selected: 1,
+    breadcrumb: 'Agregar vehículo',
+    busy: _isLoading,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const ParkHeading(
+          'Un vehículo.\nTu próximo recorrido.',
+          'Registra los vehículos de tu propiedad.',
+        ),
+        ParkColumns(
+          children: [
+            ParkCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Agregar vehículo',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: _plateController,
+                    enabled: !_isLoading,
+                    textCapitalization: TextCapitalization.characters,
+                    decoration: const InputDecoration(
+                      labelText: 'Placa *',
+                      hintText: 'ABC123',
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedType,
+                    decoration: const InputDecoration(
+                      labelText: 'Tipo de vehículo *',
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'automovil',
+                        child: Text('Automóvil'),
+                      ),
+                      DropdownMenuItem(value: 'moto', child: Text('Moto')),
+                    ],
+                    onChanged: _isLoading
+                        ? null
+                        : (value) {
+                            if (value != null)
+                              setState(() => _selectedType = value);
+                          },
+                  ),
+                  const SizedBox(height: 18),
+                  TextField(
+                    controller: _brandController,
+                    enabled: !_isLoading,
+                    decoration: const InputDecoration(
+                      labelText: 'Marca y modelo',
+                      hintText: 'Ej. Chevrolet Onix',
+                    ),
+                  ),
+                  if (_errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Color(0xFFB3261E)),
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: _isLoading ? null : _handleSave,
+                    child: Text(_isLoading ? 'Guardando…' : 'Guardar vehículo'),
+                  ),
+                ],
+              ),
+            ),
+            ParkCard(
+              color: ParkColors.yellow,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const ParkIcon(Icons.directions_car_outlined),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Listo para tu\npróxima entrada.',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Tu QR es personal, temporal y de un solo uso. Genéralo antes de llegar a portería.',
+                  ),
+                  const SizedBox(height: 24),
+                  ParkCar(motorcycle: _selectedType == 'moto'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
   );
 }

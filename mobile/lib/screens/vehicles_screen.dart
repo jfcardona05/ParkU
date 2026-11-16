@@ -120,60 +120,115 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
     }
   }
 
-  void _openQr(VehicleModel vehicle) => Navigator.push(context, MaterialPageRoute(
-    builder: (_) => VehicleQrScreen(
-      vehicle: vehicle,
-      apiService: widget.apiService,
-      source: const bool.fromEnvironment('PARKU_QR_DEMO') ? DemoVehicleQrSource() : ApiVehicleQrSource(widget.apiService),
+  void _openQr(VehicleModel vehicle) => Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => VehicleQrScreen(
+        vehicle: vehicle,
+        apiService: widget.apiService,
+        source: const bool.fromEnvironment('PARKU_QR_DEMO')
+            ? DemoVehicleQrSource()
+            : ApiVehicleQrSource(widget.apiService),
+      ),
     ),
-  ));
+  );
 
   @override
   Widget build(BuildContext context) => ParkShell(
-    api: widget.apiService, selected: 1, breadcrumb: 'Vehículos', refresh: _fetchVehicles,
-    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const ParkHeading('Tus vehículos', 'Tu QR seguro, siempre a mano.'),
-      if (_isLoading) const Center(child: CircularProgressIndicator())
-      else if (_loadError != null) LoadError(message: _loadError!, retry: _fetchVehicles)
-      else ...[
-        ParkColumns(flex: const [4, 7], children: [
-          Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            if (_vehicles.isEmpty) const ParkNotice('Aún no tienes vehículos registrados.'),
-            for (final vehicle in _vehicles) Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: ParkVehicleCard(
-                key: ValueKey(vehicle.id), vehicle: vehicle, api: widget.apiService,
-                onQr: () => _openQr(vehicle), onDelete: () => _deleteVehicle(vehicle),
-              ),
-            ),
-          ]),
-          ParkCard(color: ParkColors.yellow, child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    api: widget.apiService,
+    selected: 1,
+    breadcrumb: 'Vehículos',
+    refresh: _fetchVehicles,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const ParkHeading('Tus vehículos', 'Tu QR seguro, siempre a mano.'),
+        if (_isLoading)
+          const Center(child: CircularProgressIndicator())
+        else if (_loadError != null)
+          LoadError(message: _loadError!, retry: _fetchVehicles)
+        else ...[
+          ParkColumns(
+            flex: const [4, 7],
             children: [
-              const ParkIcon(Icons.directions_car_outlined),
-              const SizedBox(height: 22),
-              Text('Un vehículo.\nTu próximo recorrido.', style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: 20),
-              const Text('Registra los vehículos de tu propiedad y genera su QR antes de llegar a portería.'),
-              const SizedBox(height: 20),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: Colors.white),
-                onPressed: _openAddVehicle, child: const Text('+ Agregar vehículo'),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (_vehicles.isEmpty)
+                    const ParkNotice('Aún no tienes vehículos registrados.'),
+                  for (final vehicle in _vehicles)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: ParkVehicleCard(
+                        key: ValueKey(vehicle.id),
+                        vehicle: vehicle,
+                        api: widget.apiService,
+                        onQr: () => _openQr(vehicle),
+                        onDelete: () => _deleteVehicle(vehicle),
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 28),
-              const ParkCar(),
+              ParkCard(
+                color: ParkColors.yellow,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ParkIcon(Icons.directions_car_outlined),
+                    const SizedBox(height: 22),
+                    Text(
+                      'Un vehículo.\nTu próximo recorrido.',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Registra los vehículos de tu propiedad y genera su QR antes de llegar a portería.',
+                    ),
+                    const SizedBox(height: 20),
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                      ),
+                      onPressed: _openAddVehicle,
+                      child: const Text('+ Agregar vehículo'),
+                    ),
+                    const SizedBox(height: 28),
+                    const ParkCar(),
+                  ],
+                ),
+              ),
             ],
-          )),
-        ]),
-        const SizedBox(height: 16),
-        const ParkCard(padding: EdgeInsets.all(18), child: Text('Solo tú puedes ver y administrar tus vehículos.', style: TextStyle(color: ParkColors.muted, fontSize: 12))),
-        const SizedBox(height: 20),
-        const ParkFeatures(items: [
-          (Icons.directions_car_outlined, '01 · Registra', 'Agrega la placa y el tipo de tu vehículo.'),
-          (Icons.qr_code_2_outlined, '02 · Genera tu QR', 'El código es temporal y de un solo uso.'),
-          (Icons.sensor_door_outlined, '03 · Preséntalo', 'Portería valida y confirma la operación.'),
-        ]),
+          ),
+          const SizedBox(height: 16),
+          const ParkCard(
+            padding: EdgeInsets.all(18),
+            child: Text(
+              'Solo tú puedes ver y administrar tus vehículos.',
+              style: TextStyle(color: ParkColors.muted, fontSize: 12),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const ParkFeatures(
+            items: [
+              (
+                Icons.directions_car_outlined,
+                '01 · Registra',
+                'Agrega la placa y el tipo de tu vehículo.',
+              ),
+              (
+                Icons.qr_code_2_outlined,
+                '02 · Genera tu QR',
+                'El código es temporal y de un solo uso.',
+              ),
+              (
+                Icons.sensor_door_outlined,
+                '03 · Preséntalo',
+                'Portería valida y confirma la operación.',
+              ),
+            ],
+          ),
+        ],
       ],
-    ]),
+    ),
   );
 }

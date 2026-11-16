@@ -63,25 +63,44 @@ class _ParkingScreenState extends State<ParkingScreen> {
       ? error.message
       : 'No se pudo cargar esta información. Intenta nuevamente.';
 
-  Widget _section<T>(String title, Future<T> future, Widget Function(T) content, {bool yellow = false}) => ParkCard(
+  Widget _section<T>(
+    String title,
+    Future<T> future,
+    Widget Function(T) content, {
+    bool yellow = false,
+  }) => ParkCard(
     color: yellow ? ParkColors.yellow : Colors.white,
-    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const Align(alignment: Alignment.centerLeft, child: ParkIcon(Icons.local_parking_outlined)),
-      const SizedBox(height: 18),
-      Text(title, style: Theme.of(context).textTheme.titleMedium),
-      const SizedBox(height: 22),
-      FutureBuilder<T>(
-        future: future,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator());
-          if (snapshot.hasError) return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(_message(snapshot.error)),
-            TextButton(onPressed: _refresh, child: const Text('Reintentar')),
-          ]);
-          return content(snapshot.requireData);
-        },
-      ),
-    ]),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Align(
+          alignment: Alignment.centerLeft,
+          child: ParkIcon(Icons.local_parking_outlined),
+        ),
+        const SizedBox(height: 18),
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 22),
+        FutureBuilder<T>(
+          future: future,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done)
+              return const Center(child: CircularProgressIndicator());
+            if (snapshot.hasError)
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_message(snapshot.error)),
+                  TextButton(
+                    onPressed: _refresh,
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              );
+            return content(snapshot.requireData);
+          },
+        ),
+      ],
+    ),
   );
 
   Future<void> _loadMore(int cursor) async {
@@ -111,82 +130,200 @@ class _ParkingScreenState extends State<ParkingScreen> {
 
   @override
   Widget build(BuildContext context) => ParkShell(
-    api: widget.apiService, selected: 3, breadcrumb: 'Parqueadero', refresh: _refresh,
-    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const ParkHeading('Así está el parqueadero', 'Ocupación, tarifas y tus accesos.'),
-      ParkColumns(children: [
-        _section('Cupos disponibles', _occupancy, (data) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    api: widget.apiService,
+    selected: 3,
+    breadcrumb: 'Parqueadero',
+    refresh: _refresh,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const ParkHeading(
+          'Así está el parqueadero',
+          'Ocupación, tarifas y tus accesos.',
+        ),
+        ParkColumns(
           children: [
-            Text(data['available'].toString() + ' de ' + data['capacity'].toString(), style: Theme.of(context).textTheme.headlineLarge),
-            const SizedBox(height: 34),
-            Text(data['occupied'].toString() + ' ocupados · datos del servidor', style: const TextStyle(fontSize: 12)),
-          ],
-        ), yellow: true),
-        _section('Tarifas vigentes', _rates, (rates) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (rates.isEmpty) const Text('No hay tarifas disponibles.'),
-            for (final rate in rates) Padding(
-              padding: const EdgeInsets.only(bottom: 18),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(rate['vehicle_type'] == 'moto' ? 'Moto' : 'Automóvil', style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 6),
-                Text(rate['amount'].toString() + ' COP / ' + (rate['block_seconds'] == 3600 ? 'hora iniciada' : rate['block_seconds'].toString() + ' s iniciados')),
-                Text('Mínimo ' + rate['minimum_blocks'].toString() + ' bloque(s).', style: Theme.of(context).textTheme.bodySmall),
-              ]),
+            _section(
+              'Cupos disponibles',
+              _occupancy,
+              (data) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    data['available'].toString() +
+                        ' de ' +
+                        data['capacity'].toString(),
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  const SizedBox(height: 34),
+                  Text(
+                    data['occupied'].toString() +
+                        ' ocupados · datos del servidor',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+              yellow: true,
             ),
-            Text('Se aplica la tarifa vigente al ingresar.', style: Theme.of(context).textTheme.bodySmall),
+            _section(
+              'Tarifas vigentes',
+              _rates,
+              (rates) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (rates.isEmpty) const Text('No hay tarifas disponibles.'),
+                  for (final rate in rates)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            rate['vehicle_type'] == 'moto'
+                                ? 'Moto'
+                                : 'Automóvil',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            rate['amount'].toString() +
+                                ' COP / ' +
+                                (rate['block_seconds'] == 3600
+                                    ? 'hora iniciada'
+                                    : rate['block_seconds'].toString() +
+                                          ' s iniciados'),
+                          ),
+                          Text(
+                            'Mínimo ' +
+                                rate['minimum_blocks'].toString() +
+                                ' bloque(s).',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  Text(
+                    'Se aplica la tarifa vigente al ingresar.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
           ],
-        )),
-      ]),
-      const SizedBox(height: 20),
-      _section('Tus últimos accesos', _history, (page) {
-        final operations = [...page.operations, ..._moreOperations];
-        final cursor = (_lastPage ?? page).nextBeforeId;
-        return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          if (operations.isEmpty) const Text('No hay accesos registrados.'),
-          for (final operation in operations) Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFECECE8)))),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text((operation['action'] == 'entry' ? 'Ingreso' : 'Salida') + ' · ' + operation['plate'].toString(), style: const TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 6),
-              Text(operation['occurred_at'].toString(), style: Theme.of(context).textTheme.bodySmall),
-              if (operation['charge'] case final Map<String, dynamic> charge) ...[
-                Text('Cobro ' + charge['amount'].toString() + ' COP · Saldo posterior ' + charge['balance_after'].toString() + ' COP'),
-                Text(charge['parking_rate_label'].toString(), style: Theme.of(context).textTheme.bodySmall),
-              ],
-            ]),
+        ),
+        const SizedBox(height: 20),
+        _section('Tus últimos accesos', _history, (page) {
+          final operations = [...page.operations, ..._moreOperations];
+          final cursor = (_lastPage ?? page).nextBeforeId;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (operations.isEmpty) const Text('No hay accesos registrados.'),
+              for (final operation in operations)
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Color(0xFFECECE8)),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        (operation['action'] == 'entry'
+                                ? 'Ingreso'
+                                : 'Salida') +
+                            ' · ' +
+                            operation['plate'].toString(),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        operation['occurred_at'].toString(),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      if (operation['charge']
+                          case final Map<String, dynamic> charge) ...[
+                        Text(
+                          'Cobro ' +
+                              charge['amount'].toString() +
+                              ' COP · Saldo posterior ' +
+                              charge['balance_after'].toString() +
+                              ' COP',
+                        ),
+                        Text(
+                          charge['parking_rate_label'].toString(),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              if (_pageError != null) Text(_pageError!),
+              if (cursor != null)
+                TextButton(
+                  onPressed: _loadingMore ? null : () => _loadMore(cursor),
+                  child: Text(
+                    _loadingMore ? 'Cargando…' : 'Cargar más accesos',
+                  ),
+                ),
+              const SizedBox(height: 12),
+              Text(
+                'Solo se muestran tus vehículos y accesos.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          );
+        }),
+        const SizedBox(height: 20),
+        _section(
+          'Mis vehículos',
+          _vehicles,
+          (vehicles) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (vehicles.isEmpty)
+                const Text('Aún no tienes vehículos registrados.'),
+              for (final parked in vehicles)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    parked.vehicle.isMoto
+                        ? Icons.two_wheeler_outlined
+                        : Icons.directions_car_outlined,
+                  ),
+                  title: Text(parked.vehicle.plate),
+                  subtitle: Text(
+                    parked.inside
+                        ? 'Dentro del parqueadero'
+                        : 'Fuera del parqueadero',
+                  ),
+                ),
+            ],
           ),
-          if (_pageError != null) Text(_pageError!),
-          if (cursor != null) TextButton(
-            onPressed: _loadingMore ? null : () => _loadMore(cursor),
-            child: Text(_loadingMore ? 'Cargando…' : 'Cargar más accesos'),
-          ),
-          const SizedBox(height: 12),
-          Text('Solo se muestran tus vehículos y accesos.', style: Theme.of(context).textTheme.bodySmall),
-        ]);
-      }),
-      const SizedBox(height: 20),
-      _section('Mis vehículos', _vehicles, (vehicles) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (vehicles.isEmpty) const Text('Aún no tienes vehículos registrados.'),
-          for (final parked in vehicles) ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(parked.vehicle.isMoto ? Icons.two_wheeler_outlined : Icons.directions_car_outlined),
-            title: Text(parked.vehicle.plate),
-            subtitle: Text(parked.inside ? 'Dentro del parqueadero' : 'Fuera del parqueadero'),
-          ),
-        ],
-      )),
-      const SizedBox(height: 20),
-      const ParkFeatures(items: [
-        (Icons.directions_car_outlined, 'Tu vehículo', 'Revisa si tienes un ingreso activo.'),
-        (Icons.local_parking_outlined, 'Tarifa vigente', 'El cobro se calcula en el servidor.'),
-        (Icons.history_outlined, 'Tus accesos', 'Consulta tus ingresos y salidas.'),
-      ]),
-    ]),
+        ),
+        const SizedBox(height: 20),
+        const ParkFeatures(
+          items: [
+            (
+              Icons.directions_car_outlined,
+              'Tu vehículo',
+              'Revisa si tienes un ingreso activo.',
+            ),
+            (
+              Icons.local_parking_outlined,
+              'Tarifa vigente',
+              'El cobro se calcula en el servidor.',
+            ),
+            (
+              Icons.history_outlined,
+              'Tus accesos',
+              'Consulta tus ingresos y salidas.',
+            ),
+          ],
+        ),
+      ],
+    ),
   );
 }

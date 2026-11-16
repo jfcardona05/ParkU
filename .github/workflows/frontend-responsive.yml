@@ -22,6 +22,7 @@ jobs:
       - run: flutter pub get
       - name: Prepare formatted source for isolated UI verification
         run: |
+          dart fix --apply
           dart format lib test
           python3 - <<'PY'
           import pathlib, subprocess, json

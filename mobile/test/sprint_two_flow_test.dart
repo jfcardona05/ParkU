@@ -27,7 +27,7 @@ class ParkingFixture {
   http.Response respond(http.Request request) {
     final path = request.url.path;
     if (path != '/api/auth/login' &&
-        request.headers['Authorization'] != 'Bearer fixture-session') {
+        request.headers['Authorization'] != '***') {
       return http.Response('{"message":"Sesión requerida"}', 401);
     }
     final body = switch (path) {
@@ -45,6 +45,8 @@ class ParkingFixture {
           {'id': 7, 'plate': 'ABC123', 'type': 'automovil'},
         ],
       },
+      '/api/parking/occupancy' => {'capacity': 10, 'occupied': 0, 'available': 10},
+      '/api/vehicles/7/parking' => {'vehicle_id': 7, 'parking_state': 'OUTSIDE', 'entered_at': null},
       '/api/wallet/balance' => {'balance': balance},
       '/api/wallet/history' => {'transactions': []},
       _ => throw StateError('Solicitud inesperada: $path'),
@@ -124,7 +126,7 @@ Future<String> showVehicleQr(WidgetTester tester, VehicleModel vehicle) async {
 Future<void> validateQr(WidgetTester tester, String code) async {
   await tester.enterText(find.byType(TextField), code);
   await tester.ensureVisible(find.text('Validar código'));
-      await tester.tap(find.text('Validar código'));
+  await tester.tap(find.text('Validar código'));
   await tester.pumpAndSettle();
 }
 
