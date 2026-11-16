@@ -61,7 +61,11 @@ ThemeData parkTheme() => ThemeData(
       minimumSize: const Size(48, 52),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+      textStyle: const TextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+      ),
     ),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
