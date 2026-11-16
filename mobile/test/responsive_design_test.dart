@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -153,6 +155,16 @@ class PreviewQr implements VehicleQrSource {
 }
 
 void main() {
+  setUpAll(() async {
+    if (const bool.fromEnvironment('CAPTURE_UI')) {
+      final font = FontLoader('Roboto');
+      font.addFont(File('build/preview-font.ttf').readAsBytes().then((bytes) => ByteData.sublistView(bytes)));
+      await font.load();
+      final icons = FontLoader('MaterialIcons');
+      icons.addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
+      await icons.load();
+    }
+  });
   const sizes = [(390.0, 844.0), (834.0, 1194.0), (1440.0, 1000.0)];
   for (final size in sizes) {
     for (final page in [

@@ -11,6 +11,7 @@ abstract final class ParkColors {
 
 ThemeData parkTheme() => ThemeData(
   useMaterial3: true,
+  fontFamily: 'Roboto',
   brightness: Brightness.light,
   scaffoldBackgroundColor: ParkColors.background,
   colorScheme: ColorScheme.fromSeed(
