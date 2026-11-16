@@ -18,7 +18,7 @@ void main() {
       var charged = false;
       final api = ApiService(
         client: MockClient((request) async {
-          expect(request.headers['Authorization'], '***');
+          expect(request.headers['Authorization'], 'Bearer student');
           final body = switch (request.url.path) {
             '/api/wallet/balance' => {'balance': charged ? 5000 : 10000},
             '/api/wallet/history' => {
@@ -84,7 +84,7 @@ void main() {
     () async {
       final api = ApiService(
         client: MockClient((request) async {
-          expect(request.headers['Authorization'], '***');
+          expect(request.headers['Authorization'], 'Bearer student');
           expect(request.url.queryParameters['before_id'], '42');
           return jsonResponse('{"operations":[],"next_before_id":null}', 200);
         }),
