@@ -158,7 +158,8 @@ void main() {
   setUpAll(() async {
     if (const bool.fromEnvironment('CAPTURE_UI')) {
       final font = FontLoader('Roboto');
-      font.addFont(File('build/preview-font.ttf').readAsBytes().then((bytes) => ByteData.sublistView(bytes)));
+      final bytes = await File('build/preview-font.ttf').readAsBytes();
+      font.addFont(Future.value(ByteData.sublistView(bytes)));
       await font.load();
       final icons = FontLoader('MaterialIcons');
       icons.addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
