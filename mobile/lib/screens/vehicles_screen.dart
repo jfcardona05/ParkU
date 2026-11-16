@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
 import '../models/vehicle_model.dart';
-import '../widgets/license_plate_widget.dart';
+import '../ui/park_shell.dart';
+import '../ui/park_widgets.dart';
+import '../ui/park_theme.dart';
+import '../ui/vehicle_card.dart';
 import 'add_vehicle_screen.dart';
 import 'vehicle_qr_screen.dart';
 import '../services/vehicle_qr_service.dart';
@@ -67,21 +70,21 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF111827),
+        backgroundColor: Colors.white,
         title: const Text(
           'Desvincular Vehículo',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: ParkColors.ink),
         ),
         content: Text(
           '¿Deseas desvincular el vehículo con placa ${v.plate} de tu cuenta?',
-          style: const TextStyle(color: Colors.white70),
+          style: const TextStyle(color: ParkColors.muted),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text(
               'Cancelar',
-              style: TextStyle(color: Colors.white54),
+              style: TextStyle(color: ParkColors.muted),
             ),
           ),
           ElevatedButton(
@@ -117,253 +120,60 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0E17),
-      body: _loadError != null
-          ? LoadError(message: _loadError!, retry: _fetchVehicles)
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Mis Vehículos',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            Text(
-                              'HU-06 • Registro y asociación a tu cuenta',
-                              style: TextStyle(
-                                color: Color(0xFF9CA3AF),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: _openAddVehicle,
-                          icon: const Icon(
-                            Icons.add,
-                            size: 18,
-                            color: Colors.black,
-                          ),
-                          label: const Text(
-                            'Registrar',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF59E0B),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+  void _openQr(VehicleModel vehicle) => Navigator.push(context, MaterialPageRoute(
+    builder: (_) => VehicleQrScreen(
+      vehicle: vehicle,
+      apiService: widget.apiService,
+      source: const bool.fromEnvironment('PARKU_QR_DEMO') ? DemoVehicleQrSource() : ApiVehicleQrSource(widget.apiService),
+    ),
+  ));
 
-                    Expanded(
-                      child: _isLoading
-                          ? const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFFF59E0B),
-                              ),
-                            )
-                          : _vehicles.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.directions_car_outlined,
-                                    size: 64,
-                                    color: Colors.white24,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Text(
-                                    'No tienes vehículos registrados',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  const Text(
-                                    'Registra la placa de tu moto o carro para asociarlo.',
-                                    style: TextStyle(
-                                      color: Colors.white54,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ElevatedButton(
-                                    onPressed: _openAddVehicle,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF1E3A8A),
-                                    ),
-                                    child: const Text(
-                                      'Registrar Ahora',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : ListView.builder(
-                              itemCount: _vehicles.length,
-                              itemBuilder: (context, index) {
-                                final v = _vehicles[index];
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF111827),
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.08,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 44,
-                                        height: 44,
-                                        decoration: BoxDecoration(
-                                          color: const Color(
-                                            0xFF1E3A8A,
-                                          ).withValues(alpha: 0.3),
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          v.isMoto
-                                              ? Icons.two_wheeler
-                                              : Icons.directions_car,
-                                          color: const Color(0xFF3B82F6),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                LicensePlateWidget(
-                                                  plate: v.plate,
-                                                  fontSize: 13,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 6,
-                                                        vertical: 2,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: const Color(
-                                                      0xFFF59E0B,
-                                                    ).withValues(alpha: 0.15),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          4,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    v.type.toUpperCase(),
-                                                    style: const TextStyle(
-                                                      color: Color(0xFFF59E0B),
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              v.brandModel.isNotEmpty
-                                                  ? v.brandModel
-                                                  : 'Modelo no especificado',
-                                              style: const TextStyle(
-                                                color: Colors.white70,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                            const Text(
-                                              'Consulta la tarifa vigente en Parqueadero.',
-                                              style: TextStyle(
-                                                color: Color(0xFF93C5FD),
-                                                fontSize: 11,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      IconButton(
-                                        tooltip: 'Mostrar QR',
-                                        icon: const Icon(Icons.qr_code),
-                                        onPressed: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => VehicleQrScreen(
-                                              vehicle: v,
-                                              source:
-                                                  const bool.fromEnvironment(
-                                                    'PARKU_QR_DEMO',
-                                                  )
-                                                  ? DemoVehicleQrSource()
-                                                  : ApiVehicleQrSource(
-                                                      widget.apiService,
-                                                    ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete_outline,
-                                          color: Color(0xFFF87171),
-                                        ),
-                                        onPressed: () => _deleteVehicle(v),
-                                        tooltip: 'Desvincular',
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
-                  ],
-                ),
+  @override
+  Widget build(BuildContext context) => ParkShell(
+    api: widget.apiService, selected: 1, breadcrumb: 'Vehículos', refresh: _fetchVehicles,
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const ParkHeading('Tus vehículos', 'Tu QR seguro, siempre a mano.'),
+      if (_isLoading) const Center(child: CircularProgressIndicator())
+      else if (_loadError != null) LoadError(message: _loadError!, retry: _fetchVehicles)
+      else ...[
+        ParkColumns(flex: const [4, 7], children: [
+          Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            if (_vehicles.isEmpty) const ParkNotice('Aún no tienes vehículos registrados.'),
+            for (final vehicle in _vehicles) Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: ParkVehicleCard(
+                key: ValueKey(vehicle.id), vehicle: vehicle, api: widget.apiService,
+                onQr: () => _openQr(vehicle), onDelete: () => _deleteVehicle(vehicle),
               ),
             ),
-    );
-  }
+          ]),
+          ParkCard(color: ParkColors.yellow, child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const ParkIcon(Icons.directions_car_outlined),
+              const SizedBox(height: 22),
+              Text('Un vehículo.\nTu próximo recorrido.', style: Theme.of(context).textTheme.headlineMedium),
+              const SizedBox(height: 20),
+              const Text('Registra los vehículos de tu propiedad y genera su QR antes de llegar a portería.'),
+              const SizedBox(height: 20),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: Colors.white),
+                onPressed: _openAddVehicle, child: const Text('+ Agregar vehículo'),
+              ),
+              const SizedBox(height: 28),
+              const ParkCar(),
+            ],
+          )),
+        ]),
+        const SizedBox(height: 16),
+        const ParkCard(padding: EdgeInsets.all(18), child: Text('Solo tú puedes ver y administrar tus vehículos.', style: TextStyle(color: ParkColors.muted, fontSize: 12))),
+        const SizedBox(height: 20),
+        const ParkFeatures(items: [
+          (Icons.directions_car_outlined, '01 · Registra', 'Agrega la placa y el tipo de tu vehículo.'),
+          (Icons.qr_code_2_outlined, '02 · Genera tu QR', 'El código es temporal y de un solo uso.'),
+          (Icons.sensor_door_outlined, '03 · Preséntalo', 'Portería valida y confirma la operación.'),
+        ]),
+      ],
+    ]),
+  );
 }

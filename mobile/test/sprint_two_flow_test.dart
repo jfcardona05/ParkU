@@ -123,7 +123,8 @@ Future<String> showVehicleQr(WidgetTester tester, VehicleModel vehicle) async {
 
 Future<void> validateQr(WidgetTester tester, String code) async {
   await tester.enterText(find.byType(TextField), code);
-  await tester.tap(find.text('Validar código'));
+  await tester.ensureVisible(find.text('Validar código'));
+      await tester.tap(find.text('Validar código'));
   await tester.pumpAndSettle();
 }
 
@@ -144,7 +145,7 @@ void main() {
     await tester.pumpWidget(ParkUApp(apiService: api));
     await tester.enterText(find.byType(TextField).first, 'park@example.test');
     await tester.enterText(find.byType(TextField).last, 'fixture-password');
-    final submit = find.text('Ingresar a mi Cuenta');
+    final submit = find.text('Ingresar a ParkU →');
     await tester.ensureVisible(submit);
     await tester.tap(submit);
     await tester.pumpAndSettle();

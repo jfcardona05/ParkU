@@ -15,7 +15,7 @@ void main() {
       ),
     );
     await tester.pumpWidget(ParkUApp(apiService: api));
-    final submit = find.text('Ingresar a mi Cuenta');
+    final submit = find.text('Ingresar a ParkU →');
     await tester.ensureVisible(submit);
     await tester.tap(submit);
     await tester.pump();
@@ -35,7 +35,7 @@ void main() {
     await tester.pumpWidget(ParkUApp(apiService: api));
     await tester.enterText(find.byType(TextField).first, 'one@test.co');
     await tester.enterText(find.byType(TextField).last, 'wrong');
-    final submit = find.text('Ingresar a mi Cuenta');
+    final submit = find.text('Ingresar a ParkU →');
     await tester.ensureVisible(submit);
     await tester.tap(submit);
     await tester.pumpAndSettle();

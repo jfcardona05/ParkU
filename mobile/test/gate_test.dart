@@ -81,11 +81,13 @@ void main() {
       ),
     );
     await tester.enterText(find.byType(TextField), token(7));
-    await tester.tap(find.text('Validar código'));
+    await tester.ensureVisible(find.text('Validar código'));
+      await tester.tap(find.text('Validar código'));
     await tester.pumpAndSettle();
     expect(find.text('Confirma los datos antes de registrar.'), findsOneWidget);
     expect(find.textContaining('Ingreso registrado'), findsNothing);
-    await tester.tap(find.text('Confirmar operación'));
+    await tester.ensureVisible(find.text('Confirmar operación'));
+      await tester.tap(find.text('Confirmar operación'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Ingreso registrado'), findsOneWidget);
     expect(find.text('Confirmar operación'), findsNothing);

@@ -6,6 +6,9 @@ import '../services/parking_service.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/load_error.dart';
 import '../widgets/wallet_movement_tile.dart';
+import '../ui/park_shell.dart';
+import '../ui/park_widgets.dart';
+import '../ui/park_theme.dart';
 
 enum ParkingStatus { outside, inside, insufficientBalance }
 
@@ -75,125 +78,63 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0E17),
-      body: FutureBuilder(
+  Widget build(BuildContext context) => ParkShell(
+    api: widget.apiService, selected: 2, breadcrumb: 'Mi saldo',
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      ParkHeading('Tu saldo, al día', 'Consulta tus recargas y cobros.',
+        action: IconButton(onPressed: _refresh, tooltip: 'Actualizar saldo y movimientos', icon: const Icon(Icons.refresh))),
+      FutureBuilder(
         future: _wallet,
         builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            final error = snapshot.error;
-            return LoadError(
-              message: error is ApiException
-                  ? error.message
-                  : 'No se pudo cargar el saldo y los movimientos.',
-              retry: _refresh,
-            );
-          }
-
-          final (balance, movements) = snapshot.requireData;
-          return SafeArea(
-            child: RefreshIndicator(
-              onRefresh: _refresh,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                children: [
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'Saldo y movimientos',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: _refresh,
-                        tooltip: 'Actualizar saldo y movimientos',
-                        icon: const Icon(Icons.refresh, color: Colors.white70),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  BalanceCard(balance: balance),
-                  const SizedBox(height: 12),
-                  FutureBuilder(
-                    future: _parkingStatus,
-                    builder: (context, parking) {
-                      final status = switch ((
-                        parking.connectionState,
-                        parking.data,
-                      )) {
-                        (ConnectionState.waiting, _) => 'Consultando estado…',
-                        (_, ParkingStatus.outside) => 'Sin ingreso activo.',
-                        (_, ParkingStatus.inside) =>
-                          'Tienes un ingreso activo.',
-                        (_, ParkingStatus.insufficientBalance) =>
-                          'Saldo insuficiente para completar la salida.',
-                        _ => 'Consulta de estado no disponible.',
-                      };
-                      return Card(
-                        color: const Color(0xFF111827),
-                        child: ListTile(
-                          leading: const Icon(
-                            Icons.local_parking,
-                            color: Colors.white70,
-                          ),
-                          title: const Text(
-                            'Estacionamiento',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          subtitle: Text(
-                            status,
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Puntos de recarga autorizados',
-                    style: TextStyle(
-                      color: Color(0xFFF59E0B),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Text(
-                    'Portería Principal (Entrada vehicular)\n'
-                    'Cafetería Central (Edificio Santo Domingo)',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Historial de movimientos',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (movements.isEmpty)
-                    const Text(
-                      'No hay movimientos registrados.',
-                      style: TextStyle(color: Colors.white70),
-                    )
-                  else
-                    for (final movement in movements)
-                      WalletMovementTile(movement: movement),
-                ],
-              ),
-            ),
+          if (snapshot.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator());
+          if (snapshot.hasError) return LoadError(
+            message: snapshot.error is ApiException ? (snapshot.error as ApiException).message : 'No se pudo cargar el saldo y los movimientos.', retry: _refresh,
           );
+          final (balance, movements) = snapshot.requireData;
+          return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            ParkColumns(flex: const [4, 7], children: [
+              BalanceCard(balance: balance),
+              const ParkCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                ParkIcon(Icons.storefront_outlined),
+                SizedBox(height: 20),
+                Text('Recarga en taquilla', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                SizedBox(height: 32),
+                Text('Acércate al operador autorizado. Tu recarga aparecerá en el historial al ser registrada.', style: TextStyle(color: ParkColors.muted)),
+                SizedBox(height: 24),
+                ParkBadge('Sin pagos en línea'),
+                SizedBox(height: 18),
+                Text('Portería Principal · Cafetería Central', style: TextStyle(fontSize: 11, color: ParkColors.muted)),
+              ])),
+            ]),
+            const SizedBox(height: 20),
+            FutureBuilder(
+              future: _parkingStatus,
+              builder: (context, parking) {
+                final status = switch ((parking.connectionState, parking.data)) {
+                  (ConnectionState.waiting, _) => 'Consultando estado…',
+                  (_, ParkingStatus.outside) => 'Sin ingreso activo.',
+                  (_, ParkingStatus.inside) => 'Tienes un ingreso activo.',
+                  (_, ParkingStatus.insufficientBalance) => 'Saldo insuficiente para completar la salida.',
+                  _ => 'Consulta de estado no disponible.',
+                };
+                return Padding(padding: const EdgeInsets.only(bottom: 20), child: Text(status, style: Theme.of(context).textTheme.bodySmall));
+              },
+            ),
+            ParkCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Tus movimientos', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 12),
+              if (movements.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Text('No hay movimientos registrados.')),
+              for (final movement in movements) WalletMovementTile(movement: movement),
+            ])),
+            const SizedBox(height: 20),
+            const ParkFeatures(items: [
+              (Icons.storefront_outlined, 'Recarga presencial', 'Acércate a taquilla con tu cuenta ParkU.'),
+              (Icons.local_parking_outlined, 'Cobro transparente', 'Consulta los cobros en tus movimientos.'),
+              (Icons.history_outlined, 'Historial personal', 'Tus movimientos se mantienen privados.'),
+            ]),
+          ]);
         },
       ),
-    );
-  }
+    ]),
+  );
 }

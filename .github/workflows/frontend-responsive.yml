@@ -1,0 +1,44 @@
+name: Frontend responsive
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/frontend-responsive.yml'
+permissions:
+  contents: read
+jobs:
+  responsive:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.8'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Prepare formatted source for isolated UI verification
+        run: |
+          dart format lib test
+          python3 - <<'PY'
+          import pathlib, subprocess, json
+          for folder in ('lib','test'):
+              for p in pathlib.Path(folder).rglob('*.dart'):
+                  original=subprocess.run(['git','show','HEAD:mobile/'+str(p)],capture_output=True,text=True)
+                  if original.returncode==0 and original.stdout!=p.read_text():
+                      print('PARKU_FORMAT '+json.dumps({'path':'mobile/'+str(p),'content':p.read_text()}))
+          PY
+      - run: flutter analyze
+      - run: flutter test --reporter expanded
+      - name: Generate desktop tablet and mobile previews
+        run: flutter test test/responsive_design_test.dart --dart-define=CAPTURE_UI=true --reporter expanded
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parku-responsive-previews
+          path: mobile/build/ui-previews/*.png
+          if-no-files-found: warn
+      - run: flutter build web

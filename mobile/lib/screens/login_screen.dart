@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
+import '../ui/park_shell.dart';
+import '../ui/park_widgets.dart';
+import '../ui/park_theme.dart';
+import 'register_screen.dart';
 import 'dashboard_screen.dart';
 import 'taquilla_screen.dart';
 import 'gate_screen.dart';
@@ -81,305 +85,66 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _fillDemo(String email, String pass) {
-    _emailController.text = email;
-    _passwordController.text = pass;
-    _handleLogin();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0E17),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              // Logo
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1E3A8A), Color(0xFF0284C7)],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFF59E0B), width: 2),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0xFF0284C7),
-                      blurRadius: 20,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: const Center(
-                  child: Text(
-                    'P',
-                    style: TextStyle(
-                      color: Color(0xFFF59E0B),
-                      fontSize: 38,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'ParkU',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Universidad Santo Tomás • Parqueadero Prepago',
-                style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
-              ),
-              const SizedBox(height: 32),
-
-              // Formulario (HU-01)
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF111827).withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.08),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'INICIO DE SESIÓN (HU-01)',
-                      style: TextStyle(
-                        color: Color(0xFFF59E0B),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    if (_errorMessage != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(
-                            0xFFEF4444,
-                          ).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(
-                              0xFFEF4444,
-                            ).withValues(alpha: 0.4),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              color: Color(0xFFEF4444),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _errorMessage!,
-                                style: const TextStyle(
-                                  color: Color(0xFFF87171),
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-
-                    const Text(
-                      'Correo Electrónico',
-                      style: TextStyle(
-                        color: Color(0xFFD1D5DB),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _emailController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'ronaldo.mosquera@usantotomas.edu.co',
-                        hintStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          fontSize: 13,
-                        ),
-                        filled: true,
-                        fillColor: Colors.black.withValues(alpha: 0.4),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    const Text(
-                      'Contraseña',
-                      style: TextStyle(
-                        color: Color(0xFFD1D5DB),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: '••••••••',
-                        hintStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.3),
-                        ),
-                        filled: true,
-                        fillColor: Colors.black.withValues(alpha: 0.4),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 46,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleLogin,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF59E0B),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.black,
-                                ),
-                              )
-                            : const Text(
-                                'Ingresar a mi Cuenta',
-                                style: TextStyle(
-                                  color: Color(0xFF0B0F19),
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 14,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-              // Botones de prueba rápida
-              const Text(
-                'CUENTAS DE DEMOSTRACIÓN (1-CLIC)',
-                style: TextStyle(
-                  color: Color(0xFF6B7280),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                children: [
-                  ActionChip(
-                    backgroundColor: const Color(
-                      0xFF1E3A8A,
-                    ).withValues(alpha: 0.3),
-                    label: const Text(
-                      'Ronaldo Mosquera (\$15.000)',
-                      style: TextStyle(color: Colors.white, fontSize: 11),
-                    ),
-                    onPressed: () => _fillDemo(
-                      'ronaldo.mosquera@usantotomas.edu.co',
-                      'pass123',
-                    ),
-                  ),
-                  ActionChip(
-                    backgroundColor: const Color(
-                      0xFF1E3A8A,
-                    ).withValues(alpha: 0.3),
-                    label: const Text(
-                      'Juan Felipe Cardona (Moto)',
-                      style: TextStyle(color: Colors.white, fontSize: 11),
-                    ),
-                    onPressed: () =>
-                        _fillDemo('juan.cardona@usantotomas.edu.co', 'pass123'),
-                  ),
-                  ActionChip(
-                    backgroundColor: const Color(
-                      0xFF1E3A8A,
-                    ).withValues(alpha: 0.3),
-                    label: const Text(
-                      'María Gómez (\$0)',
-                      style: TextStyle(color: Colors.white, fontSize: 11),
-                    ),
-                    onPressed: () =>
-                        _fillDemo('maria.gomez@usantotomas.edu.co', 'usta2026'),
-                  ),
-                  ActionChip(
-                    backgroundColor: const Color(
-                      0xFFF59E0B,
-                    ).withValues(alpha: 0.2),
-                    label: const Text(
-                      '🏢 Operador Taquilla USTA',
-                      style: TextStyle(
-                        color: Color(0xFFFDE68A),
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    onPressed: () =>
-                        _fillDemo('taquilla@usantotomas.edu.co', 'caja123'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+    final mobile = MediaQuery.sizeOf(context).width < 760;
+    final intro = ParkCard(
+      color: mobile ? ParkColors.background : ParkColors.yellow,
+      padding: EdgeInsets.all(mobile ? 0 : 32),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (!mobile) const Text('MENOS VUELTAS. MÁS TIEMPO.', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 22),
+        Text('Tu parqueadero,\nmás fácil.', style: mobile ? Theme.of(context).textTheme.headlineMedium : Theme.of(context).textTheme.headlineLarge),
+        const SizedBox(height: 22),
+        Text(mobile ? 'Bienvenido a ParkU' : 'Gestiona tu vehículo, consulta tu saldo\ny entra con un QR seguro.', style: mobile ? Theme.of(context).textTheme.bodySmall : Theme.of(context).textTheme.bodyLarge),
+        const SizedBox(height: 22),
+        const ParkCar(),
+      ]),
+    );
+    final form = ParkCard(
+      padding: EdgeInsets.all(mobile ? 0 : 32),
+      color: mobile ? ParkColors.background : Colors.white,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Inicia sesión', style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: 14),
+        Text('Ingresa con tu cuenta de ParkU.', style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 26),
+        if (_errorMessage != null) ...[
+          Text(_errorMessage!, style: const TextStyle(color: Color(0xFFB3261E))),
+          const SizedBox(height: 16),
+        ],
+        const Text('Correo electrónico', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 10),
+        TextField(controller: _emailController, enabled: !_isLoading, keyboardType: TextInputType.emailAddress, autofillHints: const [AutofillHints.username], decoration: const InputDecoration(hintText: 'tu.correo@usantotomas.edu.co')),
+        const SizedBox(height: 18),
+        const Text('Contraseña', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 10),
+        TextField(controller: _passwordController, enabled: !_isLoading, obscureText: true, autofillHints: const [AutofillHints.password], onSubmitted: (_) => _isLoading ? null : _handleLogin(), decoration: const InputDecoration(hintText: '••••••••')),
+        const SizedBox(height: 20),
+        FilledButton(onPressed: _isLoading ? null : _handleLogin, child: _isLoading
+          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+          : const Text('Ingresar a ParkU →')),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: _isLoading ? null : () => Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen(apiService: widget.apiService))),
+          child: const Text('¿Aún no tienes cuenta? Regístrate'),
         ),
-      ),
+        Text('Acceso de portería y taquilla según tu rol.', style: Theme.of(context).textTheme.bodySmall),
+      ]),
+    );
+    return ParkShell(
+      api: widget.apiService, selected: -1, breadcrumb: 'Iniciar sesión', busy: _isLoading,
+      child: Column(children: [
+        ParkColumns(flex: const [6, 5], breakpoint: 760, children: [intro, form]),
+        if (!mobile) ...[
+          const SizedBox(height: 20),
+          const ParkFeatures(items: [
+            (Icons.directions_car_outlined, 'Tu vehículo', 'Registra los vehículos que utilizas.'),
+            (Icons.qr_code_2_outlined, 'Tu QR seguro', 'Genera el código antes de llegar.'),
+            (Icons.account_balance_wallet_outlined, 'Tu saldo', 'Consulta tus movimientos en un lugar.'),
+          ]),
+        ],
+      ]),
     );
   }
 }
