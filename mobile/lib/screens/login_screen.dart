@@ -122,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: 22),
           ConstrainedBox(
             constraints: BoxConstraints(maxWidth: mobile ? 300 : 490),
-            child: const ParkCar(),
+            child: const ParkCar(maxWidth: 490),
           ),
         ],
       ),

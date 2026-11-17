@@ -181,7 +181,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ],
                         ),
-                        const ParkCar(),
+                        const ParkCar(maxWidth: 285),
                       ],
                     ),
                   ],

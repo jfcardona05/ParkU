@@ -179,17 +179,25 @@ class ParkNotice extends StatelessWidget {
   );
 }
 
-/// Original Figma car, bundled locally and contained without stretching.
+/// Original Figma car, bundled locally in its design slot without stretching.
 class ParkCar extends StatelessWidget {
   final bool motorcycle;
-  const ParkCar({super.key, this.motorcycle = false});
+  final double maxWidth;
+  const ParkCar({super.key, this.motorcycle = false, this.maxWidth = 350});
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
-    child: AspectRatio(
-      aspectRatio: 490 / 213.15,
-      child: motorcycle
-          ? const Center(child: Icon(Icons.two_wheeler_outlined, size: 88))
-          : Image.asset('assets/figma/43925.png', fit: BoxFit.contain),
+    child: Align(
+      alignment: Alignment.centerLeft,
+      heightFactor: 1,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: AspectRatio(
+          aspectRatio: 490 / 213.15,
+          child: motorcycle
+              ? const Center(child: Icon(Icons.two_wheeler_outlined, size: 88))
+              : Image.asset('assets/figma/43925.png', fit: BoxFit.contain),
+        ),
+      ),
     ),
   );
 }

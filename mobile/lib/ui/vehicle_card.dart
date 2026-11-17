@@ -68,7 +68,7 @@ class _ParkVehicleCardState extends State<ParkVehicleCard> {
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 20),
-        ParkCar(motorcycle: widget.vehicle.isMoto),
+        ParkCar(motorcycle: widget.vehicle.isMoto, maxWidth: 270),
         const SizedBox(height: 16),
         FutureBuilder<Map<String, dynamic>>(
           future: _status,
