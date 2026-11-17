@@ -102,6 +102,37 @@ ApiService fixture({String role = 'estudiante'}) {
             },
           ],
         },
+        '/api/admin/recharges' => {
+          'from': request.url.queryParameters['date'] ?? '2026-11-16',
+          'through': request.url.queryParameters['date'] ?? '2026-11-16',
+          'summary': {'total_amount': 70000, 'count': 2, 'user_count': 2},
+          'page': 0,
+          'has_more': false,
+          'recharges': [
+            {
+              'id': 11,
+              'amount': 50000,
+              'user_name': 'Ronaldo Mosquera',
+              'user_email': 'preview@example.test',
+              'operator_name': 'Taquilla principal',
+              'point_name': 'Punto 1 - Portería Principal USTA',
+              'reference': '11111111-1111-4111-8111-111111111111',
+              'created_at':
+                  '${request.url.queryParameters['date'] ?? '2026-11-16'}T17:00:00Z',
+            },
+            {
+              'id': 10,
+              'amount': 20000,
+              'user_name': 'Juan Cardona',
+              'user_email': 'juan@example.test',
+              'operator_name': 'Taquilla principal',
+              'point_name': 'Punto 2 - Cafetería Central USTA',
+              'reference': '22222222-2222-4222-8222-222222222222',
+              'created_at':
+                  '${request.url.queryParameters['date'] ?? '2026-11-16'}T15:00:00Z',
+            },
+          ],
+        },
         '/api/admin/users' => {
           'users': [
             {
@@ -185,6 +216,7 @@ void main() {
       'parking',
       'gate',
       'cash',
+      'cash-history',
     ]) {
       testWidgets('responsive $page at ${size.$1}', (tester) async {
         tester.view.physicalSize = Size(size.$1, size.$2);
@@ -192,7 +224,7 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
         final api = fixture(
-          role: page == 'cash'
+          role: page.startsWith('cash')
               ? 'operador'
               : page == 'gate'
               ? 'guard'
@@ -235,6 +267,10 @@ void main() {
           );
         });
         await tester.pumpAndSettle();
+        if (page == 'cash-history') {
+          await tester.tap(find.text('Ver historial de recargas'));
+          await tester.pumpAndSettle();
+        }
         expect(
           tester.takeException(),
           isNull,

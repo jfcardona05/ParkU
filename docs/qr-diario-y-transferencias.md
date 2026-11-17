@@ -47,3 +47,14 @@ En un despliegue público se usa la URL HTTPS del backend. `QR_PUBLIC_BASE_URL` 
 ## Verificación
 
 Pruebas API con PostgreSQL separado (`*_test`) cubren concurrencia, cambio de día, precio, fondos, doble generación, transferencias opuestas, reintentos, rollback y ficha HTML. Widgets comprueban confirmaciones/cancelaciones, recuperación tras pérdida de respuesta y diseño en móvil/tablet/desktop. El flujo live conecta Flutter con Spring Boot y PostgreSQL. La lectura física con cámaras reales depende de accesibilidad de la red y se valida en los dispositivos del equipo.
+
+## Historial de recargas para taquilla (#45)
+
+En **Taquilla → Ver historial de recargas** se consultan los abonos presenciales realizados a todos los usuarios y en todos los puntos, incluidos los registrados por otros operadores. Cada fila muestra destinatario, correo, valor, fecha/hora colombiana, operador, punto y referencia de comprobante. No incluye transferencias ni cobros de parqueadero.
+
+- **Día**, **Semana** (lunes a domingo) y **Mes** calendario usan una fecha de referencia seleccionable; se pueden consultar períodos anteriores.
+- El resumen muestra el total COP, número de recargas y usuarios distintos del período completo, aunque haya varias páginas. Buscar por nombre o correo filtra tanto filas como resumen.
+- La hora de corte es **America/Bogota**, desde las 00:00 inclusive hasta las 00:00 del período siguiente, exclusive. El historial muestra 50 recargas por página, más recientes primero.
+- Se actualiza después de registrar un abono y dispone de actualización manual. Un error no se presenta como saldo/total cero.
+- `GET /api/admin/recharges?period=day|week|month&date=YYYY-MM-DD&search=nombre-o-correo&page=0` está limitado al rol `operador` (taquilla). No amplía permisos a estudiantes, docentes o portería.
+- V8 solo agrega un índice para consultar las recargas existentes; no borra ni reescribe movimientos. Las recargas antiguas aparecen con los datos de usuario y operador que ya conserva el sistema.

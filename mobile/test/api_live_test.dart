@@ -50,6 +50,24 @@ void main() {
       expect(history, hasLength(1));
       expect(history.single.amount, 10000);
       expect(history.single.reference, isNotEmpty);
+      final now = DateTime.now().toUtc().subtract(const Duration(hours: 5));
+      final date =
+          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      for (final period in ['day', 'week', 'month']) {
+        final report = await cash.getRechargeHistory(
+          period: period,
+          date: date,
+          search: email,
+        );
+        expect(report.totalAmount, 10000);
+        expect(report.count, 1);
+        expect(report.recharges.single.userEmail, email);
+        expect(report.recharges.single.reference, history.single.reference);
+      }
+      await expectLater(
+        user.getRechargeHistory(period: 'day', date: date),
+        throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 403)),
+      );
       await user.logout();
       await cash.logout();
     },

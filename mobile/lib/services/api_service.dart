@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/user_model.dart';
+import '../models/recharge_history.dart';
 import '../models/vehicle_model.dart';
 import '../models/transaction_model.dart';
 
@@ -190,6 +191,25 @@ class ApiService {
     final balance = data['balance_after'];
     if (balance is int) _currentUser = _currentUser?.copyWith(balance: balance);
     return data;
+  }
+
+  Future<RechargeHistoryPage> getRechargeHistory({
+    required String period,
+    required String date,
+    String search = '',
+    int page = 0,
+  }) async {
+    final query = Uri(
+      queryParameters: {
+        'period': period,
+        'date': date,
+        'search': search,
+        'page': '$page',
+      },
+    ).query;
+    return RechargeHistoryPage.fromJson(
+      await _request('GET', '/api/admin/recharges?$query'),
+    );
   }
 
   Future<List<UserModel>> getUsers() async {
