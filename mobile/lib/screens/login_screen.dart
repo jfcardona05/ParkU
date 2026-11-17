@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
               'MENOS VUELTAS. MÁS TIEMPO.',
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
             ),
-          const SizedBox(height: 22),
+          SizedBox(height: mobile ? 0 : 16),
           Text(
             'Tu parqueadero,\nmás fácil.',
             style: mobile

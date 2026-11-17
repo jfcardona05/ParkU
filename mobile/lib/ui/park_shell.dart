@@ -255,7 +255,13 @@ class ParkShell extends StatelessWidget {
                             ),
                           )
                         else
-                          logo(),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: logo(),
+                            ),
+                          ),
                         if (!rail) const SizedBox(width: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(
