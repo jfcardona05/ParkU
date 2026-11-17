@@ -30,7 +30,7 @@ class WalletMovementTile extends StatelessWidget {
               color: recharge ? ParkColors.greenLight : ParkColors.background,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
+            child: ParkGlyph(
               debit
                   ? Icons.sensor_door_outlined
                   : Icons.account_balance_wallet_outlined,

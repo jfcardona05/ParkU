@@ -127,7 +127,7 @@ class ParkShell extends StatelessWidget {
                 ? null
                 : () => open(context, api!, item.$1),
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 24),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
