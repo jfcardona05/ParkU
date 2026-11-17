@@ -214,6 +214,12 @@ void main() {
             home: RepaintBoundary(key: capture, child: screen),
           ),
         );
+        await tester.runAsync(() async {
+          await precacheImage(
+            const AssetImage('assets/figma/43925.png'),
+            tester.element(find.byType(MaterialApp)),
+          );
+        });
         await tester.pumpAndSettle();
         expect(
           tester.takeException(),
