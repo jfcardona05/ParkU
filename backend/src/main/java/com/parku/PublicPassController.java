@@ -16,7 +16,7 @@ public class PublicPassController {
     this.qr = qr;
   }
 
-  @GetMapping(value = "/p/{token}", produces = MediaType.TEXT_HTML_VALUE)
+  @GetMapping(value = "/p/{token}", produces = "text/html;charset=UTF-8")
   public ResponseEntity<String> view(@PathVariable String token) {
     int status = 200;
     String content;
@@ -61,7 +61,7 @@ public class PublicPassController {
         .header(
             "Content-Security-Policy",
             "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'")
-        .contentType(MediaType.TEXT_HTML)
+        .contentType(new MediaType("text", "html", java.nio.charset.StandardCharsets.UTF_8))
         .body(html);
   }
 

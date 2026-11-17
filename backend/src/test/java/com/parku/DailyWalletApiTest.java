@@ -298,6 +298,8 @@ class DailyWalletApiTest {
         .contains("CAR123", "Automóvil", "&lt;script&gt;")
         .doesNotContain("<script>", "user1@test.co", "5000", token);
     assertThat(page.getHeaders().getFirst("Cache-Control")).isEqualTo("no-store");
+    assertThat(page.getHeaders().getContentType().getCharset())
+        .isEqualTo(java.nio.charset.StandardCharsets.UTF_8);
     assertThat(count("parking_operations")).isZero();
     clock.set("2030-01-01T05:00:00Z");
     var expired = http.getForEntity("/p/" + token, String.class);
@@ -341,6 +343,28 @@ class DailyWalletApiTest {
       assertThat(transfer("s1", "user2@test.co", value, "invalid" + value).getStatusCode().value())
           .isEqualTo(400);
     assertThat(transfer("s1", "not-an-email", 1, "email").getStatusCode().value()).isEqualTo(400);
+    assertThat(balance(1)).isEqualTo(10000);
+    assertThat(balance(2)).isEqualTo(10000);
+    assertThat(count("transactions")).isZero();
+  }
+
+  @Test
+  void fractionalOrStringMoneyIsRejectedWithoutRounding() {
+    for (Object amount : List.of(1.9, "1000", 1000.0)) {
+      var response =
+          call(
+              HttpMethod.POST,
+              "/api/wallet/transfers",
+              Map.of(
+                  "recipient_email",
+                  "user2@test.co",
+                  "amount",
+                  amount,
+                  "request_id",
+                  "invalid-number"),
+              "s1");
+      error(response, 400, "INVALID_REQUEST");
+    }
     assertThat(balance(1)).isEqualTo(10000);
     assertThat(balance(2)).isEqualTo(10000);
     assertThat(count("transactions")).isZero();

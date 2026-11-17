@@ -21,7 +21,11 @@ public class WalletTransferController {
 
   public record Transfer(
       @NotBlank @Email @Size(max = 200) String recipient_email,
-      @NotNull @Positive @Max(1000000000) Long amount,
+      @NotNull
+          @Positive
+          @Max(1000000000)
+          @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WholeCopAmount.class)
+          Long amount,
       @NotBlank @Size(max = 100) String request_id) {
     public Transfer {
       if (recipient_email != null) recipient_email = recipient_email.trim();
