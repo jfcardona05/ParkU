@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
 abstract final class ParkColors {
-  static const ink = Color(0xFF191927);
+  static const ink = Color(0xFF171725);
   static const muted = Color(0xFF777783);
   static const background = Color(0xFFF7F7F4);
-  static const yellow = Color(0xFFFFDE4A);
-  static const green = Color(0xFF087950);
-  static const greenLight = Color(0xFFE9F5EF);
+  static const yellow = Color(0xFFFFDB4D);
+  static const green = Color(0xFF227654);
+  static const greenLight = Color(0xFFEAF5EE);
 }
 
 ThemeData parkTheme() => ThemeData(
   useMaterial3: true,
-  fontFamily: 'Roboto',
+  fontFamily: 'Manrope',
   brightness: Brightness.light,
   scaffoldBackgroundColor: ParkColors.background,
   colorScheme: ColorScheme.fromSeed(
@@ -26,18 +26,18 @@ ThemeData parkTheme() => ThemeData(
     headlineLarge: TextStyle(
       fontSize: 40,
       height: 1.18,
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w800,
       color: ParkColors.ink,
     ),
     headlineMedium: TextStyle(
-      fontSize: 30,
+      fontSize: 34,
       height: 1.25,
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w800,
       color: ParkColors.ink,
     ),
     titleLarge: TextStyle(
       fontSize: 22,
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w800,
       color: ParkColors.ink,
     ),
     titleMedium: TextStyle(
@@ -62,7 +62,7 @@ ThemeData parkTheme() => ThemeData(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       textStyle: const TextStyle(
-        fontFamily: 'Roboto',
+        fontFamily: 'Manrope',
         fontSize: 13,
         fontWeight: FontWeight.w600,
       ),

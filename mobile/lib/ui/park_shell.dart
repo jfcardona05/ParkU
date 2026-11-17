@@ -9,6 +9,7 @@ import '../screens/gate_screen.dart';
 import '../screens/taquilla_screen.dart';
 import '../screens/login_screen.dart';
 import 'park_theme.dart';
+import 'park_glyph.dart';
 
 class ParkShell extends StatelessWidget {
   final ApiService? api;
@@ -64,7 +65,7 @@ class ParkShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final desktop = width >= 1100;
-    final rail = width >= 760;
+    final rail = width >= 768;
     final role = api?.currentUser?.role;
     final roleName = switch (role) {
       'guard' => 'Portería',
@@ -99,22 +100,22 @@ class ParkShell extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+            padding: EdgeInsets.symmetric(horizontal: 7, vertical: 7),
             child: Text(
               'P',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
             ),
           ),
         ),
         SizedBox(width: 7),
         Text(
           'ParkU',
-          style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
         ),
       ],
     );
     Widget nav((int, IconData, String) item, {bool compact = false}) => Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.only(bottom: 26),
       child: Tooltip(
         message: compact ? item.$3 : '',
         child: Material(
@@ -127,20 +128,18 @@ class ParkShell extends StatelessWidget {
                 : () => open(context, api!, item.$1),
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: compact ? 14 : 16,
-                vertical: 18,
+                horizontal: 14,
+                vertical: 24,
               ),
               child: Row(
-                mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(item.$2, size: 21),
+                  ParkGlyph(item.$2, size: 22),
                   if (!compact) ...[
                     const SizedBox(width: 12),
-                    Flexible(
-                      child: Text(
+                    Text(
                         item.$3,
-                        style: const TextStyle(fontSize: 13),
-                      ),
+                        style: const TextStyle(fontSize: 14),
                     ),
                   ],
                 ],
@@ -154,9 +153,9 @@ class ParkShell extends StatelessWidget {
       constraints: const BoxConstraints(maxWidth: 1320),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          desktop ? 32 : 20,
-          rail ? 12 : 20,
-          desktop ? 32 : 20,
+          desktop ? 36 : 24,
+          rail ? 0 : 12,
+          desktop ? 36 : 24,
           32,
         ),
         child: child,
@@ -170,13 +169,14 @@ class ParkShell extends StatelessWidget {
           children: [
             if (rail)
               Container(
-                width: desktop ? 204 : 88,
+                width: desktop ? 236 : 88,
                 color: Colors.white,
                 padding: EdgeInsets.symmetric(
-                  horizontal: desktop ? 22 : 16,
+                  horizontal: desktop ? 24 : 16,
                   vertical: 24,
                 ),
-                child: Column(
+                child: SingleChildScrollView(
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (desktop)
@@ -191,24 +191,18 @@ class ParkShell extends StatelessWidget {
                           ),
                         ),
                       ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 26),
                     if (desktop)
                       const Text(
                         'MI PARQUEADERO',
                         style: TextStyle(fontSize: 9, color: ParkColors.muted),
                       ),
-                    const SizedBox(height: 22),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (final item in items)
-                              nav(item, compact: !desktop),
-                          ],
-                        ),
+                    const SizedBox(height: 26),
+                    for (final item in items)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: nav(item, compact: !desktop),
                       ),
-                    ),
                     if (desktop)
                       Container(
                         padding: const EdgeInsets.all(14),
@@ -238,6 +232,7 @@ class ParkShell extends StatelessWidget {
                         ),
                       ),
                   ],
+                  ),
                 ),
               ),
             Expanded(
@@ -245,10 +240,10 @@ class ParkShell extends StatelessWidget {
                 children: [
                   Padding(
                     padding: EdgeInsets.fromLTRB(
-                      desktop ? 32 : 20,
-                      rail ? 22 : 16,
-                      desktop ? 32 : 20,
-                      rail ? 22 : 8,
+                      desktop ? 36 : 24,
+                      rail ? 36 : 24,
+                      desktop ? 36 : 24,
+                      rail ? 24 : 20,
                     ),
                     child: Row(
                       children: [
@@ -263,7 +258,8 @@ class ParkShell extends StatelessWidget {
                             ),
                           )
                         else
-                          Expanded(child: logo()),
+                          logo(),
+                        if (!rail) const SizedBox(width: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -281,6 +277,7 @@ class ParkShell extends StatelessWidget {
                             ),
                           ),
                         ),
+                        if (!rail) const Spacer(),
                         if (initials.isNotEmpty && rail) ...[
                           const SizedBox(width: 14),
                           Text(
@@ -338,7 +335,7 @@ class ParkShell extends StatelessWidget {
               child: Material(
                 color: Colors.white,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   child: Row(
                     children: [
                       for (final item in items)
@@ -355,7 +352,7 @@ class ParkShell extends StatelessWidget {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  ParkGlyph(
                                     item.$2,
                                     size: 21,
                                     color: selected == item.$1

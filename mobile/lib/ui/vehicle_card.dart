@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'park_glyph.dart';
 import '../models/vehicle_model.dart';
 import '../services/api_service.dart';
 import 'park_widgets.dart';
@@ -38,11 +39,11 @@ class _ParkVehicleCardState extends State<ParkVehicleCard> {
       children: [
         Row(
           children: [
-            Icon(
+            ParkGlyph(
               widget.vehicle.isMoto
                   ? Icons.two_wheeler_outlined
                   : Icons.directions_car_outlined,
-              size: 21,
+              size: 25,
             ),
             const SizedBox(width: 10),
             Expanded(

@@ -90,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final mobile = MediaQuery.sizeOf(context).width < 760;
     final intro = ParkCard(
       color: mobile ? ParkColors.background : ParkColors.yellow,
-      padding: EdgeInsets.all(mobile ? 0 : 32),
+      padding: EdgeInsets.all(mobile ? 0 : 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -103,8 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
           Text(
             'Tu parqueadero,\nmás fácil.',
             style: mobile
-                ? Theme.of(context).textTheme.headlineMedium
-                : Theme.of(context).textTheme.headlineLarge,
+                ? Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 28)
+                : Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 55),
           ),
           const SizedBox(height: 22),
           Text(
@@ -116,7 +116,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 : Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 22),
-          const ParkCar(),
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: mobile ? 300 : 490),
+            child: const ParkCar(),
+          ),
         ],
       ),
     );
@@ -128,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           Text(
             'Inicia sesión',
-            style: Theme.of(context).textTheme.headlineMedium,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: mobile ? 28 : 36),
           ),
           const SizedBox(height: 14),
           Text(
@@ -210,7 +213,8 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         children: [
           ParkColumns(
-            flex: const [6, 5],
+            flex: const [600, 492],
+            gap: 40,
             breakpoint: 760,
             children: [intro, form],
           ),

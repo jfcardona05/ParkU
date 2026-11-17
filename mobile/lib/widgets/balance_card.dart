@@ -21,8 +21,8 @@ class BalanceCard extends StatelessWidget {
           child: Text(
             '\$${NumberFormat.decimalPattern('es_CO').format(balance)}',
             style: const TextStyle(
-              fontSize: 38,
-              fontWeight: FontWeight.w700,
+              fontSize: 40,
+              fontWeight: FontWeight.w800,
               height: 1.2,
             ),
           ),

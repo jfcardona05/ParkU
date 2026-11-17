@@ -7,6 +7,7 @@ import 'login_screen.dart';
 import '../ui/park_shell.dart';
 import '../ui/park_widgets.dart';
 import '../ui/park_theme.dart';
+import '../ui/park_glyph.dart';
 
 class GateScreen extends StatefulWidget {
   final ApiService apiService;
@@ -204,16 +205,15 @@ class _GateScreenState extends State<GateScreen> {
                             color: ParkColors.ink,
                             borderRadius: BorderRadius.circular(22),
                           ),
-                          child: const Column(
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
+                              ParkGlyph(
                                 Icons.qr_code_scanner,
-                                size: 78,
-                                color: ParkColors.yellow,
+                                size: MediaQuery.sizeOf(context).width >= 1100 ? 140 : 68,
                               ),
-                              SizedBox(height: 18),
-                              Text(
+                              const SizedBox(height: 18),
+                              const Text(
                                 'Centra el QR del vehículo',
                                 style: TextStyle(
                                   color: Colors.white,

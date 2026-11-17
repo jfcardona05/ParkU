@@ -14,11 +14,16 @@ Tarea #38, PR #39. Sustituye la interfaz anterior; no cambia el backend, servici
 
 ## Recursos y fidelidad
 
-Se usaron las capturas visibles como referencia. El archivo Figma no pudo leerse directamente.
-La ilustración de vehículo es una recreación vectorial local; no es el recurso original del diseñador.
-No hay solicitudes externas de imágenes ni nuevas fuentes remotas. Sustituir por el recurso original
-si el equipo lo aporta y exige coincidencia gráfica exacta. Colores, tarjetas y navegación implementados
-deben compararse visualmente con Figma antes de aprobar: los tests de layout no certifican fidelidad píxel a píxel.
+El archivo original ya es accesible. Se leyeron las catorce pantallas desktop/mobile con contexto de diseño.
+Se incorporan localmente el PNG original del automóvil, las variantes SVG de los iconos y la fuente Manrope
+con su licencia OFL. Colores, lateral de 236 px, márgenes y proporciones se ajustaron a esos nodos.
+Los SVG conservan las dimensiones raíz originales; el automóvil usa BoxFit.contain en su slot de diseño.
+El QR de acceso sigue siendo dinámico y procede del servidor, nunca del QR ilustrativo de Figma.
+La representación de motos y las acciones adicionales sin diseño siguen siendo componentes nativos.
+No hay URLs temporales de Figma ni descargas de fuentes en tiempo de ejecución.
+
+Las capturas permiten revisar la implementación en tres anchuras. Los tests de layout verifican que
+las vistas no desbordan; no certifican por sí solos coincidencia píxel a píxel ni interacción física.
 
 ## Verificación remota
 

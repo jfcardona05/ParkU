@@ -24,15 +24,6 @@ jobs:
         run: dart format --output=none --set-exit-if-changed lib test
       - run: flutter analyze
       - run: flutter test --reporter expanded
-      - name: Prepare real font for review captures
-        run: |
-          python3 - <<'PY'
-          import pathlib, urllib.request
-          target=pathlib.Path('build/preview-font.ttf')
-          target.parent.mkdir(parents=True,exist_ok=True)
-          with urllib.request.urlopen('https://raw.githubusercontent.com/google/fonts/main/ofl/roboto/Roboto%5Bwdth%2Cwght%5D.ttf') as response:
-              target.write_bytes(response.read())
-          PY
       - name: Generate desktop tablet and mobile previews
         run: flutter test test/responsive_design_test.dart --dart-define=CAPTURE_UI=true --reporter expanded
       - name: Prepare visual review sheet

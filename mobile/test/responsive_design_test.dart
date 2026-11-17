@@ -156,9 +156,8 @@ class PreviewQr implements VehicleQrSource {
 void main() {
   setUpAll(() async {
     if (const bool.fromEnvironment('CAPTURE_UI')) {
-      final font = FontLoader('Roboto');
-      final bytes = await File('build/preview-font.ttf').readAsBytes();
-      font.addFont(Future.value(ByteData.sublistView(bytes)));
+      final font = FontLoader('Manrope');
+      font.addFont(rootBundle.load('assets/fonts/Manrope.ttf'));
       await font.load();
       final icons = FontLoader('MaterialIcons');
       icons.addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
