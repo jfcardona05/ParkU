@@ -103,8 +103,12 @@ class _LoginScreenState extends State<LoginScreen> {
           Text(
             'Tu parqueadero,\nmás fácil.',
             style: mobile
-                ? Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 28)
-                : Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 55),
+                ? Theme.of(
+                    context,
+                  ).textTheme.headlineMedium?.copyWith(fontSize: 28)
+                : Theme.of(
+                    context,
+                  ).textTheme.headlineLarge?.copyWith(fontSize: 55),
           ),
           const SizedBox(height: 22),
           Text(
@@ -131,7 +135,9 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           Text(
             'Inicia sesión',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: mobile ? 28 : 36),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontSize: mobile ? 28 : 36),
           ),
           const SizedBox(height: 14),
           Text(

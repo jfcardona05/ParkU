@@ -127,20 +127,14 @@ class ParkShell extends StatelessWidget {
                 ? null
                 : () => open(context, api!, item.$1),
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 24,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 24),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ParkGlyph(item.$2, size: 22),
                   if (!compact) ...[
                     const SizedBox(width: 12),
-                    Text(
-                        item.$3,
-                        style: const TextStyle(fontSize: 14),
-                    ),
+                    Text(item.$3, style: const TextStyle(fontSize: 14)),
                   ],
                 ],
               ),
@@ -177,61 +171,64 @@ class ParkShell extends StatelessWidget {
                 ),
                 child: SingleChildScrollView(
                   child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (desktop)
-                      logo()
-                    else
-                      const Center(
-                        child: Text(
-                          'P',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 26,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (desktop)
+                        logo()
+                      else
+                        const Center(
+                          child: Text(
+                            'P',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 26,
+                            ),
                           ),
                         ),
-                      ),
-                    const SizedBox(height: 26),
-                    if (desktop)
-                      const Text(
-                        'MI PARQUEADERO',
-                        style: TextStyle(fontSize: 9, color: ParkColors.muted),
-                      ),
-                    const SizedBox(height: 26),
-                    for (final item in items)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: nav(item, compact: !desktop),
-                      ),
-                    if (desktop)
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: ParkColors.background,
-                          borderRadius: BorderRadius.circular(22),
+                      const SizedBox(height: 26),
+                      if (desktop)
+                        const Text(
+                          'MI PARQUEADERO',
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: ParkColors.muted,
+                          ),
                         ),
-                        child: const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Universidad\nSanto Tomás',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(height: 12),
-                            Text(
-                              'Parqueadero prepago',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: ParkColors.muted,
-                              ),
-                            ),
-                          ],
+                      const SizedBox(height: 26),
+                      for (final item in items)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: nav(item, compact: !desktop),
                         ),
-                      ),
-                  ],
+                      if (desktop)
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: ParkColors.background,
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                          child: const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Universidad\nSanto Tomás',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                'Parqueadero prepago',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: ParkColors.muted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),

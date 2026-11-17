@@ -210,7 +210,9 @@ class _GateScreenState extends State<GateScreen> {
                             children: [
                               ParkGlyph(
                                 Icons.qr_code_scanner,
-                                size: MediaQuery.sizeOf(context).width >= 1100 ? 140 : 68,
+                                size: MediaQuery.sizeOf(context).width >= 1100
+                                    ? 140
+                                    : 68,
                               ),
                               const SizedBox(height: 18),
                               const Text(

@@ -28,14 +28,26 @@ class ParkGlyph extends StatelessWidget {
           : size <= 21
           ? (muted ? '7b337' : 'e4593')
           : '5b1f0';
-      dimension = size == 28 ? 28 : size == 25 ? 25 : size == 24 ? 24 : size <= 21 ? 21 : 22;
+      dimension = size == 28
+          ? 28
+          : size == 25
+          ? 25
+          : size == 24
+          ? 24
+          : size <= 21
+          ? 21
+          : 22;
     } else if (icon == Icons.account_balance_wallet_outlined) {
       asset = size <= 20
           ? 'd9cd4'
           : size <= 21
           ? (muted ? '7f6c1' : 'b4eeb')
           : '843c7';
-      dimension = size <= 20 ? 20 : size <= 21 ? 21 : 22;
+      dimension = size <= 20
+          ? 20
+          : size <= 21
+          ? 21
+          : 22;
     } else if (icon == Icons.local_parking_outlined ||
         icon == Icons.qr_code_2_outlined ||
         icon == Icons.history_outlined) {
@@ -46,10 +58,24 @@ class ParkGlyph extends StatelessWidget {
           : size <= 21
           ? (muted ? 'd6ae4' : '8f4ff')
           : 'dfbad';
-      dimension = size == 28 ? 28 : size == 24 ? 24 : size <= 21 ? 21 : 22;
+      dimension = size == 28
+          ? 28
+          : size == 24
+          ? 24
+          : size <= 21
+          ? 21
+          : 22;
     } else if (icon == Icons.sensor_door_outlined) {
-      asset = size <= 20 ? '5c73a' : size == 24 ? '8eb16' : 'f72b1';
-      dimension = size <= 20 ? 20 : size == 24 ? 24 : 22;
+      asset = size <= 20
+          ? '5c73a'
+          : size == 24
+          ? '8eb16'
+          : 'f72b1';
+      dimension = size <= 20
+          ? 20
+          : size == 24
+          ? 24
+          : 22;
     } else if (icon == Icons.qr_code_scanner) {
       asset = size >= 100 ? '2969a' : 'ea9ff';
       dimension = size >= 100 ? 140 : 68;
