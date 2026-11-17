@@ -134,7 +134,13 @@ class ParkShell extends StatelessWidget {
                   ParkGlyph(item.$2, size: 22),
                   if (!compact) ...[
                     const SizedBox(width: 12),
-                    Text(item.$3, style: const TextStyle(fontSize: 14)),
+                    Flexible(
+                      child: Text(
+                        item.$3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
                   ],
                 ],
               ),
