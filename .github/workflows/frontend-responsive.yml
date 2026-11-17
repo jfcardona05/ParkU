@@ -61,6 +61,9 @@ jobs:
 
   api-integration:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
     services:
       postgres:
         image: postgres:17
