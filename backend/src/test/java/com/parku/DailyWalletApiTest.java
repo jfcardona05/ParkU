@@ -115,6 +115,60 @@ class DailyWalletApiTest {
   }
 
   @Test
+  void v7UpgradePreservesExistingBalanceVehicleAndHistory() throws Exception {
+    String schema = "upgrade_" + UUID.randomUUID().toString().replace("-", "");
+    try (var connection = db.getDataSource().getConnection();
+        var statement = connection.createStatement()) {
+      statement.execute("CREATE SCHEMA " + schema);
+      try {
+        statement.execute("SET search_path TO " + schema);
+        for (String file :
+            List.of(
+                "V1__identity_and_vehicles.sql",
+                "V2__wallet_transactions.sql",
+                "V3__secure_vehicle_qr.sql",
+                "V4__parking_operations.sql",
+                "V5__versioned_tariffs_and_charges.sql",
+                "V6__parking_history_indexes.sql")) {
+          var resource = new org.springframework.core.io.ClassPathResource("db/migration/" + file);
+          statement.execute(resource.getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
+        }
+        statement.execute(
+            "INSERT INTO users(name,email,password_hash,role,balance) VALUES('Historic','historic@test.co','unused','estudiante',9000)");
+        statement.execute("INSERT INTO vehicles(user_id,plate,type) VALUES(1,'OLD123','moto')");
+        statement.execute(
+            "INSERT INTO transactions(user_id,operator_id,type,amount,point_name,reference,balance_after) VALUES(1,1,'RECARGA_PRESENCIAL',10000,'Punto histórico','"
+                + UUID.randomUUID()
+                + "',9000)");
+        var migration =
+            new org.springframework.core.io.ClassPathResource(
+                "db/migration/V7__daily_passes_and_wallet_transfers.sql");
+        statement.execute(migration.getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
+        try (var result =
+            statement.executeQuery("SELECT balance FROM users WHERE email='historic@test.co'")) {
+          assertThat(result.next()).isTrue();
+          assertThat(result.getLong(1)).isEqualTo(9000);
+        }
+        try (var result = statement.executeQuery("SELECT plate FROM vehicles")) {
+          assertThat(result.next()).isTrue();
+          assertThat(result.getString(1)).isEqualTo("OLD123");
+        }
+        try (var result =
+            statement.executeQuery("SELECT type,amount,balance_after FROM transactions")) {
+          assertThat(result.next()).isTrue();
+          assertThat(result.getString(1)).isEqualTo("RECARGA_PRESENCIAL");
+          assertThat(result.getLong(2)).isEqualTo(10000);
+          assertThat(result.getLong(3)).isEqualTo(9000);
+          assertThat(result.next()).isFalse();
+        }
+      } finally {
+        statement.execute("RESET search_path");
+        statement.execute("DROP SCHEMA " + schema + " CASCADE");
+      }
+    }
+  }
+
+  @Test
   void quoteIsFreeAndUsesColombianMidnight() {
     var quote = call(HttpMethod.GET, "/api/vehicles/1/qr", null, "s1");
     assertThat(quote.getStatusCode().value()).isEqualTo(200);

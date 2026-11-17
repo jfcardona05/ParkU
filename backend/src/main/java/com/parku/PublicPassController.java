@@ -46,7 +46,7 @@ public class PublicPassController {
         .brand b{display:inline-block;background:#ffdb4d;padding:7px 11px;border-radius:12px;margin-right:8px}
         article{background:white;border-radius:24px;padding:28px;border-top:8px solid #ffdb4d}
         .badge{display:inline-block;background:#eaf5ee;color:#227654;border-radius:16px;padding:10px 14px;font-size:13px}
-        h1{font-size:32px;margin:24px 0}dt{color:#777783;font-size:13px;margin-top:20px}
+        h1{font-size:32px;margin:24px 0;overflow-wrap:anywhere}dt{color:#777783;font-size:13px;margin-top:20px}
         dd{margin:6px 0 0;font-size:20px;font-weight:700;overflow-wrap:anywhere}
         .muted{color:#777783;font-size:13px;line-height:1.6;margin-top:28px}
         </style></head><body><main><div class="brand"><b>P</b>ParkU</div><article>
