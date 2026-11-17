@@ -44,7 +44,7 @@ public class WalletController {
         true,
         "transactions",
         db.queryForList(
-            "SELECT id,type,amount,point_name,reference,balance_after,created_at,visit_id,parking_rate_label FROM transactions WHERE user_id=? ORDER BY id DESC",
+            "SELECT id,type,amount,point_name,reference,balance_after,created_at,visit_id,parking_rate_label,counterpart_email FROM transactions WHERE user_id=? ORDER BY id DESC",
             user.get("id")));
   }
 

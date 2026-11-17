@@ -10,12 +10,21 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class VehicleQrController {
   private final VehicleQrService qr;
+  private final DailyPassService daily;
 
-  public VehicleQrController(VehicleQrService qr) {
+  public VehicleQrController(VehicleQrService qr, DailyPassService daily) {
     this.qr = qr;
+    this.daily = daily;
   }
 
   public record Token(@NotBlank @Size(max = 512) String token) {}
+
+  @GetMapping("/vehicles/{id}/qr")
+  public ResponseEntity<?> quote(
+      @RequestHeader(value = "Authorization", required = false) String auth,
+      @PathVariable long id) {
+    return ResponseEntity.ok().header("Cache-Control", "no-store").body(daily.quote(auth, id));
+  }
 
   @PostMapping("/vehicles/{id}/qr")
   public ResponseEntity<?> issue(

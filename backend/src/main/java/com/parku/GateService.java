@@ -52,28 +52,31 @@ public class GateService {
     }
     var found =
         db.queryForList(
-            "SELECT vehicle_id FROM vehicle_qr WHERE token_hash=?", VehicleQrService.digest(token));
+            "SELECT vehicle_id,user_id FROM vehicle_qr WHERE token_hash=?", VehicleQrService.digest(token));
     if (found.isEmpty()) throw new ApiProblem(422, "QR_INVALID", "QR inválido");
     Object vehicleId = found.getFirst().get("vehicle_id");
+    db.queryForMap("SELECT id FROM users WHERE id=? FOR UPDATE", found.getFirst().get("user_id"));
     var vehicles = db.queryForList("SELECT * FROM vehicles WHERE id=? FOR UPDATE", vehicleId);
     if (vehicles.isEmpty()) throw new ApiProblem(422, "QR_INVALID", "QR inválido");
     var valid = qr.inspectToken(token); // Expiry rechecked after waiting for both locks.
     var active =
         db.queryForList(
             "SELECT * FROM parking_visits WHERE vehicle_id=? AND exited_at IS NULL", vehicleId);
+    var passes = db.queryForList("SELECT id FROM parking_day_passes WHERE qr_id=?", valid.get("id"));
+    Object dailyPassId = passes.isEmpty() ? null : passes.getFirst().get("id");
     var now = OffsetDateTime.now(ZoneOffset.UTC);
     Map<String, Object> visit;
     Map<String, Object> charge = null;
     if ("entry".equals(action)) {
       if (!active.isEmpty())
         throw new ApiProblem(409, "ALREADY_INSIDE", "El vehículo ya tiene ingreso activo");
-      if (settings.get("capacity") == null)
+      if (dailyPassId == null && settings.get("capacity") == null)
         throw new ApiProblem(
             503, "PARKING_NOT_CONFIGURED", "El administrador debe configurar capacidad");
       long count =
           db.queryForObject(
               "SELECT count(*) FROM parking_visits WHERE exited_at IS NULL", Long.class);
-      if (count >= ((Number) settings.get("capacity")).longValue())
+      if (dailyPassId == null && count >= ((Number) settings.get("capacity")).longValue())
         throw new ApiProblem(409, "PARKING_FULL", "Parqueadero lleno");
       var vehicle = vehicles.getFirst();
       var rates =
@@ -84,21 +87,21 @@ public class GateService {
         throw new ApiProblem(503, "PARKING_NOT_CONFIGURED", "Tarifa no configurada");
       visit =
           db.queryForMap(
-              "INSERT INTO parking_visits(vehicle_id,user_id,plate,vehicle_type,entered_at,rate_id) VALUES(?,?,?,?,?,?) RETURNING *",
+              "INSERT INTO parking_visits(vehicle_id,user_id,plate,vehicle_type,entered_at,rate_id,daily_pass_id) VALUES(?,?,?,?,?,?,?) RETURNING *",
               vehicleId,
               valid.get("user_id"),
               vehicle.get("plate"),
               vehicle.get("type"),
               now,
-              rates.getFirst().get("id"));
+              rates.getFirst().get("id"), dailyPassId);
     } else {
       if (active.isEmpty())
         throw new ApiProblem(409, "NOT_INSIDE", "El vehículo no tiene ingreso activo");
       visit = active.getFirst();
-      charge = completeExit(visit, operator, now);
+      if (visit.get("daily_pass_id") == null) charge = completeExit(visit, operator, now);
       db.update("UPDATE parking_visits SET exited_at=? WHERE id=?", now, visit.get("id"));
     }
-    db.update("UPDATE vehicle_qr SET consumed=true WHERE id=?", valid.get("id"));
+    if (dailyPassId == null) db.update("UPDATE vehicle_qr SET consumed=true WHERE id=?", valid.get("id"));
     long operationId =
         db.queryForObject(
             "INSERT INTO parking_operations(operator_id,request_id,fingerprint,visit_id,action,occurred_at,receipt) VALUES(?,?,?,?,?,?,'{}') RETURNING id",
@@ -118,6 +121,7 @@ public class GateService {
     receipt.put("parking_state", "entry".equals(action) ? "INSIDE" : "OUTSIDE");
     receipt.put("occurred_at", now.toString());
     receipt.put("replayed", false);
+    receipt.put("prepaid", visit.get("daily_pass_id") != null);
     receipt.put("message", "entry".equals(action) ? "Ingreso registrado" : "Salida registrada");
     if (charge != null) receipt.put("charge", charge);
     try {
