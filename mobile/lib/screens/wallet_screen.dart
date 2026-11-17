@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'transfer_screen.dart';
+
 import '../models/transaction_model.dart';
 import '../services/api_service.dart';
 import '../services/parking_service.dart';
@@ -77,6 +79,16 @@ class _WalletScreenState extends State<WalletScreen> {
     }
   }
 
+  Future<void> _transfer() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TransferScreen(apiService: widget.apiService),
+      ),
+    );
+    if (mounted) await _refresh();
+  }
+
   @override
   Widget build(BuildContext context) => ParkShell(
     api: widget.apiService,
@@ -115,7 +127,18 @@ class _WalletScreenState extends State<WalletScreen> {
                 ParkColumns(
                   flex: const [4, 7],
                   children: [
-                    BalanceCard(balance: balance),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        BalanceCard(balance: balance),
+                        const SizedBox(height: 12),
+                        FilledButton.icon(
+                          onPressed: _transfer,
+                          icon: const Icon(Icons.send_outlined),
+                          label: const Text('Transferir saldo'),
+                        ),
+                      ],
+                    ),
                     const ParkCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

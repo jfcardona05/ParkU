@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'park_theme.dart';
 import 'park_glyph.dart';
 
@@ -198,6 +199,33 @@ class ParkCar extends StatelessWidget {
               : Image.asset('assets/figma/43925.png', fit: BoxFit.contain),
         ),
       ),
+    ),
+  );
+}
+
+class ParkAvailabilitySoon extends StatelessWidget {
+  final bool yellow;
+  const ParkAvailabilitySoon({super.key, this.yellow = false});
+  @override
+  Widget build(BuildContext context) => ParkCard(
+    color: yellow ? ParkColors.yellow : Colors.white,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const ParkIcon(Icons.local_parking_outlined),
+        const SizedBox(height: 18),
+        Text(
+          'Cupos de parqueadero',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 24),
+        Text('Próximamente', style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: 24),
+        Text(
+          'La disponibilidad estará aquí cuando se habilite el control de ingresos.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
     ),
   );
 }
