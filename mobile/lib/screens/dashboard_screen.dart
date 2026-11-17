@@ -1,365 +1,248 @@
-import '../widgets/load_error.dart';
-
 import 'package:flutter/material.dart';
-
 import '../services/api_service.dart';
+import '../services/parking_service.dart';
+import '../services/vehicle_qr_service.dart';
 import '../models/vehicle_model.dart';
 import '../models/transaction_model.dart';
 import '../widgets/balance_card.dart';
-import '../widgets/license_plate_widget.dart';
 import '../widgets/wallet_movement_tile.dart';
-import 'vehicles_screen.dart';
-import 'wallet_screen.dart';
-import 'login_screen.dart';
-import 'parking_screen.dart';
+import '../widgets/load_error.dart';
+import '../ui/park_shell.dart';
+import '../ui/park_widgets.dart';
+import '../ui/park_theme.dart';
+import '../ui/vehicle_card.dart';
+import 'vehicle_qr_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final ApiService apiService;
-
   const DashboardScreen({super.key, required this.apiService});
-
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentIndex = 0;
-  int _refreshVersion = 0;
-  String? _loadError;
-  bool _isLoading = true;
-  int _balance = 0;
-  List<VehicleModel> _vehicles = [];
-  List<TransactionModel> _recentTx = [];
-
+  late Future<(int, List<VehicleModel>, List<TransactionModel>)> _data;
+  late Future<Map<String, dynamic>> _occupancy;
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _startLoad();
   }
 
-  Future<void> _loadData() async {
-    if (!mounted) return;
-    setState(() {
-      _isLoading = true;
-      _loadError = null;
-    });
+  void _startLoad() {
+    _data = _load();
+    _occupancy = ParkingService(widget.apiService).getOccupancy();
+    _data.ignore();
+    _occupancy.ignore();
+  }
+
+  Future<(int, List<VehicleModel>, List<TransactionModel>)> _load() async {
+    final balance = await widget.apiService.getBalance();
+    final vehicles = await widget.apiService.getVehicles();
+    final history = await widget.apiService.getHistory();
+    return (balance, vehicles, history);
+  }
+
+  Future<void> _refresh() async {
+    setState(_startLoad);
     try {
-      final bal = await widget.apiService.getBalance();
-      final vehs = await widget.apiService.getVehicles();
-      final txs = await widget.apiService.getHistory();
-      if (!mounted) return;
-      setState(() {
-        _balance = bal;
-        _vehicles = vehs;
-        _recentTx = txs;
-        _refreshVersion++;
-        _isLoading = false;
-      });
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _loadError = e.message;
-        _isLoading = false;
-      });
-    }
+      await _data;
+    } catch (_) {}
   }
 
-  void _handleLogout() async {
-    await widget.apiService.logout();
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LoginScreen(apiService: widget.apiService),
+  void _qr(VehicleModel vehicle) => Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => VehicleQrScreen(
+        vehicle: vehicle,
+        apiService: widget.apiService,
+        source: const bool.fromEnvironment('PARKU_QR_DEMO')
+            ? DemoVehicleQrSource()
+            : ApiVehicleQrSource(widget.apiService),
       ),
-    );
-  }
-
+    ),
+  );
   @override
   Widget build(BuildContext context) {
-    final user = widget.apiService.currentUser;
-
-    final pages = [
-      _buildHomeTab(user?.name ?? 'Usuario'),
-      WalletScreen(
-        key: ValueKey(_refreshVersion),
-        apiService: widget.apiService,
-      ),
-      VehiclesScreen(apiService: widget.apiService),
-    ];
-
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0E17),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF111827),
-        elevation: 0,
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E3A8A),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFF59E0B)),
-              ),
-              child: const Center(
-                child: Text(
-                  'P',
-                  style: TextStyle(
-                    color: Color(0xFFF59E0B),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'ParkU',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white70),
-            onPressed: _loadData,
-            tooltip: 'Actualizar',
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Color(0xFFF87171)),
-            onPressed: _handleLogout,
-            tooltip: 'Cerrar sesión',
-          ),
-        ],
-      ),
-      body: pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() => _currentIndex = index);
-          if (index == 0) _loadData();
-        },
-        backgroundColor: const Color(0xFF111827),
-        selectedItemColor: const Color(0xFFF59E0B),
-        unselectedItemColor: Colors.white38,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            activeIcon: Icon(Icons.account_balance_wallet),
-            label: 'Saldo',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.directions_car_outlined),
-            activeIcon: Icon(Icons.directions_car),
-            label: 'Vehículos',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHomeTab(String userName) {
-    if (_loadError != null) {
-      return LoadError(message: _loadError!, retry: _loadData);
-    }
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Color(0xFFF59E0B)),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadData,
-      color: const Color(0xFFF59E0B),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Hola, ${userName.split(' ')[0]} 👋',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const Text(
-              'Campus Universidad Santo Tomás',
-              style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
-            ),
-            const SizedBox(height: 16),
-
-            // Tarjeta de Saldo (HU-01 y HU-02)
-            BalanceCard(balance: _balance),
-            const SizedBox(height: 16),
-
-            OutlinedButton.icon(
-              icon: const Icon(Icons.local_parking),
-              label: const Text('Consultar cupos, tarifas y accesos'),
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        ParkingScreen(apiService: widget.apiService),
-                  ),
+    final name =
+        widget.apiService.currentUser?.name.trim().split(' ').first ??
+        'Usuario';
+    return ParkShell(
+      api: widget.apiService,
+      selected: 0,
+      breadcrumb: 'Inicio',
+      refresh: _refresh,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ParkHeading('Hola, $name 👋', 'Todo listo para tu próxima entrada.'),
+          FutureBuilder(
+            future: _data,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return LoadError(
+                  message: snapshot.error is ApiException
+                      ? (snapshot.error as ApiException).message
+                      : 'No se pudo cargar el inicio.',
+                  retry: _refresh,
                 );
-                await _loadData();
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // Vehículo Principal (HU-06)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Mis Vehículos Asociados',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => setState(() => _currentIndex = 2),
-                  child: Text(
-                    'Ver todos (${_vehicles.length})',
-                    style: const TextStyle(
-                      color: Color(0xFFF59E0B),
-                      fontSize: 12,
+              }
+              final (balance, vehicles, history) = snapshot.requireData;
+              final narrow = MediaQuery.sizeOf(context).width < 760;
+              final balanceAndSpaces = ParkColumns(
+                breakpoint: 480,
+                children: [
+                  BalanceCard(balance: balance),
+                  ParkCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const ParkIcon(Icons.local_parking_outlined),
+                        const SizedBox(height: 16),
+                        const ParkBadge('Cupos disponibles', success: true),
+                        const SizedBox(height: 24),
+                        FutureBuilder(
+                          future: _occupancy,
+                          builder: (context, spaces) {
+                            if (spaces.connectionState !=
+                                ConnectionState.done) {
+                              return const Text('Consultando…');
+                            }
+                            if (spaces.hasError) {
+                              return const Text('Cupos no disponibles.');
+                            }
+                            final data = spaces.requireData;
+                            return Text(
+                              '${data['available']} / ${data['capacity']}',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 28),
+                        Text(
+                          'Cupos libres · información del servidor',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              ParkShell.open(context, widget.apiService, 3),
+                          child: const Text('Consultar parqueadero →'),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            if (_vehicles.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF111827),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white10),
-                ),
+                ],
+              );
+              final hero = ParkCard(
+                color: ParkColors.yellow,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const ParkIcon(Icons.directions_car_outlined),
+                    const SizedBox(height: 18),
                     const Text(
-                      'No tienes vehículos registrados en tu cuenta.',
-                      style: TextStyle(color: Colors.white60, fontSize: 13),
+                      'LLEGA. ESCANEA. PARQUEA.',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: () => setState(() => _currentIndex = 2),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1E3A8A),
-                      ),
-                      child: const Text(
-                        'Registrar Vehículo (HU-06)',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      ),
+                    const SizedBox(height: 20),
+                    ParkColumns(
+                      breakpoint: 430,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tu lugar empieza\ncon un QR.',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(height: 18),
+                            FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Colors.white,
+                              ),
+                              onPressed: vehicles.isEmpty
+                                  ? () => ParkShell.open(
+                                      context,
+                                      widget.apiService,
+                                      1,
+                                    )
+                                  : () => _qr(vehicles.first),
+                              child: Text(
+                                vehicles.isEmpty
+                                    ? 'Registrar vehículo →'
+                                    : 'Ver mi QR →',
+                              ),
+                            ),
+                          ],
+                        ),
+                        const ParkCar(maxWidth: 285),
+                      ],
                     ),
                   ],
                 ),
-              )
-            else
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF111827),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white10),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _vehicles[0].isMoto
-                          ? Icons.two_wheeler
-                          : Icons.directions_car,
-                      color: const Color(0xFF3B82F6),
-                      size: 32,
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              );
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (narrow) ...[balanceAndSpaces, const SizedBox(height: 20)],
+                  ParkColumns(
+                    flex: const [7, 4],
+                    children: [
+                      Column(
                         children: [
-                          LicensePlateWidget(
-                            plate: _vehicles[0].plate,
-                            fontSize: 14,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _vehicles[0].brandModel.isNotEmpty
-                                ? _vehicles[0].brandModel
-                                : 'Vehículo activo',
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
+                          hero,
+                          if (!narrow) ...[
+                            const SizedBox(height: 20),
+                            balanceAndSpaces,
+                          ],
                         ],
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'Activo',
-                        style: TextStyle(
-                          color: Color(0xFF10B981),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                      if (vehicles.isEmpty)
+                        const ParkNotice(
+                          'Registra tu primer vehículo para generar un QR.',
+                        )
+                      else
+                        ParkVehicleCard(
+                          key: ValueKey(_data),
+                          vehicle: vehicles.first,
+                          api: widget.apiService,
+                          onQr: () => _qr(vehicles.first),
                         ),
-                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  ParkCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tus últimos movimientos',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        if (history.isEmpty)
+                          const Text('No hay movimientos registrados.'),
+                        for (final tx in history.take(3))
+                          WalletMovementTile(movement: tx),
+                        TextButton(
+                          onPressed: () =>
+                              ParkShell.open(context, widget.apiService, 2),
+                          child: const Text('Ver todos mis movimientos →'),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-
-            const SizedBox(height: 24),
-            const Text(
-              'Últimos movimientos',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            if (_recentTx.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  'Aún no tienes movimientos registrados.',
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
-                ),
-              )
-            else
-              for (final movement in _recentTx.take(3))
-                WalletMovementTile(movement: movement),
-          ],
-        ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }

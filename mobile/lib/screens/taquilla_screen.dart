@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
 import '../models/user_model.dart';
-import 'login_screen.dart';
+import '../ui/park_shell.dart';
+import '../ui/park_widgets.dart';
+import '../ui/park_theme.dart';
 import 'gate_screen.dart';
 import '../services/gate_service.dart';
 
@@ -114,428 +116,203 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
     }
   }
 
-  void _handleLogout() async {
-    await widget.apiService.logout();
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LoginScreen(apiService: widget.apiService),
-      ),
-    );
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0E17),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF111827),
-        title: const Row(
-          children: [
-            Icon(Icons.point_of_sale, color: Color(0xFFF59E0B)),
-            SizedBox(width: 8),
-            Text(
-              'Taquilla Presencial USTA',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
+  Widget build(BuildContext context) => ParkShell(
+    api: widget.apiService,
+    selected: 5,
+    breadcrumb: 'Taquilla',
+    busy: _isSubmitting,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const ParkHeading(
+          'Tu recarga, registrada.',
+          'Atención presencial · Taquilla ParkU',
         ),
-        actions: [
-          if (const bool.fromEnvironment('PARKU_QR_DEMO'))
-            IconButton(
-              tooltip: 'Demo portería',
-              icon: const Icon(Icons.qr_code_scanner),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => GateScreen(
-                    apiService: widget.apiService,
-                    gateway: DemoGateGateway(),
-                  ),
+        if (const bool.fromEnvironment('PARKU_QR_DEMO'))
+          TextButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => GateScreen(
+                  apiService: widget.apiService,
+                  gateway: DemoGateGateway(),
                 ),
               ),
             ),
-
-          IconButton(
-            icon: const Icon(Icons.logout, color: Color(0xFFF87171)),
-            onPressed: _handleLogout,
-            tooltip: 'Cerrar sesión',
+            child: const Text('Demo portería'),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        if (_errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: ParkNotice(
+              _errorMessage!,
+              retry: _isSubmitting ? null : _fetchUsers,
+            ),
+          ),
+        ParkColumns(
+          flex: const [6, 5],
           children: [
-            // Banner de Rol Autorizado
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E3A8A).withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFF3B82F6).withValues(alpha: 0.4),
-                ),
-              ),
-              child: const Row(
+            ParkCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    Icons.admin_panel_settings,
-                    color: Color(0xFF3B82F6),
-                    size: 24,
+                  const ParkIcon(Icons.point_of_sale_outlined),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Recarga presencial',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  SizedBox(width: 10),
-                  Expanded(
+                  const SizedBox(height: 24),
+                  if (_isLoadingUsers)
+                    const Center(child: CircularProgressIndicator())
+                  else if (_users.isEmpty)
+                    const Text('No hay usuarios disponibles.')
+                  else
+                    DropdownButtonFormField<int>(
+                      key: ValueKey(_selectedUserId),
+                      initialValue: _selectedUserId,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Usuario destinatario',
+                      ),
+                      items: [
+                        for (final user in _users)
+                          DropdownMenuItem(
+                            value: user.id,
+                            child: Text(
+                              '${user.name} · ${user.email}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                      onChanged: _isSubmitting
+                          ? null
+                          : (value) => setState(() => _selectedUserId = value),
+                    ),
+                  const SizedBox(height: 18),
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedPoint,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Punto físico de atención',
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'Punto 1 - Portería Principal USTA',
+                        child: Text('Portería Principal'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Punto 2 - Cafetería Central USTA',
+                        child: Text('Cafetería Central'),
+                      ),
+                    ],
+                    onChanged: _isSubmitting
+                        ? null
+                        : (value) {
+                            if (value != null) {
+                              setState(() => _selectedPoint = value);
+                            }
+                          },
+                  ),
+                  const SizedBox(height: 18),
+                  TextField(
+                    controller: _amountController,
+                    enabled: !_isSubmitting,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Importe recibido en efectivo (COP)',
+                      prefixText: '\$ ',
+                      hintText: '10000',
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final amount in [4000, 5000, 20000])
+                        ActionChip(
+                          label: Text('\$$amount'),
+                          onPressed: _isSubmitting
+                              ? null
+                              : () =>
+                                    _amountController.text = amount.toString(),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed:
+                        _isSubmitting || _isLoadingUsers || _users.isEmpty
+                        ? null
+                        : _handleRecharge,
                     child: Text(
-                      'Módulo Exclusivo de Taquilla: Solo el operador autorizado puede ingresar abonos en efectivo al sistema.',
-                      style: TextStyle(color: Color(0xFFBFDBFE), fontSize: 12),
+                      _isSubmitting
+                          ? 'Registrando…'
+                          : 'Registrar abono en taquilla',
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-
-            if (_errorMessage != null) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEF4444).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFEF4444)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Color(0xFFEF4444),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(
-                          color: Color(0xFFF87171),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
-            const Text(
-              'Conductor / Usuario Destinatario',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              decoration: BoxDecoration(
-                color: const Color(0xFF111827),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white24),
-              ),
-              child: _isLoadingUsers
-                  ? const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFFF59E0B),
-                          strokeWidth: 2,
-                        ),
-                      ),
-                    )
-                  : DropdownButtonHideUnderline(
-                      child: DropdownButton<int>(
-                        value: _selectedUserId,
-                        dropdownColor: const Color(0xFF111827),
-                        style: const TextStyle(color: Colors.white),
-                        isExpanded: true,
-                        items: _users
-                            .map(
-                              (u) => DropdownMenuItem(
-                                value: u.id,
-                                child: Text(
-                                  '${u.name} (Saldo actual: \$${u.balance})',
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() => _selectedUserId = val);
-                          }
-                        },
-                      ),
-                    ),
-            ),
-            const SizedBox(height: 18),
-
-            const Text(
-              'Punto de Atención Físico USTA',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              decoration: BoxDecoration(
-                color: const Color(0xFF111827),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white24),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedPoint,
-                  dropdownColor: const Color(0xFF111827),
-                  style: const TextStyle(color: Colors.white),
-                  isExpanded: true,
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'Punto 1 - Portería Principal USTA',
-                      child: Text(
-                        'Punto 1 - Portería Principal (Entrada vehicular)',
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Punto 2 - Cafetería Central USTA',
-                      child: Text(
-                        'Punto 2 - Cafetería Central (Edif. Santo Domingo)',
-                      ),
-                    ),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) setState(() => _selectedPoint = val);
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 18),
-
-            const Text(
-              'Importe en Efectivo Recibido (COP) *',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              decoration: InputDecoration(
-                prefixText: '\$ ',
-                prefixStyle: const TextStyle(
-                  color: Color(0xFFF59E0B),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-                hintText: '10000',
-                hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.3),
-                ),
-                filled: true,
-                fillColor: const Color(0xFF111827),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.white24),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            Wrap(
-              spacing: 8,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ActionChip(
-                  label: const Text('\$4.000'),
-                  onPressed: () => _amountController.text = '4000',
-                  backgroundColor: const Color(
-                    0xFF1E3A8A,
-                  ).withValues(alpha: 0.4),
-                  labelStyle: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
+                const ParkCard(
+                  color: ParkColors.yellow,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ParkIcon(Icons.account_balance_wallet_outlined),
+                      SizedBox(height: 24),
+                      Text(
+                        'Cada abono,\ncon su comprobante.',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Confirma el destinatario y el efectivo recibido. La recarga se refleja en el saldo y los movimientos del usuario.',
+                      ),
+                      SizedBox(height: 24),
+                      ParkBadge('Solo operador autorizado'),
+                    ],
                   ),
                 ),
-                ActionChip(
-                  label: const Text('\$5.000'),
-                  onPressed: () => _amountController.text = '5000',
-                  backgroundColor: const Color(
-                    0xFF1E3A8A,
-                  ).withValues(alpha: 0.4),
-                  labelStyle: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
+                if (_lastReceipt != null) ...[
+                  const SizedBox(height: 20),
+                  ParkCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const ParkBadge('Recarga registrada', success: true),
+                        const SizedBox(height: 20),
+                        Text(
+                          'Comprobante de recarga',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 16),
+                        Text('Importe: +\$${_lastReceipt!['amount']} COP'),
+                        Text(
+                          'Saldo posterior: \$${_lastReceipt!['balance_after']} COP',
+                        ),
+                        const SizedBox(height: 12),
+                        Text('Punto: ${_lastReceipt!['point_name']}'),
+                        Text('Referencia: ${_lastReceipt!['reference']}'),
+                        Text('Fecha: ${_lastReceipt!['created_at']}'),
+                      ],
+                    ),
                   ),
-                ),
-                ActionChip(
-                  label: const Text('\$20.000'),
-                  onPressed: () => _amountController.text = '20000',
-                  backgroundColor: const Color(
-                    0xFF1E3A8A,
-                  ).withValues(alpha: 0.4),
-                  labelStyle: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
-                ),
+                ],
               ],
             ),
-            const SizedBox(height: 24),
-
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton.icon(
-                onPressed: _isSubmitting ? null : _handleRecharge,
-                icon: const Icon(
-                  Icons.check_circle_outline,
-                  color: Color(0xFF0B0F19),
-                ),
-                label: _isSubmitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.black,
-                        ),
-                      )
-                    : const Text(
-                        'Registrar Abono en Taquilla',
-                        style: TextStyle(
-                          color: Color(0xFF0B0F19),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF59E0B),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Comprobante Digital generado
-            if (_lastReceipt != null) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFF10B981),
-                    width: 1.5,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'COMPROBANTE DE RECARGA',
-                          style: TextStyle(
-                            color: Color(0xFF10B981),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          'ESTADO: EXITOSO',
-                          style: TextStyle(
-                            color: Color(0xFF10B981),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Divider(color: Colors.white12, height: 16),
-                    Text(
-                      'Usuario: ${_lastReceipt!['user_name']}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                    Text(
-                      'Punto: ${_lastReceipt!['point_name']}',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
-                    Text(
-                      'Referencia: ${_lastReceipt!['reference']}',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
-                    Text(
-                      'Fecha: ${_lastReceipt!['created_at']}',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Importe: + \$${_lastReceipt!['amount']} COP',
-                          style: const TextStyle(
-                            color: Color(0xFF10B981),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          'Nuevo Saldo: \$${_lastReceipt!['new_balance']} COP',
-                          style: const TextStyle(
-                            color: Color(0xFFF59E0B),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ],
         ),
-      ),
-    );
-  }
+      ],
+    ),
+  );
 }

@@ -98,17 +98,19 @@ void main() {
         'guard@example.test',
       );
       await tester.enterText(find.byType(TextField).last, 'password');
-      await tester.ensureVisible(find.text('Ingresar a mi Cuenta'));
-      await tester.tap(find.text('Ingresar a mi Cuenta'));
+      await tester.ensureVisible(find.text('Ingresar a ParkU →'));
+      await tester.tap(find.text('Ingresar a ParkU →'));
       await tester.pumpAndSettle();
       expect(find.text('Portería'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'opaque-token');
+      await tester.ensureVisible(find.text('Validar código'));
       await tester.tap(find.text('Validar código'));
       await tester.pumpAndSettle();
       expect(find.text('Operación: Salida'), findsOneWidget);
       expect(operations, isEmpty);
 
+      await tester.ensureVisible(find.text('Confirmar operación'));
       await tester.ensureVisible(find.text('Confirmar operación'));
       await tester.tap(find.text('Confirmar operación'));
       await tester.pumpAndSettle();
@@ -140,8 +142,10 @@ void main() {
         ),
       );
       await tester.enterText(find.byType(TextField), 'opaque');
+      await tester.ensureVisible(find.text('Validar código'));
       await tester.tap(find.text('Validar código'));
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Confirmar operación'));
       await tester.tap(find.text('Confirmar operación'));
       await tester.pumpAndSettle();
       expect(find.text('Se perdió la respuesta'), findsOneWidget);
@@ -149,6 +153,7 @@ void main() {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 1100)),
       );
+      await tester.ensureVisible(find.text('Confirmar operación'));
       await tester.tap(find.text('Confirmar operación'));
       await tester.pumpAndSettle();
       expect(gateway.ids, hasLength(2));

@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.2.0
+  flutter_svg: ^2.2.0
   qr_flutter: ^4.1.0
   intl: ^0.19.0
 
@@ -21,3 +22,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/figma/
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope.ttf

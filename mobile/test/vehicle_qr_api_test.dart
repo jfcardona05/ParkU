@@ -35,6 +35,13 @@ void main() {
             200,
           );
         }
+        if (request.url.path == '/api/vehicles/7/parking') {
+          expect(request.method, 'GET');
+          return jsonResponse(
+            '{"vehicle_id":7,"parking_state":"OUTSIDE","entered_at":null}',
+            200,
+          );
+        }
         expect(request.method, 'POST');
         expect(request.url.path, '/api/vehicles/7/qr');
         return jsonResponse(
@@ -52,12 +59,17 @@ void main() {
     )..setToken('session');
     await tester.pumpWidget(MaterialApp(home: VehiclesScreen(apiService: api)));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byTooltip('Mostrar QR'));
     await tester.tap(find.byTooltip('Mostrar QR'));
     await tester.pumpAndSettle();
     expect(find.byType(QrImageView), findsOneWidget);
     expect(find.text('QR · ABC123'), findsOneWidget);
     expect(find.textContaining('DEMOSTRACIÓN'), findsNothing);
-    expect(requests, hasLength(2));
+    expect(requests.map((r) => r.url.path), [
+      '/api/vehicles',
+      '/api/vehicles/7/parking',
+      '/api/vehicles/7/qr',
+    ]);
     await tester.pumpWidget(const SizedBox());
   });
 
