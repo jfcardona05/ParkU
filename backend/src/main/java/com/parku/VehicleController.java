@@ -16,10 +16,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class VehicleController {
   private final JdbcTemplate db;
   private final IdentityService identity;
+  private final java.time.Clock clock;
 
-  public VehicleController(JdbcTemplate db, IdentityService identity) {
+  public VehicleController(JdbcTemplate db, IdentityService identity, java.time.Clock clock) {
     this.db = db;
     this.identity = identity;
+    this.clock = clock;
   }
 
   public record Vehicle(
@@ -69,6 +71,15 @@ public class VehicleController {
     if (!db.queryForList(
             "SELECT id FROM parking_visits WHERE vehicle_id=? AND exited_at IS NULL", id)
         .isEmpty()) throw new ApiProblem(409, "VEHICLE_IN_USE", "El vehículo tiene ingreso activo");
+    if (!db.queryForList(
+            "SELECT id FROM parking_day_passes WHERE vehicle_id=? AND expires_at>?",
+            id,
+            java.sql.Timestamp.from(clock.instant()))
+        .isEmpty())
+      throw new ApiProblem(
+          409,
+          "DAILY_PASS_ACTIVE",
+          "Este vehículo tiene el QR pagado de hoy. Podrás desvincularlo cuando venza el pase.");
     if (db.update("DELETE FROM vehicles WHERE id=? AND user_id=?", id, user.get("id")) == 0)
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehículo no encontrado");
     return Map.of("success", true);

@@ -16,7 +16,8 @@ public class VehicleQrService {
   private final DailyPassService daily;
   private final Clock clock;
 
-  public VehicleQrService(JdbcTemplate db, IdentityService identity, DailyPassService daily, Clock clock) {
+  public VehicleQrService(
+      JdbcTemplate db, IdentityService identity, DailyPassService daily, Clock clock) {
     this.db = db;
     this.identity = identity;
     this.daily = daily;
@@ -37,11 +38,27 @@ public class VehicleQrService {
     return daily.issue(auth, vehicleId);
   }
 
+  public static String tokenValue(String value) {
+    if (value != null && (value.startsWith("https://") || value.startsWith("http://"))) {
+      try {
+        var uri = java.net.URI.create(value);
+        if (uri.getPath().matches("/p/[A-Za-z0-9_-]{43}")
+            && uri.getRawQuery() == null
+            && uri.getFragment() == null) return uri.getPath().substring(3);
+      } catch (IllegalArgumentException ignored) {
+        // Reject malformed URLs through the same invalid-token response.
+      }
+      throw new ApiProblem(422, "QR_INVALID", "El enlace QR no es válido.");
+    }
+    return value;
+  }
+
   // Caller must lock the vehicle before calling this method during confirmation.
   public Map<String, Object> inspectToken(String token) {
+    token = tokenValue(token);
     var rows =
         db.queryForList(
-            "SELECT q.*,v.plate FROM vehicle_qr q JOIN vehicles v ON v.id=q.vehicle_id AND v.user_id=q.user_id WHERE q.token_hash=?",
+            "SELECT q.*,v.plate,v.type AS vehicle_type,u.name AS owner_name FROM vehicle_qr q JOIN vehicles v ON v.id=q.vehicle_id AND v.user_id=q.user_id JOIN users u ON u.id=q.user_id WHERE q.token_hash=?",
             digest(token));
     if (rows.isEmpty()) throw new ApiProblem(422, "QR_INVALID", "QR inválido");
     var qr = rows.getFirst();

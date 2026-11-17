@@ -14,12 +14,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/wallet")
 public class WalletTransferController {
   private final WalletTransferService service;
-  public WalletTransferController(WalletTransferService service) { this.service = service; }
+
+  public WalletTransferController(WalletTransferService service) {
+    this.service = service;
+  }
 
   public record Transfer(
       @NotBlank @Email @Size(max = 200) String recipient_email,
       @NotNull @Positive @Max(1000000000) Long amount,
-      @NotBlank @Size(max = 100) String request_id) {}
+      @NotBlank @Size(max = 100) String request_id) {
+    public Transfer {
+      if (recipient_email != null) recipient_email = recipient_email.trim();
+    }
+  }
 
   @PostMapping("/transfers")
   public Map<String, Object> transfer(

@@ -28,6 +28,7 @@ public class GateService {
   @Transactional
   public Result confirm(String auth, String token, String action, String requestId) {
     var operator = identity.requireRole(auth, "guard", "admin");
+    token = VehicleQrService.tokenValue(token);
     // The singleton lock serializes admission, configuration and idempotency across app instances.
     var settings = db.queryForMap("SELECT * FROM parking_settings WHERE id=1 FOR UPDATE");
     String fingerprint = VehicleQrService.digest(action + ":" + token);
@@ -52,7 +53,8 @@ public class GateService {
     }
     var found =
         db.queryForList(
-            "SELECT vehicle_id,user_id FROM vehicle_qr WHERE token_hash=?", VehicleQrService.digest(token));
+            "SELECT vehicle_id,user_id FROM vehicle_qr WHERE token_hash=?",
+            VehicleQrService.digest(token));
     if (found.isEmpty()) throw new ApiProblem(422, "QR_INVALID", "QR inválido");
     Object vehicleId = found.getFirst().get("vehicle_id");
     db.queryForMap("SELECT id FROM users WHERE id=? FOR UPDATE", found.getFirst().get("user_id"));
@@ -62,7 +64,8 @@ public class GateService {
     var active =
         db.queryForList(
             "SELECT * FROM parking_visits WHERE vehicle_id=? AND exited_at IS NULL", vehicleId);
-    var passes = db.queryForList("SELECT id FROM parking_day_passes WHERE qr_id=?", valid.get("id"));
+    var passes =
+        db.queryForList("SELECT id,rate_id FROM parking_day_passes WHERE qr_id=?", valid.get("id"));
     Object dailyPassId = passes.isEmpty() ? null : passes.getFirst().get("id");
     var now = OffsetDateTime.now(ZoneOffset.UTC);
     Map<String, Object> visit;
@@ -93,7 +96,8 @@ public class GateService {
               vehicle.get("plate"),
               vehicle.get("type"),
               now,
-              rates.getFirst().get("id"), dailyPassId);
+              dailyPassId == null ? rates.getFirst().get("id") : passes.getFirst().get("rate_id"),
+              dailyPassId);
     } else {
       if (active.isEmpty())
         throw new ApiProblem(409, "NOT_INSIDE", "El vehículo no tiene ingreso activo");
@@ -101,7 +105,8 @@ public class GateService {
       if (visit.get("daily_pass_id") == null) charge = completeExit(visit, operator, now);
       db.update("UPDATE parking_visits SET exited_at=? WHERE id=?", now, visit.get("id"));
     }
-    if (dailyPassId == null) db.update("UPDATE vehicle_qr SET consumed=true WHERE id=?", valid.get("id"));
+    if (dailyPassId == null)
+      db.update("UPDATE vehicle_qr SET consumed=true WHERE id=?", valid.get("id"));
     long operationId =
         db.queryForObject(
             "INSERT INTO parking_operations(operator_id,request_id,fingerprint,visit_id,action,occurred_at,receipt) VALUES(?,?,?,?,?,?,'{}') RETURNING id",

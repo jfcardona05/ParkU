@@ -58,7 +58,19 @@ class SprintTwoApiTest {
   }
 
   String qr(long id, String session) {
-    return (String) post("/api/vehicles/" + id + "/qr", null, session).getBody().get("token");
+    // Compatibility fixtures for visits/short-lived codes created before daily passes.
+    String token =
+        java.util.Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(
+                (UUID.randomUUID().toString() + UUID.randomUUID())
+                    .substring(0, 32)
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    db.update(
+        "INSERT INTO vehicle_qr(token_hash,vehicle_id,user_id,expires_at) SELECT ?,id,user_id,CURRENT_TIMESTAMP+INTERVAL '2 minutes' FROM vehicles WHERE id=?",
+        VehicleQrService.digest(token),
+        id);
+    return token;
   }
 
   void error(ResponseEntity<Map> response, int status, String code) {
@@ -71,6 +83,8 @@ class SprintTwoApiTest {
     assertThat(post("/api/vehicles/1/qr", null, null).getStatusCode().value()).isEqualTo(401);
     error(post("/api/vehicles/1/qr", null, "docente"), 404, "VEHICLE_NOT_FOUND");
     String old = qr(1, "estudiante"), token = qr(1, "estudiante");
+    db.update(
+        "UPDATE vehicle_qr SET revoked=true WHERE token_hash=?", VehicleQrService.digest(old));
     assertThat(token).hasSize(43).isNotEqualTo(old);
     assertThat(
             db.queryForObject(
@@ -99,15 +113,16 @@ class SprintTwoApiTest {
   }
 
   @Test
-  void concurrentRegenerationLeavesExactlyOneUsableToken() {
-    var a = CompletableFuture.supplyAsync(() -> qr(1, "estudiante"));
-    var b = CompletableFuture.supplyAsync(() -> qr(1, "estudiante"));
-    var results =
-        List.of(a.join(), b.join()).stream()
-            .map(
-                t -> post("/api/gate/inspect", Map.of("token", t), "guard").getStatusCode().value())
-            .toList();
-    assertThat(results).containsExactlyInAnyOrder(200, 409);
+  void concurrentDailyRequestsReturnOnePaidToken() {
+    var a = CompletableFuture.supplyAsync(() -> post("/api/vehicles/1/qr", null, "estudiante"));
+    var b = CompletableFuture.supplyAsync(() -> post("/api/vehicles/1/qr", null, "estudiante"));
+    assertThat(a.join().getStatusCode().value()).isEqualTo(201);
+    assertThat(b.join().getStatusCode().value()).isEqualTo(201);
+    assertThat(a.join().getBody().get("token")).isEqualTo(b.join().getBody().get("token"));
+    assertThat(db.queryForObject("SELECT balance FROM users WHERE id=1", Long.class))
+        .isEqualTo(6000);
+    assertThat(db.queryForObject("SELECT count(*) FROM parking_day_passes", Integer.class))
+        .isEqualTo(1);
   }
 
   Map<String, Object> operation(String token, String action, String key) {
