@@ -58,3 +58,89 @@ jobs:
           path: mobile/build/ui-previews/
           if-no-files-found: warn
       - run: flutter build web
+
+  api-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: parku_frontend
+          POSTGRES_USER: parku
+          POSTGRES_PASSWORD: test_local
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U parku -d parku_frontend"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_URL: jdbc:postgresql://localhost:5432/parku_frontend
+      DB_USER: parku
+      DB_PASSWORD: test_local
+      PARKU_DEMO: 'false'
+      PORT: '8000'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.8'
+          channel: stable
+          cache: true
+      - name: Start unchanged backend against disposable PostgreSQL
+        working-directory: backend
+        run: |
+          chmod +x mvnw
+          ./mvnw -B -DskipTests package
+          nohup java -jar target/*.jar > ../api-integration.log 2>&1 &
+      - name: Wait for API and create isolated test accounts
+        run: |
+          python3 - <<'PY'
+          import socket, time, json, urllib.request
+          for attempt in range(90):
+              try:
+                  with socket.create_connection(('localhost',8000),timeout=1): pass
+                  break
+              except OSError:
+                  time.sleep(1)
+          else:
+              raise RuntimeError('Backend did not start')
+          accounts=[
+              ('CI student','frontend-student@test.co','pass123'),
+              ('CI guard','frontend-guard@test.co','pass123'),
+              ('CI admin','frontend-admin@test.co','pass123'),
+              ('CI cash','taquilla@usantotomas.edu.co','caja123'),
+          ]
+          for name,email,password in accounts:
+              body=json.dumps(dict(name=name,email=email,password=password)).encode()
+              request=urllib.request.Request('http://localhost:8000/api/auth/register',data=body,headers={'Content-Type':'application/json'})
+              with urllib.request.urlopen(request) as response:
+                  assert response.status == 201
+          print('Four disposable integration accounts created')
+          PY
+      - name: Assign fixture roles in disposable database only
+        run: |
+          docker exec -i ${{ job.services.postgres.id }} psql -v ON_ERROR_STOP=1 -U parku -d parku_frontend <<'SQL'
+          UPDATE users SET role='guard' WHERE email='frontend-guard@test.co';
+          UPDATE users SET role='admin' WHERE email='frontend-admin@test.co';
+          UPDATE users SET role='operador' WHERE email='taquilla@usantotomas.edu.co';
+          SQL
+      - run: flutter pub get
+      - name: Live registration vehicles wallet and cash recharge
+        run: flutter test test/api_live_test.dart --dart-define=LIVE_API=true --reporter expanded
+      - name: Live QR entry exit permissions and single charge
+        run: >-
+          flutter test test/parking_live_test.dart --reporter expanded
+          --dart-define=LIVE_PARKING_API=true
+          --dart-define=LIVE_STUDENT_EMAIL=frontend-student@test.co
+          --dart-define=LIVE_GUARD_EMAIL=frontend-guard@test.co
+          --dart-define=LIVE_ADMIN_EMAIL=frontend-admin@test.co
+          --dart-define=LIVE_TEST_PASSWORD=pass123
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: frontend-api-integration-log
+          path: api-integration.log
