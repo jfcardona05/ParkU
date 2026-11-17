@@ -1,0 +1,65 @@
+name: Import original Figma assets
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/import-figma-assets.yml'
+permissions:
+  contents: write
+jobs:
+  import:
+    if: github.head_ref == 'feature/frontend-figma-responsive' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Download original assets using Figma export instructions
+        run: |
+          mkdir -p mobile/assets/figma mobile/assets/fonts
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/1f34c946-0801-44da-9074-ac34c4cf27da/43925.png' --output 'mobile/assets/figma/43925.png'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/1f34c946-0801-44da-9074-ac34c4cf27da/c5b91.svg' --output 'mobile/assets/figma/c5b91.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/1f34c946-0801-44da-9074-ac34c4cf27da/5b1f0.svg' --output 'mobile/assets/figma/5b1f0.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/1f34c946-0801-44da-9074-ac34c4cf27da/843c7.svg' --output 'mobile/assets/figma/843c7.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/1f34c946-0801-44da-9074-ac34c4cf27da/dfbad.svg' --output 'mobile/assets/figma/dfbad.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/1f34c946-0801-44da-9074-ac34c4cf27da/cab47.svg' --output 'mobile/assets/figma/cab47.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/1f34c946-0801-44da-9074-ac34c4cf27da/d210e.svg' --output 'mobile/assets/figma/d210e.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/044b51e1-1232-467d-87ef-40ee1182f095/ae0db.svg' --output 'mobile/assets/figma/ae0db.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/044b51e1-1232-467d-87ef-40ee1182f095/7b337.svg' --output 'mobile/assets/figma/7b337.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/044b51e1-1232-467d-87ef-40ee1182f095/7f6c1.svg' --output 'mobile/assets/figma/7f6c1.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/044b51e1-1232-467d-87ef-40ee1182f095/d6ae4.svg' --output 'mobile/assets/figma/d6ae4.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/80ba3109-1e2a-42cd-bd87-3f5d1c5ca061/8f3a7.svg' --output 'mobile/assets/figma/8f3a7.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/80ba3109-1e2a-42cd-bd87-3f5d1c5ca061/40395.svg' --output 'mobile/assets/figma/40395.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/80ba3109-1e2a-42cd-bd87-3f5d1c5ca061/d9cd4.svg' --output 'mobile/assets/figma/d9cd4.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/80ba3109-1e2a-42cd-bd87-3f5d1c5ca061/5c73a.svg' --output 'mobile/assets/figma/5c73a.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/80ba3109-1e2a-42cd-bd87-3f5d1c5ca061/c0f51.svg' --output 'mobile/assets/figma/c0f51.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/42529ff6-af3c-48d6-a3f5-453b0cfa5d9b/24a7c.svg' --output 'mobile/assets/figma/24a7c.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/3857afff-9b55-421b-b841-beef41e9284b/e4593.svg' --output 'mobile/assets/figma/e4593.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/47e02e5b-7814-4b32-838a-19b76e034c75/b4eeb.svg' --output 'mobile/assets/figma/b4eeb.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/0cd64331-41c5-416e-9b16-5a904aa052e6/8f4ff.svg' --output 'mobile/assets/figma/8f4ff.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/9d19382b-9228-47a1-ae4d-0130735345f4/f72b1.svg' --output 'mobile/assets/figma/f72b1.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/9d19382b-9228-47a1-ae4d-0130735345f4/2969a.svg' --output 'mobile/assets/figma/2969a.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/9d19382b-9228-47a1-ae4d-0130735345f4/8eb16.svg' --output 'mobile/assets/figma/8eb16.svg'
+          curl --fail --location --retry 2 'https://www.figma.com/api/mcp/asset/d962be3c-09cb-4296-8972-c61edebb3ece/ea9ff.svg' --output 'mobile/assets/figma/ea9ff.svg'
+          curl --fail --location 'https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/Manrope%5Bwght%5D.ttf' --output mobile/assets/fonts/Manrope.ttf
+          curl --fail --location 'https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt' --output mobile/assets/fonts/OFL-Manrope.txt
+      - name: Verify asset types and original dimensions
+        run: |
+          python3 - <<'PY'
+          import pathlib, struct, xml.etree.ElementTree as ET
+          for p in sorted(pathlib.Path('mobile/assets/figma').iterdir()):
+              assert p.stat().st_size > 0
+              if p.suffix == '.svg':
+                  root=ET.parse(p).getroot()
+                  print(p.name, root.attrib)
+              else:
+                  data=p.read_bytes()
+                  assert data[:8] == b'\x89PNG\r\n\x1a\n'
+                  print(p.name, 'PNG dimensions', struct.unpack('>II',data[16:24]))
+          PY
+      - name: Commit original assets to the redesign branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add mobile/assets
+          git commit -m 'assets: import original ParkU Figma illustrations icons and Manrope'
+          git push origin HEAD:feature/frontend-figma-responsive
