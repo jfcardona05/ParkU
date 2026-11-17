@@ -34,6 +34,46 @@ class LostReplyGateway implements GateGateway {
 }
 
 void main() {
+  for (final prepaid in [true, false]) {
+    test(
+      'gate exit without charge requires explicit prepaid=$prepaid',
+      () async {
+        final api = ApiService(
+          client: MockClient(
+            (request) async => http.Response(
+              jsonEncode({
+                'success': true,
+                'operation_id': 99,
+                'action': 'exit',
+                'vehicle_id': 7,
+                'parking_state': 'OUTSIDE',
+                'message': 'Salida registrada',
+                'prepaid': prepaid,
+              }),
+              201,
+              headers: {'content-type': 'application/json'},
+            ),
+          ),
+        )..setToken('guard-fixture');
+        final preview = GatePreview(
+          token: 'paid',
+          plate: 'ABC123',
+          vehicleId: 7,
+          expiresAt: DateTime.now().toUtc().add(const Duration(hours: 1)),
+          allowedAction: GateAction.exit,
+        );
+        final confirmation = ApiGateGateway(
+          api,
+        ).confirm(preview, GateAction.exit, 'paid-exit');
+        if (prepaid) {
+          expect(await confirmation, contains('Sin cobro adicional'));
+        } else {
+          await expectLater(confirmation, throwsA(isA<ApiException>()));
+        }
+      },
+    );
+  }
+
   testWidgets(
     'guard login opens live gateway and confirms server-selected exit',
     (tester) async {
