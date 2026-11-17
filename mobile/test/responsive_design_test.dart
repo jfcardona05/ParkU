@@ -11,6 +11,7 @@ import 'package:http/testing.dart';
 import 'package:parku_mobile/models/user_model.dart';
 import 'package:parku_mobile/models/vehicle_model.dart';
 import 'package:parku_mobile/screens/login_screen.dart';
+import 'package:parku_mobile/screens/transfer_screen.dart';
 import 'package:parku_mobile/screens/register_screen.dart';
 import 'package:parku_mobile/screens/dashboard_screen.dart';
 import 'package:parku_mobile/screens/vehicles_screen.dart';
@@ -45,12 +46,6 @@ ApiService fixture({String role = 'estudiante'}) {
           'parking_state': 'OUTSIDE',
           'visit_id': null,
           'entered_at': null,
-        },
-        '/api/parking/occupancy' => {
-          'success': true,
-          'available': 38,
-          'capacity': 80,
-          'occupied': 42,
         },
         '/api/parking/rates' => {
           'rates': [
@@ -142,14 +137,25 @@ ApiService fixture({String role = 'estudiante'}) {
   return api;
 }
 
-class PreviewQr implements VehicleQrSource {
+class PreviewQr extends DailyVehicleQrSource {
+  final bool issued;
+  PreviewQr({this.issued = true});
   @override
   bool get isDemo => false;
+  @override
+  Future<DailyQrQuote> lookup(VehicleModel vehicle) async => DailyQrQuote(
+    amount: 5000,
+    serviceDate: '2030-01-01',
+    qr: issued ? await issue(vehicle) : null,
+  );
   @override
   Future<VehicleQr> issue(VehicleModel vehicle) async => VehicleQr(
     vehicleId: vehicle.id,
     token: 'VISUAL-TEST-ONLY-NOT-AN-ACCESS-TOKEN',
-    expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 2)),
+    daily: true,
+    amount: 5000,
+    scanUrl: 'https://preview.example.test/p/VISUAL-TEST-ONLY',
+    expiresAt: DateTime.now().toUtc().add(const Duration(hours: 3)),
   );
 }
 
@@ -173,6 +179,8 @@ void main() {
       'vehicles',
       'add-vehicle',
       'qr',
+      'qr-new',
+      'transfer',
       'wallet',
       'parking',
       'gate',
@@ -200,6 +208,12 @@ void main() {
           'qr' => VehicleQrScreen(
             vehicle: vehicle,
             source: PreviewQr(),
+            apiService: api,
+          ),
+          'transfer' => TransferScreen(apiService: api),
+          'qr-new' => VehicleQrScreen(
+            vehicle: vehicle,
+            source: PreviewQr(issued: false),
             apiService: api,
           ),
           'wallet' => WalletScreen(apiService: api),
@@ -269,7 +283,7 @@ void main() {
     await tester.tap(find.text('Parqueadero'));
     await tester.pumpAndSettle();
     expect(find.text('Así está el parqueadero'), findsOneWidget);
-    expect(find.text('38 de 80'), findsOneWidget);
+    expect(find.text('Próximamente'), findsOneWidget);
     await tester.tap(find.text('Vehículos'));
     await tester.pumpAndSettle();
     expect(find.text('Tus vehículos'), findsOneWidget);

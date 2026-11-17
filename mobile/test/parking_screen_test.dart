@@ -9,18 +9,12 @@ import 'package:parku_mobile/services/api_service.dart';
 
 void main() {
   testWidgets(
-    'occupancy failure leaves rates and history usable and pagination retries safely',
+    'occupancy is forthcoming and history pagination retries safely',
     (tester) async {
       final cursors = <String?>[];
       var failedOnce = false;
       final api = ApiService(
         client: MockClient((request) async {
-          if (request.url.path == '/api/parking/occupancy') {
-            return http.Response(
-              '{"message":"Capacidad pendiente","code":"PARKING_NOT_CONFIGURED"}',
-              503,
-            );
-          }
           final Object body;
           switch (request.url.path) {
             case '/api/vehicles':
@@ -65,7 +59,8 @@ void main() {
         MaterialApp(home: ParkingScreen(apiService: api)),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Capacidad pendiente'), findsOneWidget);
+      expect(find.text('Próximamente'), findsOneWidget);
+      expect(find.textContaining('4000 COP / pase diario'), findsOneWidget);
       expect(find.text('Moto'), findsOneWidget);
       await tester.ensureVisible(find.text('Cargar más accesos'));
       await tester.tap(find.text('Cargar más accesos'));
