@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
 import '../services/gate_service.dart';
 import '../screens/dashboard_screen.dart';
@@ -7,6 +8,7 @@ import '../screens/wallet_screen.dart';
 import '../screens/parking_screen.dart';
 import '../screens/gate_screen.dart';
 import '../screens/taquilla_screen.dart';
+import '../screens/taquilla_reports_screen.dart';
 import '../screens/login_screen.dart';
 import 'park_theme.dart';
 import 'park_glyph.dart';
@@ -37,12 +39,17 @@ class ParkShell extends StatelessWidget {
       );
       return;
     }
+    // Cashiers have an operational workspace, never a personal wallet/home.
+    if (api.currentUser?.role == 'operador' && [0, 1, 2].contains(index)) {
+      index = 5;
+    }
     final Widget page = switch (index) {
       0 => DashboardScreen(apiService: api),
       1 => VehiclesScreen(apiService: api),
       2 => WalletScreen(apiService: api),
       3 => ParkingScreen(apiService: api),
       4 => GateScreen(apiService: api, gateway: ApiGateGateway(api)),
+      6 => TaquillaReportsScreen(apiService: api),
       _ => TaquillaScreen(apiService: api),
     };
     Navigator.of(
@@ -74,13 +81,17 @@ class ParkShell extends StatelessWidget {
       _ => 'Usuario',
     };
     final items = <(int, IconData, String)>[
-      (0, Icons.home_outlined, 'Inicio'),
-      (1, Icons.directions_car_outlined, 'Vehículos'),
-      (2, Icons.account_balance_wallet_outlined, 'Mi saldo'),
+      if (role == 'operador') ...[
+        (5, Icons.point_of_sale_outlined, 'Panel de caja'),
+        (6, Icons.receipt_long_outlined, 'Reportes'),
+      ] else ...[
+        (0, Icons.home_outlined, 'Inicio'),
+        (1, Icons.directions_car_outlined, 'Vehículos'),
+        (2, Icons.account_balance_wallet_outlined, 'Mi saldo'),
+      ],
       (3, Icons.local_parking_outlined, 'Parqueadero'),
       if (role == 'guard' || role == 'admin')
         (4, Icons.sensor_door_outlined, 'Portería'),
-      if (role == 'operador') (5, Icons.point_of_sale_outlined, 'Taquilla'),
     ];
     final name = api?.currentUser?.name ?? '';
     final initials = name
@@ -193,9 +204,11 @@ class ParkShell extends StatelessWidget {
                         ),
                       const SizedBox(height: 26),
                       if (desktop)
-                        const Text(
-                          'MI PARQUEADERO',
-                          style: TextStyle(
+                        Text(
+                          role == 'operador'
+                              ? 'OPERACIÓN DE CAJA'
+                              : 'MI PARQUEADERO',
+                          style: const TextStyle(
                             fontSize: 9,
                             color: ParkColors.muted,
                           ),
