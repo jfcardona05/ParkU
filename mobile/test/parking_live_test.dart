@@ -28,6 +28,20 @@ void main() {
           ))['success'],
           true,
         );
+        final cashState = await cash.request('GET', '/api/cash/current');
+        var cashDay = cashState['session'] as Map<String, dynamic>?;
+        if (cashDay == null) {
+          final info = (cashState['points'] as List)
+              .cast<Map<String, dynamic>>()
+              .firstWhere((p) => p['available'] == true);
+          cashDay =
+              (await cash.request('POST', '/api/cash/open', {
+                    'point_name': info['point_name'],
+                    'opening_amount': info['opening_amount'] ?? 0,
+                  }))['session']
+                  as Map<String, dynamic>;
+        }
+        final cashPoint = cashDay['point_name'] as String;
         final rates = await ParkingService(student).getRates();
         final rate =
             rates.singleWhere((r) => r['vehicle_type'] == 'automovil')['amount']
@@ -60,7 +74,7 @@ void main() {
         expect(
           (await cash.recharge(
             amount: rate * 2,
-            pointName: 'Punto 1 - Portería Principal USTA',
+            pointName: cashPoint,
             userId: student.currentUser!.id,
           ))['success'],
           true,

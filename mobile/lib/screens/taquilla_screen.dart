@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
-import '../widgets/recharge_history_card.dart';
+import '../widgets/cash_session_card.dart';
 import '../models/user_model.dart';
 import '../ui/park_shell.dart';
 import '../ui/park_widgets.dart';
@@ -27,8 +27,10 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
   bool _isSubmitting = false;
   String? _errorMessage;
   Map<String, dynamic>? _lastReceipt;
-  int _historyVersion = 0;
-  final _historyKey = GlobalKey();
+  int _cashVersion = 0;
+  bool _cashBusy = false;
+  Map<String, dynamic>? _cashSession;
+  bool get _canRecharge => _cashSession?['can_recharge'] == true;
 
   @override
   void initState() {
@@ -68,6 +70,7 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
   }
 
   Future<void> _handleRecharge() async {
+    if (!_canRecharge || _cashBusy) return;
     if (_selectedUserId == null) {
       setState(
         () => _errorMessage = 'Debe seleccionar un usuario destinatario.',
@@ -108,7 +111,7 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
       if (!mounted) return;
       setState(() {
         _lastReceipt = res['recharge'];
-        _historyVersion++;
+        _cashVersion++;
         _amountController.clear();
       });
       _fetchUsers(); // Actualizar saldo del usuario
@@ -126,10 +129,10 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
     selected: 5,
     breadcrumb: 'Panel de caja',
     refresh: () {
-      setState(() => _historyVersion++);
+      setState(() => _cashVersion++);
       _fetchUsers();
     },
-    busy: _isSubmitting,
+    busy: _isSubmitting || _cashBusy,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -137,27 +140,24 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
           'Centro de operaciones',
           'Gestiona recargas presenciales y consulta la actividad de taquilla.',
         ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: () {
-              final target = _historyKey.currentContext;
-              if (target != null) {
-                Scrollable.ensureVisible(
-                  target,
-                  duration: const Duration(milliseconds: 300),
-                );
-              }
-            },
-            icon: const Icon(Icons.receipt_long_outlined),
-            label: const Text('Ver historial de recargas'),
-          ),
+        CashSessionCard(
+          api: widget.apiService,
+          version: _cashVersion,
+          disabled: _isSubmitting,
+          onBusy: (busy) => setState(() => _cashBusy = busy),
+          onSession: (session) => setState(() {
+            _cashSession = session;
+            if (session != null) {
+              _selectedPoint = session['point_name'] as String;
+            }
+          }),
         ),
+        const SizedBox(height: 24),
         Align(
           alignment: Alignment.centerLeft,
           child: OutlinedButton.icon(
             style: OutlinedButton.styleFrom(foregroundColor: ParkColors.ink),
-            onPressed: _isSubmitting
+            onPressed: _isSubmitting || _cashBusy
                 ? null
                 : () => ParkShell.open(context, widget.apiService, 6),
             icon: const Icon(Icons.insights_outlined),
@@ -223,39 +223,20 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                             ),
                           ),
                       ],
-                      onChanged: _isSubmitting
+                      onChanged: _isSubmitting || _cashBusy || !_canRecharge
                           ? null
                           : (value) => setState(() => _selectedUserId = value),
                     ),
                   const SizedBox(height: 18),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedPoint,
-                    isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Punto físico de atención',
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Punto 1 - Portería Principal USTA',
-                        child: Text('Portería Principal'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Punto 2 - Cafetería Central USTA',
-                        child: Text('Cafetería Central'),
-                      ),
-                    ],
-                    onChanged: _isSubmitting
-                        ? null
-                        : (value) {
-                            if (value != null) {
-                              setState(() => _selectedPoint = value);
-                            }
-                          },
+                  Text(
+                    _canRecharge
+                        ? 'Punto de caja: $_selectedPoint'
+                        : 'Abre una caja para registrar recargas.',
                   ),
                   const SizedBox(height: 18),
                   TextField(
                     controller: _amountController,
-                    enabled: !_isSubmitting,
+                    enabled: !_isSubmitting && !_cashBusy && _canRecharge,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       labelText: 'Importe recibido en efectivo (COP)',
@@ -271,7 +252,7 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                       for (final amount in [4000, 5000, 20000])
                         ActionChip(
                           label: Text('\$$amount'),
-                          onPressed: _isSubmitting
+                          onPressed: _isSubmitting || _cashBusy || !_canRecharge
                               ? null
                               : () =>
                                     _amountController.text = amount.toString(),
@@ -281,7 +262,11 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                   const SizedBox(height: 24),
                   FilledButton(
                     onPressed:
-                        _isSubmitting || _isLoadingUsers || _users.isEmpty
+                        _isSubmitting ||
+                            _cashBusy ||
+                            !_canRecharge ||
+                            _isLoadingUsers ||
+                            _users.isEmpty
                         ? null
                         : _handleRecharge,
                     child: Text(
@@ -347,12 +332,6 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
               ],
             ),
           ],
-        ),
-        const SizedBox(height: 24),
-        RechargeHistoryCard(
-          key: _historyKey,
-          api: widget.apiService,
-          refreshVersion: _historyVersion,
         ),
       ],
     ),

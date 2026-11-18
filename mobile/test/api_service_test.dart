@@ -5,6 +5,17 @@ import 'package:http/testing.dart';
 import 'package:parku_mobile/services/api_service.dart';
 
 void main() {
+  test('share QR URL preserves the access prefix', () {
+    final service = ApiService(
+      apiBaseUrl:
+          'https://demo.trycloudflare.com/0123456789abcdef0123456789abcdef',
+    );
+    expect(
+      service.qrScanUrl('token'),
+      'https://demo.trycloudflare.com/0123456789abcdef0123456789abcdef/p/token',
+    );
+  });
+
   test(
     'login retains session; taquilla request includes bearer token',
     () async {

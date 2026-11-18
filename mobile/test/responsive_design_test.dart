@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'support/cash_fixtures.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -39,6 +40,11 @@ ApiService fixture({String role = 'estudiante'}) {
   final api = ApiService(
     client: MockClient((request) async {
       final Object response = switch (request.url.path) {
+        '/api/cash/current' => cashCurrent(),
+        '/api/cash/history' => {
+          'sessions': [cashSession(closed: true)],
+          'has_more': false,
+        },
         '/api/vehicles' => {
           'vehicles': [vehicle.toJson()],
         },
@@ -254,6 +260,7 @@ void main() {
           'parking' => ParkingScreen(apiService: api),
           'gate' => GateScreen(apiService: api, gateway: ApiGateGateway(api)),
           'cash-reports' => TaquillaReportsScreen(apiService: api),
+          'cash-history' => TaquillaReportsScreen(apiService: api),
           _ => TaquillaScreen(apiService: api),
         };
         final capture = GlobalKey();
@@ -270,10 +277,7 @@ void main() {
           );
         });
         await tester.pumpAndSettle();
-        if (page == 'cash-history') {
-          await tester.tap(find.text('Ver historial de recargas'));
-          await tester.pumpAndSettle();
-        }
+
         expect(
           tester.takeException(),
           isNull,

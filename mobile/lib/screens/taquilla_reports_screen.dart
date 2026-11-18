@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import '../ui/park_shell.dart';
 import '../ui/park_widgets.dart';
 import '../widgets/recharge_history_card.dart';
+import '../widgets/cash_closures_card.dart';
 
 /// Uses the existing authorized recharge report API; grants no new permissions.
 class TaquillaReportsScreen extends StatelessWidget {
@@ -36,6 +37,8 @@ class TaquillaReportsScreen extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(height: 24),
+        CashClosuresCard(api: apiService),
         const SizedBox(height: 24),
         RechargeHistoryCard(api: apiService),
       ],
