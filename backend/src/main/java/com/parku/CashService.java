@@ -180,9 +180,11 @@ public class CashService {
       throw new ApiProblem(
           409, "CASH_CLOSED", "El cierre ya está registrado y no puede modificarse.");
     }
-    if (retained > counted)
+    if (retained <= 0 || retained > counted)
       throw new ApiProblem(
-          400, "INVALID_RETAINED", "La base para devueltas no puede superar el efectivo contado.");
+          400,
+          "INVALID_RETAINED",
+          "La base para devueltas debe ser mayor a cero y no superar el efectivo contado.");
     var total = totals(id);
     long collected = number(total, "collected"),
         expected = number(row, "opening_amount") + collected;

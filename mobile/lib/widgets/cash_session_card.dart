@@ -110,12 +110,12 @@ class _CashSessionCardState extends State<CashSessionCard> {
             (counted == null ||
                 retained == null ||
                 counted < 0 ||
-                retained < 0 ||
+                retained <= 0 ||
                 counted > 1000000000000 ||
                 retained > counted))) {
       setState(
         () => _error =
-            'Ingresa importes enteros válidos. La base retenida no puede superar lo contado.',
+            'Ingresa importes enteros válidos. La base retenida debe ser mayor a cero y no superar lo contado.',
       );
       return;
     }

@@ -23,7 +23,7 @@ public class CashController {
   public record Close(
       @NotNull @Min(0) @Max(1000000000000L) @JsonDeserialize(using = WholeCopAmount.class)
           Long counted_cash,
-      @NotNull @Min(0) @Max(1000000000000L) @JsonDeserialize(using = WholeCopAmount.class)
+      @NotNull @Min(1) @Max(1000000000000L) @JsonDeserialize(using = WholeCopAmount.class)
           Long retained_cash,
       @Size(max = 1000) String notes) {}
 

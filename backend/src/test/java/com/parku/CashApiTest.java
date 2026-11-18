@@ -146,11 +146,12 @@ class CashApiTest {
     assertThat(
             post(
                     "/api/cash/" + id + "/close",
-                    Map.of("counted_cash", 10000, "retained_cash", 0),
+                    Map.of("counted_cash", 10000, "retained_cash", 1000),
                     "c3")
                 .getStatusCode()
                 .value())
         .isEqualTo(404);
+    assertThat(close(id, 10000, 0, "").getStatusCode().value()).isEqualTo(400);
     assertThat(close(id, 9000, 10000, "reason").getStatusCode().value()).isEqualTo(400);
     assertThat(close(id, 9000, 1000, "").getStatusCode().value()).isEqualTo(400);
     assertThat(session(close(id, 9000, 1000, "Faltante verificado")))
@@ -194,9 +195,9 @@ class CashApiTest {
 
   @Test
   void closingAndRechargeSerializeOnSameSession() {
-    var id = session(open(0, "c2")).get("id");
+    var id = session(open(1000, "c2")).get("id");
     var a = CompletableFuture.supplyAsync(() -> recharge(1000));
-    var b = CompletableFuture.supplyAsync(() -> close(id, 0, 0, "Conteo al cierre"));
+    var b = CompletableFuture.supplyAsync(() -> close(id, 1000, 1000, "Conteo al cierre"));
     var credit = a.join();
     var closed = session(b.join());
     int total = credit.getStatusCode().value() == 200 ? 1000 : 0;

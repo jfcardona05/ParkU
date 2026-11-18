@@ -6,7 +6,7 @@
 
 1. El operador elige un punto y registra la base inicial en COP enteros. Si ese punto ya tiene un cierre anterior, la base se toma del efectivo retenido en ese cierre y no se puede cambiar.
 2. Cada nueva recarga requiere una caja abierta del mismo operador, punto y día de Colombia. La recarga queda ligada a la caja en la misma transacción de base de datos que acredita el saldo.
-3. Al cerrar, se cuenta **todo** el efectivo, incluida la base inicial. Se ingresa cuánto se retiene para las devueltas de la siguiente apertura. Esta cantidad no puede superar lo contado.
+3. Al cerrar, se cuenta **todo** el efectivo, incluida la base inicial. Se ingresa cuánto se retiene para las devueltas de la siguiente apertura. Esta cantidad debe ser mayor a cero y no puede superar lo contado.
 4. Si lo contado no coincide con lo esperado, se exige una explicación. Se muestra una confirmación antes de guardar el cierre definitivo.
 5. El comprobante permanece en Reportes. Su descarga es un HTML autocontenido; al abrirlo en Chrome se puede **Imprimir / Guardar PDF**. Es un comprobante interno, no una factura electrónica.
 

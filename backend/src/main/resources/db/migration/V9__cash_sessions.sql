@@ -19,7 +19,7 @@ CREATE TABLE cash_sessions (
  reference UUID NOT NULL UNIQUE,
  UNIQUE(point_name,business_date),
  CHECK ((status='OPEN' AND closed_at IS NULL AND recharge_total IS NULL AND expected_cash IS NULL AND counted_cash IS NULL AND retained_cash IS NULL AND remitted_cash IS NULL AND difference IS NULL AND recharge_count IS NULL)
- OR (status='CLOSED' AND closed_at IS NOT NULL AND recharge_total IS NOT NULL AND recharge_count IS NOT NULL AND expected_cash IS NOT NULL AND counted_cash IS NOT NULL AND retained_cash IS NOT NULL AND remitted_cash IS NOT NULL AND difference IS NOT NULL AND notes IS NOT NULL AND recharge_total >= 0 AND recharge_count >= 0 AND expected_cash=opening_amount+recharge_total AND counted_cash BETWEEN 0 AND 1000000000000 AND retained_cash BETWEEN 0 AND counted_cash AND remitted_cash=counted_cash-retained_cash AND difference=counted_cash-expected_cash AND (difference=0 OR length(trim(notes))>0)))
+ OR (status='CLOSED' AND closed_at IS NOT NULL AND recharge_total IS NOT NULL AND recharge_count IS NOT NULL AND expected_cash IS NOT NULL AND counted_cash IS NOT NULL AND retained_cash IS NOT NULL AND remitted_cash IS NOT NULL AND difference IS NOT NULL AND notes IS NOT NULL AND recharge_total >= 0 AND recharge_count >= 0 AND expected_cash=opening_amount+recharge_total AND counted_cash BETWEEN 0 AND 1000000000000 AND retained_cash BETWEEN 1 AND counted_cash AND remitted_cash=counted_cash-retained_cash AND difference=counted_cash-expected_cash AND (difference=0 OR length(trim(notes))>0)))
 );
 CREATE UNIQUE INDEX cash_open_point ON cash_sessions(point_name) WHERE status='OPEN';
 CREATE UNIQUE INDEX cash_open_operator ON cash_sessions(operator_id) WHERE status='OPEN';
