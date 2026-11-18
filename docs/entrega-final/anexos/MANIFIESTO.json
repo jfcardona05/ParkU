@@ -1,0 +1,262 @@
+[
+  {
+    "archivo": "12_Declaracion_IA.md",
+    "bytes": 1604,
+    "sha256": "24f7af76ea95229cc4d90d310e04b5e07a55d5446e2fcf851169dd8395270a5b"
+  },
+  {
+    "archivo": "A_Retrospectivas/Acta_Sprint_1.md",
+    "bytes": 1543,
+    "sha256": "7e0344cf192603e3bd754ad6c499d37291e123f3b8629a34bcc13ff5fcbb1844"
+  },
+  {
+    "archivo": "A_Retrospectivas/Acta_Sprint_2.md",
+    "bytes": 1537,
+    "sha256": "99884db7256a9ec96cfbd8daad5405b37abef21333316f00a86423f1dc065f41"
+  },
+  {
+    "archivo": "B_Calidad/Reporte_tecnologias.md",
+    "bytes": 1901,
+    "sha256": "c774b72330de5794d15fa91321cfebfe26fc777d6b9fec5f006dda976fd8d323"
+  },
+  {
+    "archivo": "B_Calidad/Semana_10.md",
+    "bytes": 347,
+    "sha256": "7cc480ac811d9af0e48e966a2b3896dae474a5cc3036e555bece9619302183fc"
+  },
+  {
+    "archivo": "B_Calidad/Semana_13.md",
+    "bytes": 347,
+    "sha256": "7aaa50cbb585c34cdb02a4dd1bf021468fdc2aa790f03c415ca1fa16a628fbae"
+  },
+  {
+    "archivo": "B_Calidad/Semana_16.md",
+    "bytes": 347,
+    "sha256": "c91cf2909c090f90f246c7dd38f432958e94da8bb26541906e07e27c382423bd"
+  },
+  {
+    "archivo": "B_Calidad/evidencias/api-integration-134545123534.txt",
+    "bytes": 164,
+    "sha256": "dda8ed7b4effeaef854a95d3cbc1b257b5fec502cf3a0dd4c392165d1096b299"
+  },
+  {
+    "archivo": "B_Calidad/evidencias/backend-134554315151.txt",
+    "bytes": 1163,
+    "sha256": "b7c93484b7049ae92f53a6edaf2391843ca184ee7f40c5c69c8a4fbe7fc3317d"
+  },
+  {
+    "archivo": "B_Calidad/evidencias/flutter-134554314689.txt",
+    "bytes": 266,
+    "sha256": "71c42d7d6b68159e0e55cd8e3cf07d2fc901eeade14266467761216599f0cdd8"
+  },
+  {
+    "archivo": "B_Calidad/evidencias/responsive-134545123264.txt",
+    "bytes": 386,
+    "sha256": "b1c0871e1b5e9d4f9cfa9c24801b956435a8e3a1702408c4dea2c362bd9c53ec"
+  },
+  {
+    "archivo": "B_Calidad/fuentes_consultadas.json",
+    "bytes": 75441,
+    "sha256": "1c679c65e7c63d2e9038525f0e713fecfe598fb2d324748d17f29cc7d721e5b4"
+  },
+  {
+    "archivo": "C_Pruebas/CP_01.md",
+    "bytes": 1054,
+    "sha256": "92e7853a361b06455886d61bc51155833193ae68ac53cb445d9cdcbb784ade5f"
+  },
+  {
+    "archivo": "C_Pruebas/CP_02.md",
+    "bytes": 1087,
+    "sha256": "a349eafdeb7aed6723a4d92d233a1098198ce423b0c0cf2c1c54b5854b38a45a"
+  },
+  {
+    "archivo": "C_Pruebas/CP_03.md",
+    "bytes": 1061,
+    "sha256": "d9d2db90191a2dfda77c79880356f65d32d4a9fede5f89996d57804e887b620c"
+  },
+  {
+    "archivo": "C_Pruebas/CP_04.md",
+    "bytes": 1056,
+    "sha256": "2816881aa8250dabdb860243a9d6f2139d3304446a4240cf132258e839e04537"
+  },
+  {
+    "archivo": "C_Pruebas/CP_05.md",
+    "bytes": 1133,
+    "sha256": "4d4e673ded2a95560338cf552c7b5d887159d893f739da939f1ad305a16bc66a"
+  },
+  {
+    "archivo": "C_Pruebas/CP_06.md",
+    "bytes": 1099,
+    "sha256": "0b727c9376247ed8739b4a0074b2e96493f20c4ba51a12a2bb7ecd5af52bfb86"
+  },
+  {
+    "archivo": "C_Pruebas/CP_07.md",
+    "bytes": 1123,
+    "sha256": "7b54ace82554e9bf01a557c346430f2ce393f3c58031753243cb783660f0dcbe"
+  },
+  {
+    "archivo": "C_Pruebas/CP_08.md",
+    "bytes": 1110,
+    "sha256": "3a626165bc868e4b6311412ea73b34cb0486ab38b3cdd8e420e925f835ff07d4"
+  },
+  {
+    "archivo": "C_Pruebas/CP_09.md",
+    "bytes": 1060,
+    "sha256": "2634a8a8efd198a17264625c726a6878a82f0f99e46fb2b54f4b82a2de9bb676"
+  },
+  {
+    "archivo": "C_Pruebas/CP_10.md",
+    "bytes": 1105,
+    "sha256": "95b09f4635821ece582648d2c1da6aa2d32298396ed413de7c1d8a9246d76d9a"
+  },
+  {
+    "archivo": "C_Pruebas/CP_11.md",
+    "bytes": 1122,
+    "sha256": "ca1971ce888ba4a51fd694fe6911e698fcd3e67ab2c1313a055df983a20ddd46"
+  },
+  {
+    "archivo": "C_Pruebas/CP_12.md",
+    "bytes": 1070,
+    "sha256": "9179c0d30ad6d93ef7c62d53976e68f1d62b80566f6b05edf435e50063b40c22"
+  },
+  {
+    "archivo": "C_Pruebas/CP_13.md",
+    "bytes": 1137,
+    "sha256": "5ee20842b3a762ad51884b482a9d3b71dfe5dbef778e74cf280f1cf915860a40"
+  },
+  {
+    "archivo": "C_Pruebas/CP_14.md",
+    "bytes": 1141,
+    "sha256": "30a5ed84f52f441af2fc12cb1aee8f4be761efcb6085e1567fe05a7bff6b2ef9"
+  },
+  {
+    "archivo": "C_Pruebas/Matriz_14_casos.csv",
+    "bytes": 7082,
+    "sha256": "a812cf153df53d38fe2612bfb39b4daf72372a3c819d07e7f6a83beb2d365bd4"
+  },
+  {
+    "archivo": "C_Pruebas/README.md",
+    "bytes": 404,
+    "sha256": "69fc2f13a79fa8124ec214d99fadfc6c1952edf03f00ed6c7b1c4bc09d6cf699"
+  },
+  {
+    "archivo": "D_Tablero/PR_commits_integraciones.csv",
+    "bytes": 7351,
+    "sha256": "95e5e14588cc1a6a92d0b2c5b5b70190a611d0cdf15d9cd1b88d52375509fc08"
+  },
+  {
+    "archivo": "D_Tablero/README.md",
+    "bytes": 1005,
+    "sha256": "32393c2979399dd8f630bf3dc691236a64a7d3fc585c3c3d31b5bff50a179f73"
+  },
+  {
+    "archivo": "D_Tablero/Sprint_1_fechas_verificadas.csv",
+    "bytes": 422,
+    "sha256": "a477d2f132e21b7bda173f3ae1336ac7d84ce8bd123ec3060119cf277d776730"
+  },
+  {
+    "archivo": "D_Tablero/Sprint_2_fechas_verificadas.csv",
+    "bytes": 1463,
+    "sha256": "d49fbe3a029e641c83ca6efbd5ce0ae3a2a9cf999867c49c07758aa6fa16d20e"
+  },
+  {
+    "archivo": "D_Tablero/issues_creacion_cierre.csv",
+    "bytes": 2623,
+    "sha256": "bfdbd29b2ae7d9f0e5f68ea2b3794b6f6e4aee10ab0eb4b08147a486060b950b"
+  },
+  {
+    "archivo": "D_Tablero/tablero-sin-sesion-404.jpg",
+    "bytes": 64407,
+    "sha256": "1da654ddc275bebc63833be69da724122d4024529ebbdc4a3509d48d55df2445"
+  },
+  {
+    "archivo": "E_Satisfaccion/Formulario.md",
+    "bytes": 1390,
+    "sha256": "ebf857dc47b2b675e390698c2ffb56614e3565e52e394eb9b4e22b11df43be5f"
+  },
+  {
+    "archivo": "E_Satisfaccion/Respuesta_P01_PENDIENTE.md",
+    "bytes": 369,
+    "sha256": "594dc11ae8ae0adb1d64a3b9416bc311401baaf1ffb1d85c94cb79e7d86c89b7"
+  },
+  {
+    "archivo": "E_Satisfaccion/Respuesta_P02_PENDIENTE.md",
+    "bytes": 369,
+    "sha256": "ba7fe743b7ef5cc5283a906e9271eed54e2c1d585decc25fa02ca49eb7e090c5"
+  },
+  {
+    "archivo": "E_Satisfaccion/Respuesta_P03_PENDIENTE.md",
+    "bytes": 369,
+    "sha256": "41082f62579233a3651ee1bcbb249c4b384d128aaae75cb6eb4952d3726c3b06"
+  },
+  {
+    "archivo": "E_Satisfaccion/Respuesta_P04_PENDIENTE.md",
+    "bytes": 369,
+    "sha256": "c0f94a5966de4cdebb6f0063a96196bd34fc91ae3de5e47ef3d2976cd8c05937"
+  },
+  {
+    "archivo": "E_Satisfaccion/Respuestas_recibidas.csv",
+    "bytes": 144,
+    "sha256": "c79dab9d3a66ee46031108d1d200e58a0a1c858e2e9ef44f0b626fb9c5068813"
+  },
+  {
+    "archivo": "Evidencias/pruebas/CashApiTest.java",
+    "bytes": 8238,
+    "sha256": "12fab1a3d46f86e1ea29518da5aa695bfccca56b9cab8d027bfc662fc144c670"
+  },
+  {
+    "archivo": "Evidencias/pruebas/DailyWalletApiTest.java",
+    "bytes": 22068,
+    "sha256": "61fd9d60afac5d92647c576f9f76a151cfb9fa8a58da3826d4628ce37d41bbb4"
+  },
+  {
+    "archivo": "Evidencias/pruebas/RechargeHistoryApiTest.java",
+    "bytes": 6885,
+    "sha256": "041fe04884f4799b532108a92d42b600175c68e2119493f76c2ccd45022f9886"
+  },
+  {
+    "archivo": "Evidencias/pruebas/SprintOneApiTest.java",
+    "bytes": 9055,
+    "sha256": "e4df89c1ac878e7e89ef5601ddbe69a4569832194e3dbe6c36dd72cf18148615"
+  },
+  {
+    "archivo": "Evidencias/pruebas/SprintTwoApiTest.java",
+    "bytes": 21479,
+    "sha256": "6a60cdd4211bb69b4891f452c5898057f3367330cd0c75f5964d7343711ea75c"
+  },
+  {
+    "archivo": "Evidencias/version.json",
+    "bytes": 191,
+    "sha256": "5a714649e81e55b2bbd899f0dd0d0bcfe27dee1c73169081aab38d1d2a5e3e74"
+  },
+  {
+    "archivo": "F_Enlaces/Registro_acceso.md",
+    "bytes": 1729,
+    "sha256": "276794a39ff23ee4e64d90fc5f555d4a3464d7b1768131015a8aa082a5bbd01c"
+  },
+  {
+    "archivo": "F_Enlaces/Story_map.md",
+    "bytes": 1295,
+    "sha256": "ddb21dead796a8ee415c7ab98945df9e10ba18e1d589aed67c862ef126ec6842"
+  },
+  {
+    "archivo": "F_Enlaces/repositorio-sin-sesion.jpg",
+    "bytes": 131456,
+    "sha256": "627674b00971d05e6b391f529aef7bfb0531c837fe0437c9ffbf117a057fc076"
+  },
+  {
+    "archivo": "Informe_Final/ParkU_Informe_Final_APA7.docx",
+    "bytes": 47619,
+    "sha256": "50f54fa879ea88da6b33d0c471ee8796a53341f45a94fca7a2377a015cd0d5a9"
+  },
+  {
+    "archivo": "PENDIENTES_ANTES_DE_RADICAR.md",
+    "bytes": 970,
+    "sha256": "fe3a92d6d7e7cba0e4771cf0bde96ab95c99dd76d52dfa7dd8c003d5aee44efa"
+  },
+  {
+    "archivo": "README.md",
+    "bytes": 2050,
+    "sha256": "2ac129f70d9743f1ebef39f4add3715cf3902a05b5371062f475f48efac2c86f"
+  }
+]
