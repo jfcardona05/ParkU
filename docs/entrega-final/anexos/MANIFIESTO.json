@@ -6,18 +6,33 @@
   },
   {
     "archivo": "A_Retrospectivas/Acta_Sprint_1.md",
-    "bytes": 1543,
-    "sha256": "7e0344cf192603e3bd754ad6c499d37291e123f3b8629a34bcc13ff5fcbb1844"
+    "bytes": 3881,
+    "sha256": "af7376f1818ba87dc1b6d26bebac788b12a0d0a1f7f879d0788bfb7272dc08a1"
   },
   {
     "archivo": "A_Retrospectivas/Acta_Sprint_2.md",
-    "bytes": 1537,
-    "sha256": "99884db7256a9ec96cfbd8daad5405b37abef21333316f00a86423f1dc065f41"
+    "bytes": 8027,
+    "sha256": "b4f5a5408d89d639d2fb2d1130efef967cf9d75da851d674b2c8652317eafa1b"
+  },
+  {
+    "archivo": "B_Calidad/Reporte_Sprint_1.md",
+    "bytes": 920,
+    "sha256": "4cb94eb9f229dbdc2b14ced51ffff4b6fbc5fa0249cb6b3032b8d886bdaa2d59"
+  },
+  {
+    "archivo": "B_Calidad/Reporte_Sprint_2_inicial.md",
+    "bytes": 929,
+    "sha256": "d1c9406b8e2c52ccc443f6978f7a5048430c40f17c717d687e478c570e4e71f5"
+  },
+  {
+    "archivo": "B_Calidad/Reporte_Version_integrada.md",
+    "bytes": 930,
+    "sha256": "17a0bf1da8a3445b17c81032317734b5348eb971b330a31b620010201ea1395c"
   },
   {
     "archivo": "B_Calidad/Reporte_tecnologias.md",
-    "bytes": 1901,
-    "sha256": "c774b72330de5794d15fa91321cfebfe26fc777d6b9fec5f006dda976fd8d323"
+    "bytes": 2209,
+    "sha256": "e729730a15dd9405b1dfc86a2efb520f3166b78322cef09827c4b2dd106fd09d"
   },
   {
     "archivo": "B_Calidad/Semana_10.md",
@@ -48,6 +63,26 @@
     "archivo": "B_Calidad/evidencias/flutter-134554314689.txt",
     "bytes": 266,
     "sha256": "71c42d7d6b68159e0e55cd8e3cf07d2fc901eeade14266467761216599f0cdd8"
+  },
+  {
+    "archivo": "B_Calidad/evidencias/historico_40820227912_backend_123270722000.txt",
+    "bytes": 402,
+    "sha256": "3d6d5a0e62c758f8cc3736a747ab546d037fb87ae2e79af75c72a3184316d2c0"
+  },
+  {
+    "archivo": "B_Calidad/evidencias/historico_40820227912_flutter_123270722421.txt",
+    "bytes": 167,
+    "sha256": "32c4ac165a3722964e1d19539dc8273c1fba0907a1c33565735c819c3c08bb4a"
+  },
+  {
+    "archivo": "B_Calidad/evidencias/historico_42927542050_backend_130217742996.txt",
+    "bytes": 686,
+    "sha256": "5a358298f2c9ed72a65ef3d4c22b417058abb5e2c72af6fb716e7967dbce6250"
+  },
+  {
+    "archivo": "B_Calidad/evidencias/historico_42927542050_flutter_130217742502.txt",
+    "bytes": 167,
+    "sha256": "f2266279a6a591629ebcdcc35ea3b6b7d805a9fc8c2a6d0e48784195fb517c31"
   },
   {
     "archivo": "B_Calidad/evidencias/responsive-134545123264.txt",
@@ -141,18 +176,38 @@
   },
   {
     "archivo": "D_Tablero/PR_commits_integraciones.csv",
-    "bytes": 7351,
-    "sha256": "95e5e14588cc1a6a92d0b2c5b5b70190a611d0cdf15d9cd1b88d52375509fc08"
+    "bytes": 7371,
+    "sha256": "903c6f7b23169259359cb68eea3181718a0e60ce5a194bc43bd424c676270f50"
   },
   {
     "archivo": "D_Tablero/README.md",
-    "bytes": 1005,
-    "sha256": "32393c2979399dd8f630bf3dc691236a64a7d3fc585c3c3d31b5bff50a179f73"
+    "bytes": 1733,
+    "sha256": "c89e97a1df4f52b827cde713147309bd36c7109e1e399c8593d67869b3d164c1"
+  },
+  {
+    "archivo": "D_Tablero/Sprint_1_burndown_reconstruido.csv",
+    "bytes": 428,
+    "sha256": "3e5cdd8db8e4dac4280ccf786d382dc40450ddbeae5f5257d24c69ce10b8ab09"
+  },
+  {
+    "archivo": "D_Tablero/Sprint_1_burndown_reconstruido.png",
+    "bytes": 62949,
+    "sha256": "3d7354c8cda36ebcbd7bc9f35e95435b76e4c229364e6c2f83209e9bab2bbde7"
   },
   {
     "archivo": "D_Tablero/Sprint_1_fechas_verificadas.csv",
     "bytes": 422,
     "sha256": "a477d2f132e21b7bda173f3ae1336ac7d84ce8bd123ec3060119cf277d776730"
+  },
+  {
+    "archivo": "D_Tablero/Sprint_2_burndown_reconstruido.csv",
+    "bytes": 717,
+    "sha256": "e85577022ec3a66b534eaa03995ca8a605a409aae1991dde27f7f31fb60e7946"
+  },
+  {
+    "archivo": "D_Tablero/Sprint_2_burndown_reconstruido.png",
+    "bytes": 67428,
+    "sha256": "65885b57c38e91a70bac56a9f7fd8bde4feb1c061a9aeaee1e108e9df54967c5"
   },
   {
     "archivo": "D_Tablero/Sprint_2_fechas_verificadas.csv",
@@ -171,8 +226,13 @@
   },
   {
     "archivo": "E_Satisfaccion/Formulario.md",
-    "bytes": 1390,
-    "sha256": "ebf857dc47b2b675e390698c2ffb56614e3565e52e394eb9b4e22b11df43be5f"
+    "bytes": 1771,
+    "sha256": "3557f54cc818e5c78c60875212195d79679e284e225cc1721615a5426132203f"
+  },
+  {
+    "archivo": "E_Satisfaccion/Formulario_interactivo.html",
+    "bytes": 5075,
+    "sha256": "a4a8ca185083e8cef57fe2b3713afb97f56cd81734b2803bd66d7875ed741609"
   },
   {
     "archivo": "E_Satisfaccion/Respuesta_P01_PENDIENTE.md",
@@ -200,6 +260,11 @@
     "sha256": "c79dab9d3a66ee46031108d1d200e58a0a1c858e2e9ef44f0b626fb9c5068813"
   },
   {
+    "archivo": "Evidencias/Indice_hallazgos.md",
+    "bytes": 543,
+    "sha256": "21d165dfda9239473da6c3e691180022d0c4c242ea53222c86e8fa709c3d24ed"
+  },
+  {
     "archivo": "Evidencias/pruebas/CashApiTest.java",
     "bytes": 8238,
     "sha256": "12fab1a3d46f86e1ea29518da5aa695bfccca56b9cab8d027bfc662fc144c670"
@@ -223,6 +288,11 @@
     "archivo": "Evidencias/pruebas/SprintTwoApiTest.java",
     "bytes": 21479,
     "sha256": "6a60cdd4211bb69b4891f452c5898057f3367330cd0c75f5964d7343711ea75c"
+  },
+  {
+    "archivo": "Evidencias/revisiones_y_cortes.json",
+    "bytes": 45088,
+    "sha256": "26b04716696057063a2c19a14555a4bbaa9e2c6e9fca4e371667c1e9fbd5c859"
   },
   {
     "archivo": "Evidencias/version.json",
@@ -251,12 +321,12 @@
   },
   {
     "archivo": "PENDIENTES_ANTES_DE_RADICAR.md",
-    "bytes": 970,
-    "sha256": "fe3a92d6d7e7cba0e4771cf0bde96ab95c99dd76d52dfa7dd8c003d5aee44efa"
+    "bytes": 1282,
+    "sha256": "86e1374ddddc21f104867054713a533acb473342d210ecbf3a61210c651b77cd"
   },
   {
     "archivo": "README.md",
-    "bytes": 2050,
-    "sha256": "2ac129f70d9743f1ebef39f4add3715cf3902a05b5371062f475f48efac2c86f"
+    "bytes": 2442,
+    "sha256": "67677c9bf9456b022ca413f2e7545e323b426da54cebd7c0aed87e040baebcb3"
   }
 ]

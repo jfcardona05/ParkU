@@ -1,0 +1,6 @@
+2026-11-10T23:57:56.9404939Z ##[group]Run chmod +x mvnw && ./mvnw -B spotless:check test
+2026-11-10T23:57:56.9405224Z [36;1mchmod +x mvnw && ./mvnw -B spotless:check test[0m
+2026-11-10T23:58:08.3834180Z [INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.202 s -- in com.parku.SprintTwoApiTest
+2026-11-10T23:58:08.3893632Z [INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in com.parku.ParkingPriceTest
+2026-11-10T23:58:10.3398323Z [INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.978 s -- in com.parku.SprintOneApiTest
+2026-11-10T23:58:10.7260235Z [INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0

@@ -1,6 +1,12 @@
-# Burndowns e historial del tablero
-El requisito pide capturas de los burndowns de ambos sprints y del historial del tablero. No se localizaron esas capturas ni una serie diaria de puntos pendientes que permita certificar los burndowns originales.
+# Burndowns reconstruidos y trazabilidad
+Se completaron dos gráficas PNG y sus series CSV a partir de fechas reales de GitHub. No son capturas originales de Insights ni evidencian movimientos de columnas.
 
-Se adjuntan las fechas reales de creación/cierre de issues, y PR y commits integrados, obtenidos de GitHub. Los ficheros de Sprint 1 usan issues 14–16; los de Sprint 2, 17–26. No son exportaciones de movimientos de columnas de Projects. Un issue cerrado no prueba por sí mismo cuándo se movió a cada columna ni cuántos puntos quedaban al final de cada día.
+Sprint 1 usa cuatro tareas técnicas: API identidad/vehículos (PR 11), Flutter identidad/vehículos (PR 8), API recargas (PR 10) y validación/entrega Flutter (PR 13). Cada unidad termina al integrar su PR, el 28/10/2026 Colombia. No son cuatro historias ni 11 puntos; se utiliza esta unidad porque las HU #14–16 se registraron después, el 03/11, y siguen abiertas, por lo que no describen el avance de octubre.
 
-La captura tablero-sin-sesion-404.jpg registra que la URL no fue visible en este navegador sin sesión. No es una captura del burndown ni de la vista del tablero. La carpeta no declara este requisito cumplido. Adjuntar las capturas auténticas desde Insights/historial de cada tablero y registrar fechas y filtros. No se fabrican curvas ideales o reales con estimaciones no documentadas.
+Sprint 2 usa los diez issues iniciales #17–26 y disminuye pendientes con sus fechas reales de cierre. Las ampliaciones Figma/QR diario/caja son posteriores y se documentan aparte en PR_commits_integraciones.csv. No se insertan retrospectivamente en el backlog inicial.
+
+No hay línea ideal porque no se conoce una planificación diaria aprobada. Las series conservan la zona America/Bogota y el origen del evento. La comparación entre curvas solo es válida recordando que sus unidades son distintas.
+
+El historial de issues y PR exportado registra creación/cierre/merge; no es el historial de cambios de estado de Projects. Para cumplir literalmente las capturas del tablero original, se necesitan Insights e historial auténticos. El acceso sin sesión devolvió 404; la captura adjunta registra esa restricción.
+
+En Sprint 1 el eje temporal representa la ventana de publicación/integración de esos cuatro PR, no la duración total del trabajo ni un plan de sprint de 23 minutos. La curva de Sprint 2 representa cierre de issues, que puede concentrarse al final aunque el desarrollo ocurriera antes.

@@ -1,0 +1,4 @@
+2026-10-29T04:53:29.1787387Z ##[group]Run chmod +x mvnw && ./mvnw -B spotless:check test
+2026-10-29T04:53:29.1787796Z [36;1mchmod +x mvnw && ./mvnw -B spotless:check test[0m
+2026-10-29T04:53:55.5230396Z [INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.374 s -- in com.parku.SprintOneApiTest
+2026-10-29T04:53:55.8903495Z [INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0

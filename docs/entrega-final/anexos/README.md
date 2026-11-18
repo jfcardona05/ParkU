@@ -6,14 +6,17 @@ Este paquete acompaña el Word final e incorpora la declaración de uso de IA y 
 | Requisito | Archivo principal | Estado |
 |---|---|---|
 | 12 Declaración IA | 12_Declaracion_IA.md | Redactada para revisión y suscripción de los autores |
-| A Dos retrospectivas firmadas | A_Retrospectivas/ | Dos actas documentales preparadas; firmas y reunión no acreditadas |
-| B Análisis semanas 10 13 16 | B_Calidad/ | Reportes Java/Dart reales; no se conocen fechas académicas para asignar las semanas |
+| A Dos retrospectivas firmadas | A_Retrospectivas/ | Dos retrospectivas documentales completadas con PR, hallazgos y acciones; firmas/reunión no acreditadas |
+| B Análisis semanas 10 13 16 | B_Calidad/ | Tres reportes y logs originales Java/Dart recuperados; falta calendario de semanas |
 | C Catorce casos | C_Pruebas/ | 14 fichas con técnica, datos, esperado, resultado y referencia a prueba automatizada |
-| D Burndowns e historial | D_Tablero/ | Historial de issues/PR exportado y reconstrucciones de cierres; faltan capturas históricas de burndowns |
-| E Formulario y cuatro respuestas | E_Satisfaccion/ | Cuestionario preparado; faltan las cuatro respuestas reales y publicación como encuesta |
+| D Burndowns e historial | D_Tablero/ | Dos gráficas de trabajo pendiente reconstruidas y series CSV; historial issues/PR; no capturas originales de Insights |
+| E Formulario y cuatro respuestas | E_Satisfaccion/ | Cuestionario interactivo descargable y guía; faltan cuatro respuestas reales |
 | F Cuatro enlaces e incógnito | F_Enlaces/ | Repositorio visible sin sesión; tablero devuelve 404; formulario/story map legibles en repo al subir; incógnito día anterior pendiente |
 
 Los archivos PENDIENTE no son evidencia de ejecución o firma. No se atribuyen opiniones a los integrantes ni se inventan personas encuestadas. Las técnicas del anexo C son una clasificación documental de pruebas existentes, no una afirmación sobre cómo se diseñaron originalmente.
 
 ## Orden de lectura
 Leer el Word final, la declaración de IA, los anexos A–F y la lista de pendientes. Los CSV abren en Excel. Los Markdown se leen directamente en GitHub. Las capturas corresponden al navegador sin sesión, no a una ventana de incógnito certificada.
+
+## Ampliación verificada
+Las actas ahora contienen la retrospectiva técnica completa; los reportes históricos incluyen logs originales; D incluye dos gráficas reconstruidas; E permite descargar respuestas auténticas desde el formulario interactivo. Consultar PENDIENTES_ANTES_DE_RADICAR.md para los datos que solo pueden aportar los participantes.

@@ -1,5 +1,5 @@
 ﻿pr,titulo,creado_utc,merge_utc,head_sha,merge_sha,url
-50,"Actualizar entrega Sprint 2 con QR diario, caja y últimas integraciones",2026-11-18T18:53:27Z,,7a40462074937eebbfe130b1929f7fd06f5a7dfa,4224d9d71d7131c95f9fc1cec9755072bfdc3d39,https://github.com/jfcardona05/ParkU/pull/50
+50,"Actualizar entrega Sprint 2 con QR diario, caja y últimas integraciones",2026-11-18T18:53:27Z,2026-11-18T20:06:05Z,e65e49b003c971cef857cfcfdc84ace0dbcb9600,40ea42283fbf7c7f513671e3a1ebc94f71017f68,https://github.com/jfcardona05/ParkU/pull/50
 49,Corregir login desde celulares en el enlace HTTPS público,2026-11-18T03:04:20Z,2026-11-18T03:27:41Z,d68628a900ad130b502cc6c64185abe15a8a1597,2f3c3e5afdbf4f0d64b7406af103a6615f746396,https://github.com/jfcardona05/ParkU/pull/49
 48,"Caja diaria con base de devueltas, comprobantes y vista pública temporal",2026-11-18T02:38:23Z,2026-11-18T02:45:17Z,a5036268afbf6ec9c95a610422b5cf31b7b1cbfa,fa19b9ce8a980dbdd9ec5f68ba41c5f1b1d40098,https://github.com/jfcardona05/ParkU/pull/48
 47,Inicio rápido de ParkU con doble clic en Windows,2026-11-18T01:59:22Z,2026-11-18T02:01:15Z,21da6e5ca6383caa84a8179a8185e66bc7a0aa22,2174153374260cce5dd4cbfca28dc882f964b0dd,https://github.com/jfcardona05/ParkU/pull/47
