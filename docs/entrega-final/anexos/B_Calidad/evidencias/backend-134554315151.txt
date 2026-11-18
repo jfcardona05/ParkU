@@ -1,0 +1,10 @@
+2026-11-18T03:28:06.7811978Z ##[group]Run chmod +x mvnw && ./mvnw -B spotless:check test
+2026-11-18T03:28:06.7812354Z [36;1mchmod +x mvnw && ./mvnw -B spotless:check test[0m
+2026-11-18T03:28:21.8729087Z [INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.173 s -- in com.parku.CashApiTest
+2026-11-18T03:28:22.5909045Z [INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.750 s -- in com.parku.RechargeHistoryApiTest
+2026-11-18T03:28:25.5119159Z [INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.925 s -- in com.parku.SprintOneApiTest
+2026-11-18T03:28:26.2228947Z [INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.702 s -- in com.parku.SprintTwoApiTest
+2026-11-18T03:28:27.3968716Z [INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.162 s -- in com.parku.DailyWalletApiTest
+2026-11-18T03:28:27.3993340Z [INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in com.parku.ParkingPriceTest
+2026-11-18T03:28:27.8420161Z [INFO] Tests run: 58, Failures: 0, Errors: 0, Skipped: 0
+2026-11-18T03:28:27.8442354Z [INFO] BUILD SUCCESS

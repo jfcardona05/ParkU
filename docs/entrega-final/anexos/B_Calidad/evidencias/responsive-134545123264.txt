@@ -1,0 +1,6 @@
+2026-11-18T03:04:54.3029036Z ##[group]Run dart format --output=none --set-exit-if-changed lib test
+2026-11-18T03:04:54.5572085Z ##[group]Run flutter analyze
+2026-11-18T03:05:04.9037345Z No issues found! (ran in 9.4s)
+2026-11-18T03:05:38.0054493Z 00:21 +106 ~2: All tests passed!
+2026-11-18T03:05:53.8496072Z 00:06 +43: All tests passed!
+2026-11-18T03:06:40.9433916Z ✓ Built build/web

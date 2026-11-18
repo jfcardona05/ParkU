@@ -1,0 +1,19 @@
+﻿numero,titulo,estado,creado_utc,cerrado_utc,url
+45,"[Urgente] Historial de recargas de taquilla por día, semana y mes",closed,2026-11-17T05:06:35Z,2026-11-18T01:11:32Z,https://github.com/jfcardona05/ParkU/issues/45
+43,[Urgente] Transferir saldo a otro usuario por correo,closed,2026-11-17T01:07:24Z,2026-11-18T01:11:30Z,https://github.com/jfcardona05/ParkU/issues/43
+42,[Urgente] QR diario por usuario con cobro al generarlo,closed,2026-11-17T01:07:23Z,2026-11-18T01:11:29Z,https://github.com/jfcardona05/ParkU/issues/42
+41,[Urgente] Cupos de parqueadero: mostrar Próximamente,closed,2026-11-17T01:07:22Z,2026-11-18T01:11:27Z,https://github.com/jfcardona05/ParkU/issues/41
+38,[Frontend] Sustituir completamente la interfaz por el prototipo Figma responsive,open,2026-11-16T23:00:26Z,,https://github.com/jfcardona05/ParkU/issues/38
+26,"[S2-09] Cierre, demo y evidencia académica",closed,2026-11-04T02:49:41Z,2026-11-11T02:19:49Z,https://github.com/jfcardona05/ParkU/issues/26
+25,"[S2-08] Integración, UX y pruebas Flutter",closed,2026-11-04T02:49:40Z,2026-11-11T02:15:38Z,https://github.com/jfcardona05/ParkU/issues/25
+24,"[S2-07] Ocupación, historial y pruebas de API",closed,2026-11-04T02:49:39Z,2026-11-11T00:23:39Z,https://github.com/jfcardona05/ParkU/issues/24
+23,"[S2-06] Saldo, cobros e historial en Flutter",closed,2026-11-04T02:49:37Z,2026-11-11T02:15:37Z,https://github.com/jfcardona05/ParkU/issues/23
+22,[S2-05] Escáner y operación de portería,closed,2026-11-04T02:49:36Z,2026-11-11T02:19:51Z,https://github.com/jfcardona05/ParkU/issues/22
+21,[S2-04] Mostrar QR en Flutter,closed,2026-11-04T02:49:35Z,2026-11-11T02:15:35Z,https://github.com/jfcardona05/ParkU/issues/21
+20,[S2-03] Tarifas y cobro atómico,closed,2026-11-04T02:49:34Z,2026-11-11T00:22:02Z,https://github.com/jfcardona05/ParkU/issues/20
+19,[S2-02] Ingreso y salida en portería,closed,2026-11-04T02:49:32Z,2026-11-11T00:20:59Z,https://github.com/jfcardona05/ParkU/issues/19
+18,[S2-01] QR seguro por vehículo,closed,2026-11-04T02:49:30Z,2026-11-11T00:19:46Z,https://github.com/jfcardona05/ParkU/issues/18
+17,[S2-00] Preparación técnica y contrato de API,closed,2026-11-04T02:47:43Z,2026-11-11T02:19:58Z,https://github.com/jfcardona05/ParkU/issues/17
+16,"[S1] HU-02 — Saldo, recargas e historial",open,2026-11-04T02:47:41Z,,https://github.com/jfcardona05/ParkU/issues/16
+15,[S1] HU-06 — Registro y gestión de vehículos,open,2026-11-04T02:47:40Z,,https://github.com/jfcardona05/ParkU/issues/15
+14,[S1] HU-01 — Autenticación e identidad,open,2026-11-04T02:47:38Z,,https://github.com/jfcardona05/ParkU/issues/14
