@@ -46,14 +46,27 @@ class SprintOneApiTest {
   }
 
   private String login(String email) {
-    return (String)
-        request(
-                HttpMethod.POST,
-                "/api/auth/login",
-                Map.of("email", email, "password", "pass123"),
-                null)
-            .getBody()
-            .get("token");
+    String token =
+        (String)
+            request(
+                    HttpMethod.POST,
+                    "/api/auth/login",
+                    Map.of("email", email, "password", "pass123"),
+                    null)
+                .getBody()
+                .get("token");
+    if (email.startsWith("cash")) {
+      assertThat(
+              request(
+                      HttpMethod.POST,
+                      "/api/cash/open",
+                      Map.of("point_name", point, "opening_amount", 0),
+                      token)
+                  .getStatusCode()
+                  .value())
+          .isEqualTo(200);
+    }
+    return token;
   }
 
   @Test

@@ -242,6 +242,10 @@ class SprintTwoApiTest {
     enter(2, "docente");
     db.update("UPDATE users SET balance=1000 WHERE id=2");
     String token = qr(2, "docente");
+    post(
+        "/api/cash/open",
+        Map.of("point_name", CashService.POINTS.getFirst(), "opening_amount", 0),
+        "operador");
     var body = operation(token, "exit", "exit-retry");
     error(post("/api/gate/operations", body, "guard"), 409, "INSUFFICIENT_BALANCE");
     assertThat(db.queryForObject("SELECT count(*) FROM transactions", Integer.class)).isZero();
@@ -297,6 +301,10 @@ class SprintTwoApiTest {
 
   @Test
   void repeatedConcurrentExitAndRechargeAreConsistent() {
+    post(
+        "/api/cash/open",
+        Map.of("point_name", CashService.POINTS.getFirst(), "opening_amount", 0),
+        "operador");
     capacity(10);
     enter(1, "estudiante");
     var body = operation(qr(1, "estudiante"), "exit", "same-exit");
