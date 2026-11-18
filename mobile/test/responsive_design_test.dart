@@ -21,6 +21,7 @@ import 'package:parku_mobile/screens/wallet_screen.dart';
 import 'package:parku_mobile/screens/parking_screen.dart';
 import 'package:parku_mobile/screens/gate_screen.dart';
 import 'package:parku_mobile/screens/taquilla_screen.dart';
+import 'package:parku_mobile/screens/taquilla_reports_screen.dart';
 import 'package:parku_mobile/services/api_service.dart';
 import 'package:parku_mobile/services/gate_service.dart';
 import 'package:parku_mobile/services/vehicle_qr_service.dart';
@@ -217,6 +218,7 @@ void main() {
       'gate',
       'cash',
       'cash-history',
+      'cash-reports',
     ]) {
       testWidgets('responsive $page at ${size.$1}', (tester) async {
         tester.view.physicalSize = Size(size.$1, size.$2);
@@ -251,6 +253,7 @@ void main() {
           'wallet' => WalletScreen(apiService: api),
           'parking' => ParkingScreen(apiService: api),
           'gate' => GateScreen(apiService: api, gateway: ApiGateGateway(api)),
+          'cash-reports' => TaquillaReportsScreen(apiService: api),
           _ => TaquillaScreen(apiService: api),
         };
         final capture = GlobalKey();

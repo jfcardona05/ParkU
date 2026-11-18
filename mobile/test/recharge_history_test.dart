@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +8,8 @@ import 'package:parku_mobile/models/user_model.dart';
 import 'package:parku_mobile/screens/taquilla_screen.dart';
 import 'package:parku_mobile/services/api_service.dart';
 import 'package:parku_mobile/ui/park_theme.dart';
+import 'package:parku_mobile/ui/park_shell.dart';
+import 'package:parku_mobile/screens/taquilla_reports_screen.dart';
 import 'package:parku_mobile/widgets/recharge_history_card.dart';
 
 Map<String, dynamic> report({
@@ -80,6 +83,123 @@ Future<void> tapText(WidgetTester tester, String text) async {
 }
 
 void main() {
+  for (final width in [390.0, 834.0, 1440.0]) {
+    for (final role in ['operador', 'estudiante', 'guard', 'admin']) {
+      testWidgets('navigation for $role at $width preserves role scope', (
+        tester,
+      ) async {
+        tester.view.physicalSize = Size(width, 1000);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final api = apiFor(
+          (_) async => throw StateError('No personal API expected'),
+        );
+        api.setCurrentUser(api.currentUser!.copyWith(role: role));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: parkTheme(),
+            home: ParkShell(
+              api: api,
+              selected: 5,
+              breadcrumb: 'Prueba',
+              child: const Text('Contenido'),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final compact = width >= 768 && width < 1100;
+        Finder navigation(String label) =>
+            compact ? find.byTooltip(label) : find.text(label);
+        expect(
+          navigation('Vehículos'),
+          role == 'operador' ? findsNothing : findsOneWidget,
+        );
+        expect(
+          navigation('Mi saldo'),
+          role == 'operador' ? findsNothing : findsOneWidget,
+        );
+        expect(
+          navigation('Panel de caja'),
+          role == 'operador' ? findsOneWidget : findsNothing,
+        );
+        expect(
+          navigation('Reportes'),
+          role == 'operador' ? findsOneWidget : findsNothing,
+        );
+        expect(
+          navigation('Portería'),
+          ['guard', 'admin'].contains(role) ? findsWidgets : findsNothing,
+        );
+        expect(tester.takeException(), isNull);
+      });
+    }
+    testWidgets(
+      'cash reports at $width use real report totals and preserve filters',
+      (tester) async {
+        tester.view.physicalSize = Size(width, 1000);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final requests = <Uri>[];
+        final api = apiFor((r) async {
+          requests.add(r.url);
+          return response(report());
+        });
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: parkTheme(),
+            home: TaquillaReportsScreen(apiService: api),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(requests.single.path, '/api/admin/recharges');
+        expect(find.text('Promedio por recarga'), findsOneWidget);
+        expect(find.text('\$35.000 COP'), findsOneWidget);
+        await tapText(tester, 'Mes');
+        expect(requests.last.queryParameters['period'], 'month');
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+  testWidgets(
+    'cashier personal navigation redirects to operations without wallet calls',
+    (tester) async {
+      final requests = <String>[];
+      final api = apiFor((r) async {
+        requests.add(r.url.path);
+        if (r.url.path == '/api/admin/users') {
+          return response({'users': []});
+        }
+        if (r.url.path == '/api/admin/recharges') {
+          return response(report(empty: true));
+        }
+        throw StateError('Unexpected API: ${r.url.path}');
+      });
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => ParkShell.open(context, api, 1),
+              child: const Text('Abrir'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Abrir'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TaquillaScreen), findsOneWidget);
+      expect(
+        requests,
+        containsAll(['/api/admin/users', '/api/admin/recharges']),
+      );
+      expect(
+        requests.any((p) => p.contains('/wallet') || p.contains('/vehicles')),
+        isFalse,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets('large monthly totals fit a phone without overflow', (
     tester,
   ) async {

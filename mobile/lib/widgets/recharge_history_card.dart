@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../models/recharge_history.dart';
 import '../services/api_service.dart';
 import '../ui/park_theme.dart';
@@ -91,6 +92,30 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
     _searchController.dispose();
     super.dispose();
   }
+
+  Widget _metric(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) => ParkCard(
+    color: ParkColors.background,
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 24),
+        const SizedBox(height: 12),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 8),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(value, style: Theme.of(context).textTheme.titleLarge),
+        ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) => ParkCard(
@@ -226,6 +251,38 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
                       ),
                     ],
                   ),
+                ),
+                const SizedBox(height: 16),
+                ParkColumns(
+                  breakpoint: 600,
+                  gap: 12,
+                  children: [
+                    _metric(
+                      context,
+                      Icons.receipt_long_outlined,
+                      'Recargas registradas',
+                      '${data.count}',
+                    ),
+                    _metric(
+                      context,
+                      Icons.people_outline,
+                      'Usuarios atendidos',
+                      '${data.userCount}',
+                    ),
+                    _metric(
+                      context,
+                      Icons.analytics_outlined,
+                      'Promedio por recarga',
+                      data.count == 0
+                          ? 'Sin recargas'
+                          : '\$${_money.format(data.totalAmount / data.count)} COP',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Indicadores del período y búsqueda seleccionados, incluyendo todas las páginas. No incluyen transferencias ni cobros de parqueadero.',
+                  style: TextStyle(fontSize: 12, color: ParkColors.muted),
                 ),
                 const SizedBox(height: 16),
                 if (data.recharges.isEmpty)

@@ -124,14 +124,18 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
   Widget build(BuildContext context) => ParkShell(
     api: widget.apiService,
     selected: 5,
-    breadcrumb: 'Taquilla',
+    breadcrumb: 'Panel de caja',
+    refresh: () {
+      setState(() => _historyVersion++);
+      _fetchUsers();
+    },
     busy: _isSubmitting,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const ParkHeading(
-          'Tu recarga, registrada.',
-          'Atención presencial · Taquilla ParkU',
+          'Centro de operaciones',
+          'Gestiona recargas presenciales y consulta la actividad de taquilla.',
         ),
         Align(
           alignment: Alignment.centerLeft,
@@ -147,6 +151,17 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
             },
             icon: const Icon(Icons.receipt_long_outlined),
             label: const Text('Ver historial de recargas'),
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(foregroundColor: ParkColors.ink),
+            onPressed: _isSubmitting
+                ? null
+                : () => ParkShell.open(context, widget.apiService, 6),
+            icon: const Icon(Icons.insights_outlined),
+            label: const Text('Abrir reportes de caja'),
           ),
         ),
         const SizedBox(height: 12),
