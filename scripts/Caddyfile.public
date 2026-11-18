@@ -1,0 +1,26 @@
+{
+    admin off
+    auto_https off
+}
+:8080 {
+    header X-Robots-Tag "noindex, nofollow"
+    header Referrer-Policy "no-referrer"
+    header X-Content-Type-Options "nosniff"
+    redir /{$PARKU_SHARE_KEY} /{$PARKU_SHARE_KEY}/ 302
+    handle_path /{$PARKU_SHARE_KEY}/* {
+        @backend path /api/* /p/*
+        handle @backend {
+            header Cache-Control "no-store"
+            reverse_proxy host.docker.internal:8000
+        }
+        handle {
+            root * /srv
+            try_files {path} /index.html
+            header Cache-Control "no-store"
+            file_server
+        }
+    }
+    handle {
+        respond "ParkU: enlace de acceso requerido." 404
+    }
+}

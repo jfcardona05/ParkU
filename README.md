@@ -28,6 +28,18 @@ flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000
 
 Para el emulador Android: `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000`. El manifiesto de depuración permite HTTP local; para una aplicación distribuida se debe usar HTTPS.
 
+## Caja diaria y compartir la web
+
+Taquilla puede abrir caja, registrar recargas y cerrar dejando una base para devueltas.
+Los históricos y comprobantes definitivos se consultan únicamente en Reportes.
+Las nuevas recargas requieren una apertura del operador en el punto y día correspondientes.
+Consulta los [cálculos, reglas y API de caja](docs/caja-y-vista-publica.md).
+
+En Windows, `iniciar-parku.cmd` arranca el entorno local. `compartir-parku.cmd` prepara
+una vista web con enlace HTTPS temporal para celulares y otros computadores;
+`cerrar-enlace-publico.cmd` termina esa vista sin borrar los datos.
+El enlace se genera en tu PC al ejecutar el archivo y requiere mantenerlo encendido.
+
 ## Cuentas de demostración
 
 | Cuenta | Contraseña | Rol |
