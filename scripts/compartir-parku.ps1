@@ -8,6 +8,30 @@ function Test-Backend {
     catch { return $false }
     finally { $socket.Dispose() }
 }
+function Test-ProxyApi([string] $url) {
+    Add-Type -AssemblyName System.Net.Http
+    $client = New-Object System.Net.Http.HttpClient
+    $client.Timeout = [TimeSpan]::FromSeconds(15)
+    try {
+        # Match a phone's HTTPS Origin while making the local HTTP probe.
+        $client.DefaultRequestHeaders.Add('Origin', 'https://parku-preview.invalid')
+        $content = New-Object System.Net.Http.StringContent('{}', [Text.Encoding]::UTF8, 'application/json')
+        try {
+            $result = $client.PostAsync($url, $content).GetAwaiter().GetResult()
+            try {
+                $body = $result.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+                $payload = $body | ConvertFrom-Json
+                # An empty login must reach Spring validation and return JSON.
+                # No credentials are sent and no login/session is created.
+                if ([int]$result.StatusCode -ne 400 -or $payload.code -ne 'INVALID_REQUEST') {
+                    throw "Respuesta inesperada de la API (HTTP $([int]$result.StatusCode))."
+                }
+            } finally { $result.Dispose() }
+        } finally { $content.Dispose() }
+    } catch {
+        throw "La pagina carga, pero la API no esta accesible desde el servidor publico. Revisa backend y Docker. Detalle: $($_.Exception.Message)"
+    } finally { $client.Dispose() }
+}
 try {
     Get-Command docker, flutter -ErrorAction Stop | Out-Null
     & docker info 2>&1 | Out-Null
@@ -41,6 +65,8 @@ try {
     $gatewayStarted = $true
     $response = Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:8080/$key/"
     if ($response.StatusCode -ne 200) { throw 'No se pudo verificar la pagina local.' }
+    Write-Host 'Verificando conexion de la web publica con la API...'
+    Test-ProxyApi "http://127.0.0.1:8080/$key/api/auth/login"
     Write-Host 'Creando enlace HTTPS temporal. Comparte SOLO el enlace completo que aparezca abajo.'
     Write-Host 'El enlace permite acceder a tu instancia local. Compartelo solo con las personas invitadas.'
     Write-Host 'Las cuentas y permisos de ParkU siguen siendo necesarios. Ctrl+C termina la vista publica.'

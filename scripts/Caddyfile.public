@@ -11,7 +11,13 @@
         @backend path /api/* /p/*
         handle @backend {
             header Cache-Control "no-store"
-            reverse_proxy host.docker.internal:8000
+            # This gateway serves the UI and API on one public origin. Spring
+            # sees the final HTTP hop, so do not forward the browser's HTTPS
+            # Origin as if it were a cross-origin request to the local API.
+            # Bearer Authorization remains intact; no CORS wildcard is added.
+            reverse_proxy host.docker.internal:8000 {
+                header_up -Origin
+            }
         }
         handle {
             root * /srv
