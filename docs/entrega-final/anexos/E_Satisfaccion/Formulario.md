@@ -22,3 +22,6 @@ Registrar fecha, rol probado y tipo de dispositivo. Escala 1 muy insatisfecho, 2
 10. ¿Pudo completar el recorrido? Sí / Parcialmente / No. Explique.
 
 No se calculan promedios, porcentajes ni conclusiones de satisfacción hasta recibir respuestas reales. Publicar el formulario en la plataforma que use el equipo y añadir el enlace público de lectura en el anexo F. Este Markdown permite leer las preguntas, pero no recopila respuestas por sí mismo.
+
+## Formulario utilizable
+Descargar Formulario_interactivo.html y abrirlo en un navegador. Cada participante escribe sus respuestas y descarga un JSON, que comparte voluntariamente con el equipo. No hay respuestas precargadas ni envío automático. El equipo debe recibir cuatro archivos auténticos y anonimizados. El HTML no está alojado como sitio web por guardarlo en GitHub.

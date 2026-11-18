@@ -1,7 +1,12 @@
-# Pendientes de evidencia antes de radicar
-1. Juan y Ronaldo deben realizar o ratificar las dos retrospectivas, completar fecha, intervenciones, acuerdos y suscribir ambas actas. No basta con líneas vacías.
-2. Asignar las semanas 10, 13 y 16 a fechas académicas reales y adjuntar sus reportes de calidad Java/Dart. Los cortes históricos localizados no se renombraron como semanas certificadas.
-3. Adjuntar capturas auténticas de burndown de ambos sprints y movimientos del tablero. Los CSV de issues y PR no sustituyen esas capturas.
-4. Publicar o aportar el formulario utilizado y recibir cuatro respuestas reales anonimizadas. Las cuatro fichas vacías no son respuestas.
-5. Resolver el acceso de lectura al tablero y comprobar los cuatro enlaces en incógnito el día anterior a la radicación, cuya fecha no se conoce.
-6. Los 14 casos sí incluyen técnica y resultado automatizado verificable; si se exige ejecución manual, registrar ese ensayo por separado.
+# Estado actualizado de evidencias
+## Completado con el repositorio
+Dos retrospectivas documentales con resultados, dificultades, lecciones, acciones y trazabilidad; tres reportes originales de calidad Java/Dart (8, 24 y 58 pruebas backend); 14 fichas de prueba; dos burndowns reconstruidos con datos verificables; historial de issues/PR; story map; formulario interactivo y declaración de IA.
+
+## Solo pueden completarse con información externa o acceso autorizado
+1. Suscripción de ambas retrospectivas por Juan y Ronaldo y fecha real de revisión conjunta. No se generan firmas.
+2. Cuatro respuestas reales de quienes utilicen el formulario. No se deducen opiniones de commits ni de aprobaciones de código.
+3. Fechas del calendario académico para asociar reportes con semanas 10, 13 y 16.
+4. Capturas originales de burndown y de movimientos de Projects, si la profesora no admite reconstrucciones. Las gráficas nuevas son reconstrucciones expresas.
+5. Resolver acceso público al tablero y comprobar los cuatro enlaces en incógnito el día anterior a la radicación; se necesita conocer esa fecha.
+
+No se atribuye ninguna de estas verificaciones a una acción no realizada. El paquete es técnicamente más completo, pero conserva los límites de evidencia de cada anexo.
