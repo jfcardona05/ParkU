@@ -1,6 +1,6 @@
 # ParkU
 
-Prototipo del Sprint 1: aplicación Flutter/Dart, API Java 21 con Spring Boot y PostgreSQL 17. Incluye HU-01 (autenticación), HU-06 (vehículos propios) y HU-02 (saldo y recargas presenciales). El Sprint 2 incorpora QR, portería y cobros con conexión Flutter/API.
+Aplicación ParkU: Flutter/Dart, API Java 21 con Spring Boot y PostgreSQL 17. Incluye HU-01 (autenticación), HU-06 (vehículos propios) y HU-02 (saldo y recargas presenciales). El Sprint 2 incorpora QR, portería y cobros con conexión Flutter/API.
 
 ## Ejecutar
 
@@ -49,7 +49,7 @@ El enlace se genera en tu PC al ejecutar el archivo y requiere mantenerlo encend
 | maria.gomez@usantotomas.edu.co | usta2026 | estudiante |
 | taquilla@usantotomas.edu.co | caja123 | operador |
 
-Los saldos iniciales demo son 15000, 8000 y 0 COP. Iniciar sesión como operador abre taquilla: elegir destinatario, punto e importe; solo esa cuenta puede acreditar saldo. El usuario consulta su saldo y referencia en el historial. Las tarifas mostradas son propuestas del prototipo, no valores confirmados por la universidad.
+Los saldos iniciales demo son 15000, 8000 y 0 COP. Iniciar sesión como operador abre taquilla: elegir destinatario, punto e importe; solo esa cuenta puede acreditar saldo. El usuario consulta su saldo y referencia en el historial. Los valores configurados son parte del proyecto; no constituyen una certificación de tarifas oficiales de la universidad.
 
 ## Verificar
 
@@ -81,36 +81,34 @@ Las pruebas de integración Flutter crean una cuenta y una recarga reales en la 
 Repositorio: https://github.com/jfcardona05/ParkU
 Tablero Sprint 2: https://github.com/users/jfcardona05/projects/2
 
-## Revisión y cierre del Sprint 2
+## Sprint 2 y evolución integrada
 
-El backend de los PR #31–35 está integrado. La conexión real de Flutter se entrega
-en el [PR #36](https://github.com/jfcardona05/ParkU/pull/36), pendiente de revisión de
-Ronaldo y merge en el corte documental del 10/11/2026. Para probarla antes de integrar,
-usar su rama `feature/s2-08-live-integration`; el modo real predeterminado corresponde
-a esa rama, no al Flutter anterior de `main`.
+El QR, portería, integración real, rediseño Figma, pase diario, transferencias y reportes
+están integrados. También están integrados el panel de taquilla, apertura/cierre de caja,
+base para devueltas, comprobantes descargables, inicio Windows y enlace HTTPS temporal.
+Los PR #36, #37, #39, #44 y #46–49 ya no deben describirse como pendientes de merge.
 
-- [Compatibilidad de Flutter con el contrato S2-00](docs/s2-00-compatibilidad-flutter.md).
-- [Matriz de pruebas, trazabilidad y revisiones](docs/s2-09-cierre-y-evidencias.md).
-- [Guion de demo, pruebas físicas y borrador de acta](docs/s2-09-demo-y-acta.md).
+- [Informe actualizado de implementación, pruebas y trazabilidad](docs/s2-09-cierre-y-evidencias.md).
+- [Guion y acta de demostración por completar](docs/s2-09-demo-y-acta.md).
+- [Pase diario y transferencias](docs/qr-diario-y-transferencias.md).
+- [Caja, reportes, comprobantes y vista pública temporal](docs/caja-y-vista-publica.md).
+- [Inicio rápido en Windows](docs/inicio-rapido-windows.md).
 
-El PR #36 pasó los checks de backend y Flutter y una prueba local contra API/PostgreSQL
-reales. Cámara física, permisos, APK y aceptación conjunta siguen pendientes.
-S2-00 y S2-09 no se declaran terminadas por publicar estos documentos.
-## Backend del Sprint 2
+Regla actual: al confirmar Generar QR diario se cobra una vez la tarifa del vehículo.
+Hay un pase por usuario y día colombiano, vinculado al vehículo elegido, válido hasta
+medianoche. Consultarlo o repetir la solicitud no vuelve a cobrar; la salida del pase
+diario no aplica otro cobro. Valores iniciales: moto 4.000 COP y automóvil 5.000 COP.
+Las estancias anteriores sin pase diario conservan su regla histórica.
+Solo admin puede versionar tarifas/configuración mediante API; falta una pantalla
+administrativa específica. Los cupos aparecen como Próximamente, sin medición física.
 
-Las API de Sprint 2 se entregan para revisión cruzada; revisar estado de los PR antes de
-considerarlas integradas. Contrato operativo: `docs/s2-00-acuerdos-v0.2.md` en el PR S2-00.
-Guías de conexión: `docs/s2-01-api.md`, `docs/s2-02-api.md`, `docs/s2-03-api.md` y
-`docs/s2-07-api-y-pruebas.md`.
+Las nuevas recargas requieren apertura válida de caja. Panel de caja y Reportes
+separan la operación diaria de los históricos y comprobantes.
+El enlace público es temporal y requiere el computador encendido; no equivale
+a alojamiento permanente. La ficha QR actual muestra nombre, placa y tipo,
+y queda pendiente ampliarla al comprobante completo del pago.
 
-Precios iniciales confirmados por Ronaldo: moto **4000 COP**, automóvil **5000 COP**.
-Supuesto configurable: hora iniciada con mínimo un bloque. Solo el rol `admin` puede
-crear nuevas versiones de tarifa y configurar capacidad; estancias en curso conservan
-la versión de ingreso. La capacidad no tiene valor inventado: debe configurarla admin
-antes de registrar ingresos. Registro público nunca concede admin/guard.
-
-El backend permite administrar tarifas por API; integrar una pantalla de administración
-Flutter corresponde a Juan. Se mantienen autenticación, vehículos, saldo y recargas del
-Sprint 1. La conexión real es el modo predeterminado. Guía de revisión y prueba con PostgreSQL:
-`docs/s2-08-integracion-real.md`. La demostración explícita se conserva con
-`PARKU_QR_DEMO=true`.
+La CI verifica backend, Flutter y compilación web. Cámara física, APK si se exige,
+demostración conjunta y acta requieren evidencia separada.
+Los contratos S2 iniciales y los informes de octubre/10 de noviembre son históricos:
+sus cifras de pruebas, QR de 120 segundos y cobro por horas no describen el nuevo flujo diario.

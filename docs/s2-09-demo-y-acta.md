@@ -1,74 +1,74 @@
-# S2-09 · Guion de demostración y acta por completar
+# Sprint 2 · Guion de demostración y acta de aceptación
 
-Preparación de Juan para revisión conjunta. Este archivo no certifica que la demo
-presencial haya ocurrido. Usar una base de demostración separada, sin datos personales reales.
+Actualizado: 18 de noviembre de 2026, America/Bogota.
+Versión funcional de referencia: 2f3c3e5afdbf4f0d64b7406af103a6615f746396.
+Informe relacionado: [implementación, evidencias y trazabilidad](s2-09-cierre-y-evidencias.md).
+
+Este archivo prepara la demostración del sistema integrado. No certifica una sesión física ni contiene firmas o aceptación inventadas. Sustituye el recorrido antiguo de QR temporal y cobro al salir.
 
 ## Preparación
 
-- Integrar #36 tras revisión y checks; si se ensaya antes, identificar su rama y commit.
-- Ronaldo verifica API, migraciones y conexión PostgreSQL. Preparar estudiante,
-  `guard`/`admin` y `operador` de taquilla; aprovisionar privilegios conforme a
-  `s2-03-api.md`. No publicar contraseñas, sesiones ni tokens QR vigentes.
-- Configurar explícitamente capacidad y comprobar tarifas vía API administrativa.
-  Acordar el valor de la demo; no reutilizar los 2 cupos del test como política oficial.
-- Juan configura `API_BASE_URL` alcanzable desde el celular; `localhost` en el
-  teléfono apunta al propio teléfono. Mantener el modo real y revisar permisos.
-- Confirmar dispositivo, plataforma y si la entrega requiere APK. Para web con
-  cámara, usar contexto seguro admitido por el navegador; no asumir que HTTP por IP funciona.
-- Revisar las decisiones abiertas de `s2-00-compatibilidad-flutter.md`.
+1. Usar una base de demostración separada y cuentas de prueba: usuario, taquilla y portería. Preparar los roles antes de la sesión.
+2. Verificar tarifas vigentes: valores iniciales moto 4.000 y automóvil 5.000 COP. Identificar el commit que realmente se ejecutará.
+3. Abrir ParkU mediante iniciar-parku.cmd o las instrucciones del README. Para invitados externos, usar compartir-parku.cmd y mantener PC y servicios encendidos. El enlace HTTPS es temporal.
+4. Elegir dispositivo, navegador y permisos de cámara. Tener disponible entrada manual como alternativa.
+5. Seleccionar un punto de taquilla disponible y abrir caja. Sin caja válida no se pueden registrar nuevas recargas.
+6. No usar datos personales reales ni publicar contraseñas, tokens o el enlace temporal en las capturas.
 
-## Guion sugerido, 6–8 minutos
+## Recorrido de demostración
 
-| Paso | Quién presenta | Acción | Resultado a mostrar |
-| --- | --- | --- | --- |
-| 1 | Ambos | Explicar estudiante → QR → portería → salida → saldo | Roles y separación Flutter/API |
-| 2 | Juan | Login estudiante; vehículo; saldo inicial y QR real | Placa correcta, vencimiento y regeneración |
-| 3 | Ronaldo | Login guard; escanear QR; mostrar vista previa | Acción determinada por servidor, sin registrar todavía |
-| 4 | Juan | Confirmar ingreso; consultar estado y cupos | Dentro del parqueadero y ocupación actualizada |
-| 5 | Ambos | Solicitar QR nuevo; intentar salida sin saldo suficiente | Mensaje de rechazo; vehículo permanece dentro |
-| 6 | Ronaldo | Taquilla: recargar destinatario en un punto admitido | Recibo de recarga y saldo del servidor |
-| 7 | Juan | Confirmar salida con QR vigente; actualizar saldo/historial | Un débito, tarifa aplicada y saldo posterior |
-| 8 | Ambos | Mostrar estado fuera, cupos e historial; explicar reintentos | Flujo completo y garantías respaldadas por pruebas |
+| Paso | Acción | Resultado esperado |
+|---|---|---|
+| 1 | Explicar propuesta, arquitectura y roles | Distinguir usuario, taquilla, portería y administración |
+| 2 | Mostrar interfaz en PC y celular/tablet | Diseño Figma y navegación responsive |
+| 3 | Usuario registra vehículo y consulta tarifa sin saldo | Consulta gratuita; generación rechazada sin fondos y sin pase |
+| 4 | Taquilla abre caja con base de prueba y acredita 20.000 COP al usuario | Caja y abono registrados; saldo e historial actualizados |
+| 5 | Usuario confirma generar QR diario para automóvil | Se descuenta la tarifa confirmada; con 5.000 COP queda en 15.000 |
+| 6 | Consultar nuevamente el QR del mismo vehículo | Mismo pase y saldo; no hay otro cobro |
+| 7 | Portería escanea o introduce el enlace, valida y confirma ingreso | Vehículo dentro; la lectura no confirma sola |
+| 8 | Confirmar salida con el pase diario vigente | Vehículo fuera y sin segundo cobro |
+| 9 | Abrir ficha desde cámara/navegador de otro teléfono | Nombre, placa y tipo; no afirmar que incluye importe/referencia del pago |
+| 10 | Transferir 3.000 COP a una segunda cuenta registrada | Confirmación, saldo remitente reducido, destinatario aumentado e historial de ambos |
+| 11 | Taquilla consulta Reportes por día, semana y mes y busca al beneficiario | Aparece la recarga y sus totales; no se mezcla transferencia ni débito QR |
+| 12 | Cerrar caja con contado y retención para devueltas | Esperado, diferencia y dinero a entregar correctos; explicación si hay diferencia |
+| 13 | Consultar y descargar comprobante de cierre desde Reportes | HTML imprimible/Guardar PDF; caja cerrada no acepta otro abono |
+| 14 | Mostrar cupos y explicar acceso público | Próximamente; enlace temporal depende del PC encendido |
+| 15 | Mostrar PR y verificaciones y explicar límites | Evidencias técnicas identificadas y pendientes declarados |
 
-Si el QR vence durante la explicación, emitir otro y volver a validar. No presentar
-como realizada una simulación de red física: el reintento sin doble cobro está cubierto
-por pruebas automatizadas y se puede explicar mostrando la evidencia.
+El pase expira a medianoche colombiana, no a las 24 horas de generarlo. Si cambia el día durante la sesión, se necesita un nuevo pase y confirmar su nuevo cobro. La demo de caja usa un punto/día disponible; un punto cerrado no se reabre el mismo día. No manipular el historial para repetirla: preparar el escenario en una base de demostración.
 
 ## Registro de pruebas físicas
 
-| Caso | Criterio de éxito | Resultado / evidencia |
-| --- | --- | --- |
-| Cámara autorizada | Escanea QR real y presenta vista previa sin confirmar sola | PENDIENTE |
-| Cámara denegada | Error legible y alternativa manual usable | PENDIENTE |
-| Entrada manual | Valida código y requiere confirmación explícita | PENDIENTE |
-| Lectura repetida | No registra accesos ni cobra automáticamente | PENDIENTE |
-| QR vencido/regenerado | Rechazo legible; nuevo QR funciona | PENDIENTE |
-| Salida sin fondos y recuperación | Sin débito parcial; recarga y salida correctas | PENDIENTE |
-| Saldo e historial | Mismo cobro, tarifa y saldo que devuelve API | PENDIENTE |
-| APK, si es exigido | Compila, instala y completa flujo en dispositivo identificado | PENDIENTE |
+| Caso | Criterio | Resultado y evidencia |
+|---|---|---|
+| PC/tablet/celular | Navegación y formularios utilizables | PENDIENTE |
+| Cámara autorizada | Lectura real y vista previa sin confirmar sola | PENDIENTE |
+| Cámara denegada | Mensaje y alternativa manual | PENDIENTE |
+| QR diario y saldo | Un cobro tras confirmar; consulta repetida gratuita | PENDIENTE |
+| Ingreso/salida | Registros coherentes y salida diaria sin otro cobro | PENDIENTE |
+| Ficha desde otro celular | Nombre, placa y tipo visibles mediante URL alcanzable | PENDIENTE |
+| Transferencia | Mismos importes en ambos historiales | PENDIENTE |
+| Caja y reportes | Apertura, recarga, cierre, retención y comprobante coherentes | PENDIENTE |
+| Acceso HTTPS externo | Login y operación desde datos móviles | PENDIENTE |
+| APK, si se exige | Compilación, instalación y flujo en Android identificado | PENDIENTE |
 
-Guardar capturas reales con nombres `s2-09-01-qr.png`, `s2-09-02-ingreso.png`,
-`s2-09-03-saldo-insuficiente.png`, `s2-09-04-salida.png` y `s2-09-05-historial.png`
-en `docs/evidencias/` cuando existan. No se adjuntan imágenes ficticias o marcadores
-que parezcan capturas. Ocultar credenciales y códigos vigentes antes de publicar.
+Las pruebas automatizadas ya enlazadas en el informe no rellenan estos resultados físicos. Adjuntar capturas reales en docs/evidencias/ solo cuando existan, ocultando datos sensibles. Registrar incidencias y reintentos observados, sin presentar mocks como operaciones reales.
 
-## Borrador de acta
+## Acta por completar
 
 | Campo | Valor |
-| --- | --- |
-| Proyecto / sprint | ParkU / Sprint 2 |
-| Participantes previstos | Juan Cardona y Ronaldo Mosquera |
-| Fecha y hora de demostración | PENDIENTE |
-| Versión / commit demostrado | PENDIENTE; anotar SHA después de integrar |
-| Dispositivo / sistema / navegador | PENDIENTE |
-| API y base de pruebas identificadas, sin claves | PENDIENTE |
-| Capacidad y tarifas efectivas | PENDIENTE |
-| Casos físicos ejecutados y resultado | PENDIENTE; enlazar tabla y capturas |
+|---|---|
+| Proyecto | ParkU · Sprint 2 y evolución integrada |
+| Participantes previstos | Juan Felipe Cardona y Ronaldo Mosquera |
+| Fecha/hora de demostración | PENDIENTE |
+| Commit realmente demostrado | PENDIENTE |
+| Dispositivo, sistema y navegador | PENDIENTE |
+| Entorno y base de demostración sin claves | PENDIENTE |
+| Tarifas, punto y caja utilizados | PENDIENTE |
+| Resultados y capturas físicas | PENDIENTE |
 | Incidencias y acciones | PENDIENTE |
-| Confirmación de Juan | PENDIENTE, personal y explícita |
-| Confirmación de Ronaldo | PENDIENTE, personal y explícita |
-| Decisión de cierre | PENDIENTE |
+| Confirmación explícita de Juan | PENDIENTE |
+| Confirmación explícita de Ronaldo | PENDIENTE |
+| Decisión de aceptación/cierre | PENDIENTE |
 
-Antes de cerrar #26: incorporar evidencia real, enlazar PR/checks/revisiones,
-resolver incidencias y registrar aceptación. La aprobación del PR documental
-confirma la revisión del documento; no reemplaza esta prueba manual.
+La aprobación de este cambio documental confirma su revisión; no sustituye la demostración ni la aceptación personal del producto.
