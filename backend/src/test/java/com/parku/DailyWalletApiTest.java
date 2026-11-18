@@ -245,6 +245,11 @@ class DailyWalletApiTest {
     assertThat(count("transactions")).isZero();
     call(
         HttpMethod.POST,
+        "/api/cash/open",
+        Map.of("point_name", CashService.POINTS.getFirst(), "opening_amount", 0),
+        "s4");
+    call(
+        HttpMethod.POST,
         "/api/wallet/recharge",
         Map.of("amount", 5001, "point_name", "Punto 1 - Portería Principal USTA", "user_id", 1),
         "s4");

@@ -35,6 +35,10 @@ void main() {
         (await cash.login('taquilla@usantotomas.edu.co', 'caja123'))['success'],
         true,
       );
+      await cash.request('POST', '/api/cash/open', {
+        'point_name': 'Punto 2 - Cafetería Central USTA',
+        'opening_amount': 0,
+      });
       final people = await cash.getUsers();
       final beneficiary = people.singleWhere((u) => u.email == email);
       expect(

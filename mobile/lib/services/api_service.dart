@@ -35,7 +35,11 @@ class ApiService {
   UserModel? _currentUser;
   ApiService({http.Client? client, String? apiBaseUrl})
     : _client = client ?? http.Client(),
-      _baseUrl = apiBaseUrl ?? baseUrl;
+      _baseUrl =
+          apiBaseUrl ??
+          (baseUrl.startsWith('/')
+              ? Uri.base.resolve(baseUrl).toString()
+              : baseUrl);
   String? get token => _token;
   UserModel? get currentUser => _currentUser;
   void setToken(String? token) => _token = token;
@@ -175,7 +179,12 @@ class ApiService {
         base.host.isEmpty) {
       throw const ApiException('La dirección pública de ParkU no es válida.');
     }
-    return base.resolve('/p/${Uri.encodeComponent(token)}').toString();
+    return Uri(
+      scheme: base.scheme,
+      host: base.host,
+      port: base.hasPort ? base.port : null,
+      path: '${base.path.replaceFirst(RegExp(r"/+$"), "")}/p/$token',
+    ).toString();
   }
 
   Future<Map<String, dynamic>> transfer({

@@ -42,9 +42,10 @@ public class VehicleQrService {
     if (value != null && (value.startsWith("https://") || value.startsWith("http://"))) {
       try {
         var uri = java.net.URI.create(value);
-        if (uri.getPath().matches("/p/[A-Za-z0-9_-]{43}")
+        if (uri.getPath().matches("/(?:[a-f0-9]{32}/)?p/[A-Za-z0-9_-]{43}")
             && uri.getRawQuery() == null
-            && uri.getFragment() == null) return uri.getPath().substring(3);
+            && uri.getFragment() == null)
+          return uri.getPath().substring(uri.getPath().lastIndexOf('/') + 1);
       } catch (IllegalArgumentException ignored) {
         // Reject malformed URLs through the same invalid-token response.
       }

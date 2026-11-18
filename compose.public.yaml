@@ -1,0 +1,21 @@
+services:
+  gateway:
+    image: caddy:2-alpine
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      PARKU_SHARE_KEY: ${PARKU_SHARE_KEY:?Use compartir-parku.cmd to generate the access path}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./scripts/Caddyfile.public:/etc/caddy/Caddyfile:ro
+      - ./mobile/build/web:/srv:ro
+    read_only: true
+    tmpfs:
+      - /config
+      - /data
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://gateway:8080
+    depends_on:
+      - gateway

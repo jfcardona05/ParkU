@@ -18,14 +18,20 @@ import org.springframework.web.server.ResponseStatusException;
 public class WalletController {
   private final JdbcTemplate db;
   private final IdentityService identity;
+  private final CashService cash;
 
-  public WalletController(JdbcTemplate db, IdentityService identity) {
+  public WalletController(JdbcTemplate db, IdentityService identity, CashService cash) {
     this.db = db;
     this.identity = identity;
+    this.cash = cash;
   }
 
   public record Recharge(
-      @NotNull @Positive Long amount,
+      @NotNull
+          @Positive
+          @jakarta.validation.constraints.Max(1000000000L)
+          @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WholeCopAmount.class)
+          Long amount,
       @NotBlank @Size(max = 120) String point_name,
       @NotNull @Positive Long user_id) {}
 
@@ -69,6 +75,9 @@ public class WalletController {
     if (!body.point_name().equals("Punto 1 - Portería Principal USTA")
         && !body.point_name().equals("Punto 2 - Cafetería Central USTA"))
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Punto físico inválido");
+    long cashId =
+        cash.lockForRecharge(
+            ((Number) operator.get("id")).longValue(), body.point_name(), body.amount());
     var balances =
         db.queryForList(
             "SELECT balance FROM users WHERE id=? AND role IN ('estudiante','docente') FOR UPDATE",
@@ -86,13 +95,14 @@ public class WalletController {
     db.update("UPDATE users SET balance=? WHERE id=?", after, body.user_id());
     var receipt =
         db.queryForMap(
-            "INSERT INTO transactions(user_id,operator_id,type,amount,point_name,reference,balance_after) VALUES (?,?,'RECARGA_PRESENCIAL',?,?,?,?) RETURNING id,type,amount,point_name,reference,balance_after,created_at",
+            "INSERT INTO transactions(user_id,operator_id,type,amount,point_name,reference,balance_after,cash_session_id) VALUES (?,?,'RECARGA_PRESENCIAL',?,?,?,?,?) RETURNING id,type,amount,point_name,reference,balance_after,created_at",
             body.user_id(),
             operator.get("id"),
             body.amount(),
             body.point_name(),
             UUID.randomUUID(),
-            after);
+            after,
+            cashId);
     return Map.of("success", true, "message", "Recarga registrada", "recharge", receipt);
   }
 }

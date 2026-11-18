@@ -10,6 +10,7 @@ dependencies:
   mobile_scanner: 7.0.1
   flutter:
     sdk: flutter
+  web: ^1.1.1
   http: ^1.2.0
   flutter_svg: ^2.2.0
   qr_flutter: ^4.1.0

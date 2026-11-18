@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'support/cash_fixtures.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,7 +47,15 @@ http.Response response(Object body, [int status = 200]) => http.Response(
   headers: {'content-type': 'application/json; charset=utf-8'},
 );
 ApiService apiFor(Future<http.Response> Function(http.Request) handler) =>
-    ApiService(client: MockClient(handler))
+    ApiService(
+        client: MockClient((r) async {
+          if (r.url.path == '/api/cash/current') return response(cashCurrent());
+          if (r.url.path == '/api/cash/history') {
+            return response({'sessions': [], 'has_more': false});
+          }
+          return handler(r);
+        }),
+      )
       ..setToken('cash-token')
       ..setCurrentUser(
         UserModel(
@@ -189,10 +198,7 @@ void main() {
       await tester.tap(find.text('Abrir'));
       await tester.pumpAndSettle();
       expect(find.byType(TaquillaScreen), findsOneWidget);
-      expect(
-        requests,
-        containsAll(['/api/admin/users', '/api/admin/recharges']),
-      );
+      expect(requests, contains('/api/admin/users'));
       expect(
         requests.any((p) => p.contains('/wallet') || p.contains('/vehicles')),
         isFalse,
@@ -299,7 +305,7 @@ void main() {
     },
   );
   testWidgets(
-    'successful recharge refreshes the history without losing the form',
+    'panel records recharge while history lives exclusively in reports',
     (tester) async {
       var recharged = false;
       var reports = 0;
@@ -343,12 +349,17 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(reports, 1);
-      await tester.enterText(find.byType(TextField).first, '20000');
+      expect(reports, 0);
+      expect(find.text('Historial de recargas'), findsNothing);
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Importe recibido en efectivo (COP)'),
+        '20000',
+      );
       await tapText(tester, 'Registrar abono en taquilla');
       expect(recharged, isTrue);
-      expect(reports, 2);
-      await tapText(tester, 'Ver historial de recargas');
+      expect(reports, 0);
+      await tapText(tester, 'Abrir reportes de caja');
+      expect(reports, 1);
       expect(find.text('\$20.000 COP'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
