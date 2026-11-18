@@ -65,3 +65,15 @@ La web y la API se sirven bajo el mismo enlace: un celular no usa `localhost:800
 Si el puerto 8080 está ocupado por una vista anterior, usa `cerrar-enlace-publico.cmd` antes de repetir. Si cloudflared no muestra un enlace, revisa los logs; los Quick Tunnels requieren salida a Internet y pueden estar bloqueados por la red. Este mecanismo es para demostraciones temporales, no alojamiento permanente. Antes de invitar personas, usa datos y cuentas de prueba que quieras compartir; el enlace da acceso a tu instancia local a quienes lo reciban.
 
 Referencias técnicas: [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/) y [Caddy reverse proxy](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy).
+
+### Diagnóstico de inicio de sesión público
+
+Antes de generar el túnel, el lanzador comprueba que un login vacío enviado por
+el proxy con un `Origin` HTTPS llegue a Spring y devuelva un error de validación
+JSON. Así detecta el caso en que la página abre pero la API falla.
+
+El proxy sirve web y API bajo el mismo origen público. Retira la cabecera `Origin`
+únicamente del salto interno a Spring por HTTP, conservando `Authorization`.
+No se amplían las reglas CORS del backend ni los permisos de ParkU.
+La integración continua comprueba también un login real por el proxy, acceso
+Bearer al saldo y rechazo del rol estudiante en caja, sin activar un túnel público.

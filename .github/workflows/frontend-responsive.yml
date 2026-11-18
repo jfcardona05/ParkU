@@ -131,6 +131,17 @@ jobs:
           UPDATE users SET role='admin' WHERE email='frontend-admin@test.co';
           UPDATE users SET role='operador' WHERE email='taquilla@usantotomas.edu.co';
           SQL
+      - name: Check public proxy with HTTPS browser Origin
+        working-directory: ${{ github.workspace }}
+        env:
+          PARKU_SHARE_KEY: '0123456789abcdef0123456789abcdef'
+          PARKU_TEST_EMAIL: frontend-student@test.co
+          PARKU_TEST_PASSWORD: pass123
+        run: |
+          mkdir -p mobile/build/web
+          trap 'docker compose -p parku-public-ci -f compose.public.yaml down --remove-orphans' EXIT
+          docker compose -p parku-public-ci -f compose.public.yaml up -d --wait gateway
+          python3 scripts/check-public-api.py "http://127.0.0.1:8080/$PARKU_SHARE_KEY"
       - run: flutter pub get
       - name: Live registration vehicles wallet and cash recharge
         run: flutter test test/api_live_test.dart --dart-define=LIVE_API=true --reporter expanded
