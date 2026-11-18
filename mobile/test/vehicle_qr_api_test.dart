@@ -19,7 +19,7 @@ final vehicle = VehicleModel(
 );
 
 void main() {
-  testWidgets('Mis Vehículos opens a QR issued with the current API session', (
+  testWidgets('Mis Vehículos consults the daily QR without charging on open', (
     tester,
   ) async {
     final requests = <http.Request>[];
@@ -42,11 +42,15 @@ void main() {
             200,
           );
         }
-        expect(request.method, 'POST');
+        expect(request.method, 'GET');
         expect(request.url.path, '/api/vehicles/7/qr');
         return jsonResponse(
           jsonEncode({
             'vehicle_id': 7,
+            'daily': true,
+            'issued': true,
+            'amount': 5000,
+            'service_date': '2030-01-01',
             'token': 'server-issued-token',
             'expires_at': DateTime.now()
                 .toUtc()

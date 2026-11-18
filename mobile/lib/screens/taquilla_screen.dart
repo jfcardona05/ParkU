@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
+import '../widgets/recharge_history_card.dart';
 import '../models/user_model.dart';
 import '../ui/park_shell.dart';
 import '../ui/park_widgets.dart';
@@ -26,6 +27,8 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
   bool _isSubmitting = false;
   String? _errorMessage;
   Map<String, dynamic>? _lastReceipt;
+  int _historyVersion = 0;
+  final _historyKey = GlobalKey();
 
   @override
   void initState() {
@@ -105,6 +108,7 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
       if (!mounted) return;
       setState(() {
         _lastReceipt = res['recharge'];
+        _historyVersion++;
         _amountController.clear();
       });
       _fetchUsers(); // Actualizar saldo del usuario
@@ -129,6 +133,23 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
           'Tu recarga, registrada.',
           'Atención presencial · Taquilla ParkU',
         ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () {
+              final target = _historyKey.currentContext;
+              if (target != null) {
+                Scrollable.ensureVisible(
+                  target,
+                  duration: const Duration(milliseconds: 300),
+                );
+              }
+            },
+            icon: const Icon(Icons.receipt_long_outlined),
+            label: const Text('Ver historial de recargas'),
+          ),
+        ),
+        const SizedBox(height: 12),
         if (const bool.fromEnvironment('PARKU_QR_DEMO'))
           TextButton(
             onPressed: () => Navigator.push(
@@ -311,6 +332,12 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
               ],
             ),
           ],
+        ),
+        const SizedBox(height: 24),
+        RechargeHistoryCard(
+          key: _historyKey,
+          api: widget.apiService,
+          refreshVersion: _historyVersion,
         ),
       ],
     ),

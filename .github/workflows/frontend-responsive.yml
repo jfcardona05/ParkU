@@ -32,7 +32,7 @@ jobs:
           python3 - <<'PY'
           from PIL import Image, ImageOps, ImageDraw
           import pathlib, base64, io
-          pages=['login','home','vehicles','qr','wallet','parking','gate','cash','add-vehicle','register']
+          pages=['login','home','vehicles','qr','qr-new','transfer','wallet','parking','gate','cash','cash-history','add-vehicle','register']
           widths=[390,834,1440]
           sheet=Image.new('RGB',(1050,260*len(pages)), '#e8e8e5')
           draw=ImageDraw.Draw(sheet)

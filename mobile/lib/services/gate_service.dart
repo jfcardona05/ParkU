@@ -171,6 +171,12 @@ class ApiGateGateway implements GateGateway {
       }
       final message = data['message'] as String;
       if (action == GateAction.entry) return message;
+      if (data['prepaid'] == true) {
+        if (data['charge'] != null) {
+          throw const FormatException();
+        }
+        return '$message\nPase diario pagado · Sin cobro adicional.';
+      }
       final charge = data['charge'] as Map<String, dynamic>;
       final amount = charge['amount'] as int;
       final balance = charge['balance_after'] as int;

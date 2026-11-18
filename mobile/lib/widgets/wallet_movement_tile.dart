@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../ui/park_glyph.dart';
+
 import 'package:intl/intl.dart';
+
 import '../models/transaction_model.dart';
 import '../ui/park_theme.dart';
 
@@ -10,11 +13,15 @@ class WalletMovementTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final recharge = movement.type == TransactionModel.inPersonRechargeType;
+    final transferSent = movement.type == TransactionModel.transferSentType;
+    final transferReceived =
+        movement.type == TransactionModel.transferReceivedType;
     final debit =
+        transferSent ||
         movement.type == TransactionModel.parkingChargeType ||
         movement.amount < 0;
     final format = NumberFormat.decimalPattern('es_CO');
-    final sign = debit ? '−' : (recharge ? '+' : '');
+    final sign = debit ? '−' : (recharge || transferReceived ? '+' : '');
     final color = debit ? ParkColors.ink : ParkColors.green;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -27,7 +34,9 @@ class WalletMovementTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: recharge ? ParkColors.greenLight : ParkColors.background,
+              color: recharge || transferReceived
+                  ? ParkColors.greenLight
+                  : ParkColors.background,
               borderRadius: BorderRadius.circular(12),
             ),
             child: ParkGlyph(
@@ -44,12 +53,21 @@ class WalletMovementTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  debit
+                  transferSent
+                      ? 'Transferencia enviada'
+                      : transferReceived
+                      ? 'Transferencia recibida'
+                      : debit
                       ? 'Cobro de estacionamiento'
                       : (recharge ? 'Recarga presencial' : 'Movimiento'),
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 5),
+                if (movement.counterpartEmail != null)
+                  Text(
+                    '${transferSent ? 'Para' : 'De'}: ${movement.counterpartEmail}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 if (movement.createdAt.isNotEmpty)
                   Text(
                     movement.createdAt,

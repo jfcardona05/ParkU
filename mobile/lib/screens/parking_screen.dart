@@ -15,7 +15,6 @@ class ParkingScreen extends StatefulWidget {
 
 class _ParkingScreenState extends State<ParkingScreen> {
   late final ParkingService _service;
-  late Future<Map<String, dynamic>> _occupancy;
   late Future<List<Map<String, dynamic>>> _rates;
   late Future<List<ParkedVehicle>> _vehicles;
   late Future<ParkingHistoryPage> _history;
@@ -34,7 +33,6 @@ class _ParkingScreenState extends State<ParkingScreen> {
 
   void _startLoad() {
     _generation++;
-    _occupancy = _service.getOccupancy();
     _rates = _service.getRates();
     _vehicles = _service.getVehicles();
     _history = _service.getHistory();
@@ -43,7 +41,6 @@ class _ParkingScreenState extends State<ParkingScreen> {
     _loadingMore = false;
     _pageError = null;
     // Each section displays its own error, even when another section is loading.
-    _occupancy.ignore();
     _rates.ignore();
     _vehicles.ignore();
     _history.ignore();
@@ -52,7 +49,6 @@ class _ParkingScreenState extends State<ParkingScreen> {
   Future<void> _refresh() async {
     setState(_startLoad);
     await Future.wait([
-      _occupancy.then<void>((_) {}, onError: (_) {}),
       _rates.then<void>((_) {}, onError: (_) {}),
       _vehicles.then<void>((_) {}, onError: (_) {}),
       _history.then<void>((_) {}, onError: (_) {}),
@@ -141,29 +137,11 @@ class _ParkingScreenState extends State<ParkingScreen> {
       children: [
         const ParkHeading(
           'Así está el parqueadero',
-          'Ocupación, tarifas y tus accesos.',
+          'Tarifas, tu pase diario y tus accesos.',
         ),
         ParkColumns(
           children: [
-            _section(
-              'Cupos disponibles',
-              _occupancy,
-              (data) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${data['available']} de ${data['capacity']}',
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  const SizedBox(height: 34),
-                  Text(
-                    '${data['occupied']} ocupados · datos del servidor',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-              yellow: true,
-            ),
+            const ParkAvailabilitySoon(yellow: true),
             _section(
               'Tarifas vigentes',
               _rates,
@@ -184,18 +162,16 @@ class _ParkingScreenState extends State<ParkingScreen> {
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 6),
+                          Text('${rate['amount']} COP / pase diario'),
                           Text(
-                            '${rate['amount']} COP / ${rate['block_seconds'] == 3600 ? 'hora iniciada' : '${rate['block_seconds']} s iniciados'}',
-                          ),
-                          Text(
-                            'Mínimo ${rate['minimum_blocks']} bloque(s).',
+                            'Un único cobro al generar tu QR del día.',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
                       ),
                     ),
                   Text(
-                    'Se aplica la tarifa vigente al ingresar.',
+                    'Se cobra al generar el QR. Consultarlo nuevamente no cobra otra vez.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

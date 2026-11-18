@@ -11,6 +11,7 @@ import 'package:http/testing.dart';
 import 'package:parku_mobile/models/user_model.dart';
 import 'package:parku_mobile/models/vehicle_model.dart';
 import 'package:parku_mobile/screens/login_screen.dart';
+import 'package:parku_mobile/screens/transfer_screen.dart';
 import 'package:parku_mobile/screens/register_screen.dart';
 import 'package:parku_mobile/screens/dashboard_screen.dart';
 import 'package:parku_mobile/screens/vehicles_screen.dart';
@@ -45,12 +46,6 @@ ApiService fixture({String role = 'estudiante'}) {
           'parking_state': 'OUTSIDE',
           'visit_id': null,
           'entered_at': null,
-        },
-        '/api/parking/occupancy' => {
-          'success': true,
-          'available': 38,
-          'capacity': 80,
-          'occupied': 42,
         },
         '/api/parking/rates' => {
           'rates': [
@@ -107,6 +102,37 @@ ApiService fixture({String role = 'estudiante'}) {
             },
           ],
         },
+        '/api/admin/recharges' => {
+          'from': request.url.queryParameters['date'] ?? '2026-11-16',
+          'through': request.url.queryParameters['date'] ?? '2026-11-16',
+          'summary': {'total_amount': 70000, 'count': 2, 'user_count': 2},
+          'page': 0,
+          'has_more': false,
+          'recharges': [
+            {
+              'id': 11,
+              'amount': 50000,
+              'user_name': 'Ronaldo Mosquera',
+              'user_email': 'preview@example.test',
+              'operator_name': 'Taquilla principal',
+              'point_name': 'Punto 1 - Portería Principal USTA',
+              'reference': '11111111-1111-4111-8111-111111111111',
+              'created_at':
+                  '${request.url.queryParameters['date'] ?? '2026-11-16'}T17:00:00Z',
+            },
+            {
+              'id': 10,
+              'amount': 20000,
+              'user_name': 'Juan Cardona',
+              'user_email': 'juan@example.test',
+              'operator_name': 'Taquilla principal',
+              'point_name': 'Punto 2 - Cafetería Central USTA',
+              'reference': '22222222-2222-4222-8222-222222222222',
+              'created_at':
+                  '${request.url.queryParameters['date'] ?? '2026-11-16'}T15:00:00Z',
+            },
+          ],
+        },
         '/api/admin/users' => {
           'users': [
             {
@@ -142,14 +168,25 @@ ApiService fixture({String role = 'estudiante'}) {
   return api;
 }
 
-class PreviewQr implements VehicleQrSource {
+class PreviewQr extends DailyVehicleQrSource {
+  final bool issued;
+  PreviewQr({this.issued = true});
   @override
   bool get isDemo => false;
+  @override
+  Future<DailyQrQuote> lookup(VehicleModel vehicle) async => DailyQrQuote(
+    amount: 5000,
+    serviceDate: '2030-01-01',
+    qr: issued ? await issue(vehicle) : null,
+  );
   @override
   Future<VehicleQr> issue(VehicleModel vehicle) async => VehicleQr(
     vehicleId: vehicle.id,
     token: 'VISUAL-TEST-ONLY-NOT-AN-ACCESS-TOKEN',
-    expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 2)),
+    daily: true,
+    amount: 5000,
+    scanUrl: 'https://preview.example.test/p/VISUAL-TEST-ONLY',
+    expiresAt: DateTime.now().toUtc().add(const Duration(hours: 3)),
   );
 }
 
@@ -173,10 +210,13 @@ void main() {
       'vehicles',
       'add-vehicle',
       'qr',
+      'qr-new',
+      'transfer',
       'wallet',
       'parking',
       'gate',
       'cash',
+      'cash-history',
     ]) {
       testWidgets('responsive $page at ${size.$1}', (tester) async {
         tester.view.physicalSize = Size(size.$1, size.$2);
@@ -184,7 +224,7 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
         final api = fixture(
-          role: page == 'cash'
+          role: page.startsWith('cash')
               ? 'operador'
               : page == 'gate'
               ? 'guard'
@@ -200,6 +240,12 @@ void main() {
           'qr' => VehicleQrScreen(
             vehicle: vehicle,
             source: PreviewQr(),
+            apiService: api,
+          ),
+          'transfer' => TransferScreen(apiService: api),
+          'qr-new' => VehicleQrScreen(
+            vehicle: vehicle,
+            source: PreviewQr(issued: false),
             apiService: api,
           ),
           'wallet' => WalletScreen(apiService: api),
@@ -221,6 +267,10 @@ void main() {
           );
         });
         await tester.pumpAndSettle();
+        if (page == 'cash-history') {
+          await tester.tap(find.text('Ver historial de recargas'));
+          await tester.pumpAndSettle();
+        }
         expect(
           tester.takeException(),
           isNull,
@@ -269,7 +319,7 @@ void main() {
     await tester.tap(find.text('Parqueadero'));
     await tester.pumpAndSettle();
     expect(find.text('Así está el parqueadero'), findsOneWidget);
-    expect(find.text('38 de 80'), findsOneWidget);
+    expect(find.text('Próximamente'), findsOneWidget);
     await tester.tap(find.text('Vehículos'));
     await tester.pumpAndSettle();
     expect(find.text('Tus vehículos'), findsOneWidget);

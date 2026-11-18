@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/user_model.dart';
+import '../models/recharge_history.dart';
 import '../models/vehicle_model.dart';
 import '../models/transaction_model.dart';
 
@@ -15,7 +16,15 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
+class WalletTransferDraft {
+  final String email;
+  final int amount;
+  final String requestId;
+  const WalletTransferDraft(this.email, this.amount, this.requestId);
+}
+
 class ApiService {
+  WalletTransferDraft? pendingTransfer;
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://localhost:8000',
@@ -99,6 +108,7 @@ class ApiService {
     } finally {
       _token = null;
       _currentUser = null;
+      pendingTransfer = null;
     }
   }
 
@@ -155,6 +165,51 @@ class ApiService {
     return (data['transactions'] as List)
         .map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  String qrScanUrl(String token) {
+    const configured = String.fromEnvironment('QR_PUBLIC_BASE_URL');
+    final base = Uri.tryParse(configured.isEmpty ? _baseUrl : configured);
+    if (base == null ||
+        !['http', 'https'].contains(base.scheme) ||
+        base.host.isEmpty) {
+      throw const ApiException('La dirección pública de ParkU no es válida.');
+    }
+    return base.resolve('/p/${Uri.encodeComponent(token)}').toString();
+  }
+
+  Future<Map<String, dynamic>> transfer({
+    required String recipientEmail,
+    required int amount,
+    required String requestId,
+  }) async {
+    final data = await _request('POST', '/api/wallet/transfers', {
+      'recipient_email': recipientEmail.trim().toLowerCase(),
+      'amount': amount,
+      'request_id': requestId,
+    });
+    final balance = data['balance_after'];
+    if (balance is int) _currentUser = _currentUser?.copyWith(balance: balance);
+    return data;
+  }
+
+  Future<RechargeHistoryPage> getRechargeHistory({
+    required String period,
+    required String date,
+    String search = '',
+    int page = 0,
+  }) async {
+    final query = Uri(
+      queryParameters: {
+        'period': period,
+        'date': date,
+        'search': search,
+        'page': '$page',
+      },
+    ).query;
+    return RechargeHistoryPage.fromJson(
+      await _request('GET', '/api/admin/recharges?$query'),
+    );
   }
 
   Future<List<UserModel>> getUsers() async {

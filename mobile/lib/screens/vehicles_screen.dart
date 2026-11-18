@@ -218,7 +218,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
               (
                 Icons.qr_code_2_outlined,
                 '02 · Genera tu QR',
-                'El código es temporal y de un solo uso.',
+                'Tu pase diario se paga al generarlo.',
               ),
               (
                 Icons.sensor_door_outlined,

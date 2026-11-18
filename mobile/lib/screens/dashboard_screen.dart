@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
-import '../services/parking_service.dart';
 import '../services/vehicle_qr_service.dart';
 import '../models/vehicle_model.dart';
 import '../models/transaction_model.dart';
@@ -22,7 +22,6 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late Future<(int, List<VehicleModel>, List<TransactionModel>)> _data;
-  late Future<Map<String, dynamic>> _occupancy;
   @override
   void initState() {
     super.initState();
@@ -31,9 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _startLoad() {
     _data = _load();
-    _occupancy = ParkingService(widget.apiService).getOccupancy();
     _data.ignore();
-    _occupancy.ignore();
   }
 
   Future<(int, List<VehicleModel>, List<TransactionModel>)> _load() async {
@@ -50,18 +47,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (_) {}
   }
 
-  void _qr(VehicleModel vehicle) => Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => VehicleQrScreen(
-        vehicle: vehicle,
-        apiService: widget.apiService,
-        source: const bool.fromEnvironment('PARKU_QR_DEMO')
-            ? DemoVehicleQrSource()
-            : ApiVehicleQrSource(widget.apiService),
+  Future<void> _qr(VehicleModel vehicle) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VehicleQrScreen(
+          vehicle: vehicle,
+          apiService: widget.apiService,
+          source: const bool.fromEnvironment('PARKU_QR_DEMO')
+              ? DemoVehicleQrSource()
+              : ApiVehicleQrSource(widget.apiService),
+        ),
       ),
-    ),
-  );
+    );
+    if (mounted) await _refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     final name =
@@ -96,44 +97,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 breakpoint: 480,
                 children: [
                   BalanceCard(balance: balance),
-                  ParkCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const ParkIcon(Icons.local_parking_outlined),
-                        const SizedBox(height: 16),
-                        const ParkBadge('Cupos disponibles', success: true),
-                        const SizedBox(height: 24),
-                        FutureBuilder(
-                          future: _occupancy,
-                          builder: (context, spaces) {
-                            if (spaces.connectionState !=
-                                ConnectionState.done) {
-                              return const Text('Consultando…');
-                            }
-                            if (spaces.hasError) {
-                              return const Text('Cupos no disponibles.');
-                            }
-                            final data = spaces.requireData;
-                            return Text(
-                              '${data['available']} / ${data['capacity']}',
-                              style: Theme.of(context).textTheme.headlineMedium,
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 28),
-                        Text(
-                          'Cupos libres · información del servidor',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        TextButton(
-                          onPressed: () =>
-                              ParkShell.open(context, widget.apiService, 3),
-                          child: const Text('Consultar parqueadero →'),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const ParkAvailabilitySoon(),
                 ],
               );
               final hero = ParkCard(

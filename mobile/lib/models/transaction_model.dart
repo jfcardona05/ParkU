@@ -3,6 +3,8 @@ class TransactionModel {
 
   // Category used by Flutter adapters for a confirmed parking debit.
   static const parkingChargeType = 'COBRO_ESTACIONAMIENTO';
+  static const transferSentType = 'TRANSFERENCIA_ENVIADA';
+  static const transferReceivedType = 'TRANSFERENCIA_RECIBIDA';
 
   final int id;
   final String type;
@@ -11,6 +13,7 @@ class TransactionModel {
   final String reference;
   final int balanceAfter;
   final String createdAt;
+  final String? counterpartEmail;
 
   // Display value supplied by the parking adapter once its contract is agreed.
   final String? parkingRateLabel;
@@ -24,6 +27,7 @@ class TransactionModel {
     required this.balanceAfter,
     required this.createdAt,
     this.parkingRateLabel,
+    this.counterpartEmail,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +41,7 @@ class TransactionModel {
       balanceAfter: json['balance_after'] as int? ?? 0,
       createdAt: json['created_at'] as String? ?? '',
       parkingRateLabel: json['parking_rate_label'] as String?,
+      counterpartEmail: json['counterpart_email'] as String?,
     );
   }
 
@@ -49,6 +54,7 @@ class TransactionModel {
       'reference': reference,
       'balance_after': balanceAfter,
       'created_at': createdAt,
+      if (counterpartEmail != null) 'counterpart_email': counterpartEmail,
       if (parkingRateLabel != null) 'parking_rate_label': parkingRateLabel,
     };
   }
