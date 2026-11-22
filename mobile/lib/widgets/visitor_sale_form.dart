@@ -51,8 +51,9 @@ class _VisitorSaleFormState extends State<VisitorSaleForm> {
 
   Future<void> _sell() async {
     if (_busy ||
-        (!_pending && (!widget.enabled || !_form.currentState!.validate())))
+        (!_pending && (!widget.enabled || !_form.currentState!.validate()))) {
       return;
+    }
     setState(() {
       _busy = true;
       _error = null;
@@ -106,14 +107,16 @@ class _VisitorSaleFormState extends State<VisitorSaleForm> {
         widget.onSold();
       }
     } catch (e) {
-      if (e is ApiException && e.statusCode != null && e.statusCode! < 500)
+      if (e is ApiException && e.statusCode != null && e.statusCode! < 500) {
         widget.api.pendingVisitorSale = null;
-      if (mounted)
+      }
+      if (mounted) {
         setState(
           () => _error = _pending
               ? 'No llegó confirmación. Reintenta para recuperar el mismo pase sin cobrar dos veces.'
               : e.toString(),
         );
+      }
     } finally {
       if (mounted) {
         setState(() => _busy = false);

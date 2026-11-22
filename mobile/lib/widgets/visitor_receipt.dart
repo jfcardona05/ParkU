@@ -38,7 +38,6 @@ class _VisitorReceiptState extends State<VisitorReceipt> {
           dataModuleShape: QrDataModuleShape.square,
           color: Colors.black,
         ),
-        emptyColor: Colors.white,
         gapless: true,
       ).toImageData(800, format: ui.ImageByteFormat.png);
       if (bytes == null) throw const ApiException('No se pudo preparar el QR.');
@@ -51,11 +50,12 @@ class _VisitorReceiptState extends State<VisitorReceipt> {
         html,
         'ParkU-pase-${row['plate']}-${row['service_date']}.html',
       );
-      if (!ok)
+      if (!ok) {
         throw const ApiException(
           'La impresión está disponible en la versión web.',
         );
-      if (mounted)
+      }
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -63,6 +63,7 @@ class _VisitorReceiptState extends State<VisitorReceipt> {
             ),
           ),
         );
+      }
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } finally {

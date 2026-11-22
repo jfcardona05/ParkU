@@ -217,16 +217,18 @@ class _TransferScreenState extends State<TransferScreen> {
                         ),
                         validator: (value) {
                           final document = value?.trim() ?? '';
-                          if (!RegExp(r'^[0-9]{5,15}$').hasMatch(document))
+                          if (!RegExp(r'^[0-9]{5,15}$').hasMatch(document)) {
                             return 'Escribe entre 5 y 15 dígitos.';
+                          }
                           if (document ==
                                   widget
                                       .apiService
                                       .currentUser
                                       ?.documentNumber &&
                               _documentType ==
-                                  widget.apiService.currentUser?.documentType)
+                                  widget.apiService.currentUser?.documentType) {
                             return 'Elige el documento de otro usuario.';
+                          }
                           return null;
                         },
                       ),

@@ -367,10 +367,11 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
                                   ),
                                 );
                               } catch (e) {
-                                if (context.mounted)
+                                if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text(e.toString())),
                                   );
+                                }
                               }
                             },
                           ),

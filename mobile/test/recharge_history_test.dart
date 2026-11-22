@@ -351,6 +351,15 @@ void main() {
       await tester.pumpAndSettle();
       expect(reports, 0);
       expect(find.text('Historial de ingresos'), findsNothing);
+      final search = find.widgetWithText(
+        TextField,
+        'Buscar usuario por nombre, documento o correo',
+      );
+      await tester.ensureVisible(search);
+      await tester.enterText(search, 'Juan');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      await tapText(tester, 'Juan');
       await tester.enterText(
         find.widgetWithText(TextField, 'Importe recibido en efectivo (COP)'),
         '20000',
