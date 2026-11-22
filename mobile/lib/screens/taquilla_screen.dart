@@ -287,24 +287,28 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                           shrinkWrap: true,
                           children: [
                             for (final user in _users)
-                              ListTile(
-                                selected: _selectedUserId == user.id,
-                                selectedTileColor: ParkColors.yellow.withValues(
-                                  alpha: .25,
+                              Material(
+                                color: Colors.transparent,
+                                child: ListTile(
+                                  selected: _selectedUserId == user.id,
+                                  selectedTileColor: ParkColors.yellow
+                                      .withValues(alpha: .25),
+                                  title: Text(user.name),
+                                  subtitle: Text(
+                                    '${user.email}${user.documentNumber == null ? '' : ' · ${user.documentType} ${user.documentNumber}'}',
+                                  ),
+                                  trailing: _selectedUserId == user.id
+                                      ? const Icon(Icons.check_circle_outline)
+                                      : null,
+                                  onTap:
+                                      _isSubmitting ||
+                                          _cashBusy ||
+                                          !_canRecharge
+                                      ? null
+                                      : () => setState(
+                                          () => _selectedUserId = user.id,
+                                        ),
                                 ),
-                                title: Text(user.name),
-                                subtitle: Text(
-                                  '${user.email}${user.documentNumber == null ? '' : ' · ${user.documentType} ${user.documentNumber}'}',
-                                ),
-                                trailing: _selectedUserId == user.id
-                                    ? const Icon(Icons.check_circle_outline)
-                                    : null,
-                                onTap:
-                                    _isSubmitting || _cashBusy || !_canRecharge
-                                    ? null
-                                    : () => setState(
-                                        () => _selectedUserId = user.id,
-                                      ),
                               ),
                           ],
                         ),

@@ -174,6 +174,7 @@ class _VisitorSaleFormState extends State<VisitorSaleForm> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: _type,
                 decoration: const InputDecoration(
                   labelText: 'Tipo de vehículo',

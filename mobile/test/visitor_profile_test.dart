@@ -96,8 +96,11 @@ void main() {
       final password = find.widgetWithText(TextFormField, 'Contraseña actual');
       await tester.ensureVisible(password);
       await tester.enterText(password, 'pass123');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
       final save = find.text('Guardar cambios');
       await tester.ensureVisible(save);
+      await tester.pumpAndSettle();
       await tester.tap(save);
       await tester.pumpAndSettle();
       expect(posts, 1);

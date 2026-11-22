@@ -117,6 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: _documentType,
                     decoration: const InputDecoration(
                       labelText: 'Tipo de documento',
@@ -124,11 +125,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     items: const [
                       DropdownMenuItem(
                         value: 'CC',
-                        child: Text('Cédula de ciudadanía'),
+                        child: Text(
+                          'Cédula de ciudadanía',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       DropdownMenuItem(
                         value: 'TI',
-                        child: Text('Tarjeta de identidad'),
+                        child: Text(
+                          'Tarjeta de identidad',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                     onChanged: _busy

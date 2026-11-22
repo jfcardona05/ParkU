@@ -187,6 +187,7 @@ class _TransferScreenState extends State<TransferScreen> {
                       ),
                     ] else ...[
                       DropdownButtonFormField<String>(
+                        isExpanded: true,
                         initialValue: _documentType,
                         decoration: const InputDecoration(
                           labelText: 'Tipo de documento',
@@ -194,11 +195,19 @@ class _TransferScreenState extends State<TransferScreen> {
                         items: const [
                           DropdownMenuItem(
                             value: 'CC',
-                            child: Text('Cédula de ciudadanía'),
+                            child: Text(
+                              'Cédula de ciudadanía',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'TI',
-                            child: Text('Tarjeta de identidad'),
+                            child: Text(
+                              'Tarjeta de identidad',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                         onChanged: _busy || _pending

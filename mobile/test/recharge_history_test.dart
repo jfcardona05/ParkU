@@ -198,6 +198,15 @@ void main() {
       await tester.tap(find.text('Abrir'));
       await tester.pumpAndSettle();
       expect(find.byType(TaquillaScreen), findsOneWidget);
+      expect(requests, isNot(contains('/api/admin/users')));
+      final search = find.widgetWithText(
+        TextField,
+        'Buscar usuario por nombre, documento o correo',
+      );
+      await tester.ensureVisible(search);
+      await tester.enterText(search, 'Juan');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
       expect(requests, contains('/api/admin/users'));
       expect(
         requests.any((p) => p.contains('/wallet') || p.contains('/vehicles')),
@@ -359,7 +368,10 @@ void main() {
       await tester.enterText(search, 'Juan');
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pumpAndSettle();
-      await tapText(tester, 'Juan');
+      final recipient = find.widgetWithText(ListTile, 'Juan');
+      await tester.ensureVisible(recipient);
+      await tester.tap(recipient);
+      await tester.pumpAndSettle();
       await tester.enterText(
         find.widgetWithText(TextField, 'Importe recibido en efectivo (COP)'),
         '20000',

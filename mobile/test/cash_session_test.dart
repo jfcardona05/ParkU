@@ -154,7 +154,10 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pumpAndSettle();
-      await tap(tester, 'Juan');
+      final recipient = find.widgetWithText(ListTile, 'Juan');
+      await tester.ensureVisible(recipient);
+      await tester.tap(recipient);
+      await tester.pumpAndSettle();
       await tester.enterText(
         input('Importe recibido en efectivo (COP)'),
         '20000',
