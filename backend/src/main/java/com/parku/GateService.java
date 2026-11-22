@@ -16,13 +16,19 @@ public class GateService {
   private final IdentityService identity;
   private final VehicleQrService qr;
   private final ObjectMapper json;
+  private final VisitorPassService visitors;
 
   public GateService(
-      JdbcTemplate db, IdentityService identity, VehicleQrService qr, ObjectMapper json) {
+      JdbcTemplate db,
+      IdentityService identity,
+      VehicleQrService qr,
+      ObjectMapper json,
+      VisitorPassService visitors) {
     this.db = db;
     this.identity = identity;
     this.qr = qr;
     this.json = json;
+    this.visitors = visitors;
   }
 
   @Transactional
@@ -51,6 +57,14 @@ public class GateService {
         throw new IllegalStateException(e);
       }
     }
+    if (visitors.find(token) != null)
+      return visitors.confirm(operator.get("id"), token, action, requestId);
+    if (!db.queryForList(
+            "SELECT id FROM visitor_gate_operations WHERE operator_id=? AND request_id=?",
+            operator.get("id"),
+            requestId)
+        .isEmpty())
+      throw new ApiProblem(409, "IDEMPOTENCY_CONFLICT", "Clave utilizada con otra solicitud");
     var found =
         db.queryForList(
             "SELECT vehicle_id,user_id FROM vehicle_qr WHERE token_hash=?",
@@ -71,7 +85,12 @@ public class GateService {
     Map<String, Object> visit;
     Map<String, Object> charge = null;
     if ("entry".equals(action)) {
-      if (!active.isEmpty())
+      if (!active.isEmpty()
+          || !db.queryForList(
+                  "SELECT id FROM visitor_passes WHERE plate=? AND entered_at IS NOT NULL AND"
+                      + " exited_at IS NULL",
+                  valid.get("plate"))
+              .isEmpty())
         throw new ApiProblem(409, "ALREADY_INSIDE", "El vehículo ya tiene ingreso activo");
       if (dailyPassId == null && settings.get("capacity") == null)
         throw new ApiProblem(
@@ -90,7 +109,9 @@ public class GateService {
         throw new ApiProblem(503, "PARKING_NOT_CONFIGURED", "Tarifa no configurada");
       visit =
           db.queryForMap(
-              "INSERT INTO parking_visits(vehicle_id,user_id,plate,vehicle_type,entered_at,rate_id,daily_pass_id) VALUES(?,?,?,?,?,?,?) RETURNING *",
+              "INSERT INTO"
+                  + " parking_visits(vehicle_id,user_id,plate,vehicle_type,entered_at,rate_id,daily_pass_id)"
+                  + " VALUES(?,?,?,?,?,?,?) RETURNING *",
               vehicleId,
               valid.get("user_id"),
               vehicle.get("plate"),
@@ -109,7 +130,9 @@ public class GateService {
       db.update("UPDATE vehicle_qr SET consumed=true WHERE id=?", valid.get("id"));
     long operationId =
         db.queryForObject(
-            "INSERT INTO parking_operations(operator_id,request_id,fingerprint,visit_id,action,occurred_at,receipt) VALUES(?,?,?,?,?,?,'{}') RETURNING id",
+            "INSERT INTO"
+                + " parking_operations(operator_id,request_id,fingerprint,visit_id,action,occurred_at,receipt)"
+                + " VALUES(?,?,?,?,?,?,'{}') RETURNING id",
             Long.class,
             operator.get("id"),
             requestId,
@@ -173,7 +196,9 @@ public class GateService {
             + rate.get("minimum_blocks");
     long movement =
         db.queryForObject(
-            "INSERT INTO transactions(user_id,operator_id,type,amount,point_name,reference,balance_after,visit_id,parking_rate_label) VALUES(?,?,'COBRO_ESTACIONAMIENTO',?,'Portería',?,?,?,?) RETURNING id",
+            "INSERT INTO"
+                + " transactions(user_id,operator_id,type,amount,point_name,reference,balance_after,visit_id,parking_rate_label)"
+                + " VALUES(?,?,'COBRO_ESTACIONAMIENTO',?,'Portería',?,?,?,?) RETURNING id",
             Long.class,
             visit.get("user_id"),
             operator.get("id"),

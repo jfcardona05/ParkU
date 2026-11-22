@@ -56,26 +56,30 @@ public class RechargeHistoryController {
         };
     String term = search.trim().toLowerCase(Locale.ROOT);
     String filter =
-        " FROM transactions t JOIN users u ON u.id=t.user_id LEFT JOIN users o ON o.id=t.operator_id WHERE t.type='RECARGA_PRESENCIAL' AND t.created_at>=? AND t.created_at<? AND (?='' OR strpos(lower(u.name),?)>0 OR strpos(lower(u.email),?)>0)";
+        " FROM cash_income t LEFT JOIN users o ON o.id=t.operator_id WHERE t.created_at>=? AND"
+            + " t.created_at<? AND (?='' OR strpos(lower(t.user_name||' '||t.user_email||'"
+            + " '||t.document||' '||t.plate),?)>0)";
     Object[] args = {
       from.atStartOfDay(COLOMBIA).toOffsetDateTime(),
       until.atStartOfDay(COLOMBIA).toOffsetDateTime(),
-      term,
       term,
       term
     };
     var summary =
         db.queryForMap(
-            "SELECT COUNT(*) AS count,COALESCE(SUM(t.amount),0) AS total_amount,COUNT(DISTINCT t.user_id) AS user_count"
+            "SELECT COUNT(*) AS count,COALESCE(SUM(t.amount),0) AS total_amount,COUNT(DISTINCT"
+                + " t.recipient_key) AS user_count"
                 + filter,
             args);
     var rowsArgs = new ArrayList<Object>(Arrays.asList(args));
     rowsArgs.add(page * 50L);
     var rows =
         db.queryForList(
-            "SELECT t.id,t.amount,t.created_at,t.point_name,t.reference,u.id AS user_id,u.name AS user_name,u.email AS user_email,COALESCE(o.name,'Operador no disponible') AS operator_name"
+            "SELECT"
+                + " t.id,t.amount,t.created_at,t.point_name,t.reference,t.user_id,t.user_name,t.user_email,t.income_type,t.document,t.plate,t.visitor_pass_id,COALESCE(o.name,'Operador"
+                + " no disponible') AS operator_name"
                 + filter
-                + " ORDER BY t.created_at DESC,t.id DESC LIMIT 50 OFFSET ?",
+                + " ORDER BY t.created_at DESC,t.income_type,t.id DESC LIMIT 50 OFFSET ?",
             rowsArgs.toArray());
     long count = ((Number) summary.get("count")).longValue();
     return Map.of(

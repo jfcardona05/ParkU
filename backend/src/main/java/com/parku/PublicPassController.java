@@ -30,7 +30,19 @@ public class PublicPassController {
               + safe(pass.get("owner_name"))
               + "</dd><dt>Tipo de vehículo</dt><dd>"
               + type
-              + "</dd></dl><p class='muted'>Consultar esta ficha no registra un ingreso o una salida. Portería debe confirmar la operación.</p>";
+              + "</dd>"
+              + (pass.containsKey("visitor_name")
+                  ? "<dt>Concepto</dt><dd>Pase diario visitante · Pagado</dd><dt>Valor"
+                      + " recibido</dt><dd>"
+                      + safe(pass.get("amount"))
+                      + " COP</dd><dt>Válido el día</dt><dd>"
+                      + safe(pass.get("service_date"))
+                      + " · Colombia</dd><dt>Referencia</dt><dd>"
+                      + safe(pass.get("reference"))
+                      + "</dd>"
+                  : "")
+              + "</dl><p class='muted'>Consultar esta ficha no registra un ingreso o una salida."
+              + " Portería debe confirmar la operación.</p>";
     } catch (ApiProblem ex) {
       status = ex.status;
       content = "<h1>Pase no disponible</h1><p>" + safe(ex.getMessage()) + "</p>";
@@ -60,7 +72,8 @@ public class PublicPassController {
         .header("X-Content-Type-Options", "nosniff")
         .header(
             "Content-Security-Policy",
-            "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'")
+            "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri"
+                + " 'none'")
         .contentType(new MediaType("text", "html", java.nio.charset.StandardCharsets.UTF_8))
         .body(html);
   }

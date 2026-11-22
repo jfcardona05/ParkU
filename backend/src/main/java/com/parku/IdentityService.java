@@ -28,14 +28,18 @@ public class IdentityService {
   }
 
   @Transactional
-  public Map<String, Object> register(String name, String email, String password) {
+  public Map<String, Object> register(
+      String name, String email, String password, String documentType, String documentNumber) {
     long id =
         db.queryForObject(
-            "INSERT INTO users(name,email,password_hash,role) VALUES (?,?,?,'estudiante') RETURNING id",
+            "INSERT INTO users(name,email,password_hash,role,document_type,document_number) VALUES"
+                + " (?,?,?,'estudiante',?,?) RETURNING id",
             Long.class,
             name.trim(),
             email.trim().toLowerCase(Locale.ROOT),
-            passwords.encode(password));
+            passwords.encode(password),
+            documentType,
+            documentNumber);
     return session(id);
   }
 
@@ -68,7 +72,9 @@ public class IdentityService {
     if (authorization == null || !authorization.startsWith("Bearer ")) throw unauthorized();
     List<Map<String, Object>> rows =
         db.queryForList(
-            "SELECT u.id,u.name,u.email,u.role,u.balance FROM users u JOIN sessions s ON s.user_id=u.id WHERE s.token_hash=? AND s.expires_at>CURRENT_TIMESTAMP",
+            "SELECT u.id,u.name,u.email,u.role,u.balance,u.document_type,u.document_number FROM"
+                + " users u JOIN sessions s ON s.user_id=u.id WHERE s.token_hash=? AND"
+                + " s.expires_at>CURRENT_TIMESTAMP",
             digest(authorization.substring(7)));
     if (rows.isEmpty()) throw unauthorized();
     return rows.getFirst();
@@ -90,10 +96,48 @@ public class IdentityService {
   }
 
   public Map<String, Object> user(long id) {
-    var rows = db.queryForList("SELECT id,name,email,role,balance FROM users WHERE id=?", id);
+    var rows =
+        db.queryForList(
+            "SELECT id,name,email,role,balance,document_type,document_number FROM users WHERE id=?",
+            id);
     if (rows.isEmpty())
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
     return rows.getFirst();
+  }
+
+  @Transactional
+  public Map<String, Object> updateProfile(String auth, IdentityController.Profile body) {
+    var current = requireRole(auth, "estudiante", "docente", "guard", "admin");
+    var locked = db.queryForMap("SELECT * FROM users WHERE id=? FOR UPDATE", current.get("id"));
+    if (!passwords.matches(body.current_password(), (String) locked.get("password_hash")))
+      throw new ApiProblem(403, "WRONG_PASSWORD", "La contraseña actual no es correcta.");
+    if (body.name().trim().isEmpty())
+      throw new ApiProblem(400, "INVALID_NAME", "Escribe tu nombre.");
+    String email = body.email().trim().toLowerCase(Locale.ROOT);
+    boolean credentialsChanged = !email.equals(locked.get("email")) || body.new_password() != null;
+    db.update(
+        "UPDATE users SET name=?,email=?,document_type=?,document_number=?,password_hash=? WHERE"
+            + " id=?",
+        body.name().trim(),
+        email,
+        body.document_type(),
+        body.document_number(),
+        body.new_password() == null
+            ? locked.get("password_hash")
+            : passwords.encode(body.new_password()),
+        current.get("id"));
+    if (credentialsChanged)
+      db.update(
+          "DELETE FROM sessions WHERE user_id=? AND token_hash<>?",
+          current.get("id"),
+          digest(auth.substring(7)));
+    return Map.of(
+        "success",
+        true,
+        "user",
+        user(((Number) current.get("id")).longValue()),
+        "message",
+        "Datos actualizados");
   }
 
   public void logout(String authorization) {

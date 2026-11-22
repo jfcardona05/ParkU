@@ -1,7 +1,6 @@
 package com.parku;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,22 +19,26 @@ public class WalletTransferController {
   }
 
   public record Transfer(
-      @NotBlank @Email @Size(max = 200) String recipient_email,
+      @NotBlank @jakarta.validation.constraints.Pattern(regexp = "CC|TI")
+          String recipient_document_type,
+      @NotBlank @jakarta.validation.constraints.Pattern(regexp = "[0-9]{5,15}")
+          String recipient_document_number,
       @NotNull
           @Positive
           @Max(1000000000)
           @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WholeCopAmount.class)
           Long amount,
-      @NotBlank @Size(max = 100) String request_id) {
-    public Transfer {
-      if (recipient_email != null) recipient_email = recipient_email.trim();
-    }
-  }
+      @NotBlank @Size(max = 100) String request_id) {}
 
   @PostMapping("/transfers")
   public Map<String, Object> transfer(
       @RequestHeader(value = "Authorization", required = false) String auth,
       @Valid @RequestBody Transfer body) {
-    return service.transfer(auth, body.recipient_email(), body.amount(), body.request_id());
+    return service.transfer(
+        auth,
+        body.recipient_document_type(),
+        body.recipient_document_number(),
+        body.amount(),
+        body.request_id());
   }
 }

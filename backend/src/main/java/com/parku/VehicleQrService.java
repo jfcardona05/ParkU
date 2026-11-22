@@ -15,13 +15,19 @@ public class VehicleQrService {
   private final IdentityService identity;
   private final DailyPassService daily;
   private final Clock clock;
+  private final VisitorPassService visitors;
 
   public VehicleQrService(
-      JdbcTemplate db, IdentityService identity, DailyPassService daily, Clock clock) {
+      JdbcTemplate db,
+      IdentityService identity,
+      DailyPassService daily,
+      Clock clock,
+      VisitorPassService visitors) {
     this.db = db;
     this.identity = identity;
     this.daily = daily;
     this.clock = clock;
+    this.visitors = visitors;
   }
 
   public static String digest(String token) {
@@ -57,9 +63,16 @@ public class VehicleQrService {
   // Caller must lock the vehicle before calling this method during confirmation.
   public Map<String, Object> inspectToken(String token) {
     token = tokenValue(token);
+    var visitor = visitors.find(token);
+    if (visitor != null) {
+      visitors.valid(visitor);
+      return visitor;
+    }
     var rows =
         db.queryForList(
-            "SELECT q.*,v.plate,v.type AS vehicle_type,u.name AS owner_name FROM vehicle_qr q JOIN vehicles v ON v.id=q.vehicle_id AND v.user_id=q.user_id JOIN users u ON u.id=q.user_id WHERE q.token_hash=?",
+            "SELECT q.*,v.plate,v.type AS vehicle_type,u.name AS owner_name FROM vehicle_qr q JOIN"
+                + " vehicles v ON v.id=q.vehicle_id AND v.user_id=q.user_id JOIN users u ON"
+                + " u.id=q.user_id WHERE q.token_hash=?",
             digest(token));
     if (rows.isEmpty()) throw new ApiProblem(422, "QR_INVALID", "QR inválido");
     var qr = rows.getFirst();
@@ -76,6 +89,8 @@ public class VehicleQrService {
   @Transactional(readOnly = true)
   public Map<String, Object> inspect(String auth, String token) {
     identity.requireRole(auth, "guard", "admin");
+    var visitor = visitors.find(token);
+    if (visitor != null) return visitors.preview(visitor);
     var qr = inspectToken(token);
     boolean inside =
         !db.queryForList(

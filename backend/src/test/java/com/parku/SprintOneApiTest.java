@@ -190,7 +190,18 @@ class SprintOneApiTest {
             HttpMethod.POST,
             "/api/auth/register",
             Map.of(
-                "name", "Fake", "email", "fake@test.co", "password", "pass123", "role", "operador"),
+                "name",
+                "Fake",
+                "email",
+                "fake@test.co",
+                "password",
+                "pass123",
+                "role",
+                "operador",
+                "document_type",
+                "CC",
+                "document_number",
+                "900001"),
             null);
     assertThat(registration.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     assertThat(((Map) registration.getBody().get("user")).get("role")).isEqualTo("estudiante");

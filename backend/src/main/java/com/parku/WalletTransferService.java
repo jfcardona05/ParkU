@@ -1,6 +1,5 @@
 package com.parku;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,37 +29,38 @@ public class WalletTransferService {
   }
 
   private Map<String, Object> receipt(Map<String, Object> row, boolean replayed) {
-    return Map.of(
-        "success",
-        true,
-        "transfer_id",
-        row.get("id"),
-        "amount",
-        row.get("amount"),
-        "recipient_email",
-        row.get("recipient_email"),
-        "balance_after",
-        row.get("sender_balance_after"),
-        "created_at",
-        ((java.sql.Timestamp) row.get("created_at")).toInstant(),
-        "replayed",
-        replayed,
-        "message",
-        "Transferencia realizada");
+    var result = new java.util.LinkedHashMap<String, Object>();
+    result.put("success", true);
+    result.put("transfer_id", row.get("id"));
+    result.put("amount", row.get("amount"));
+    result.put("recipient_email", row.get("recipient_email"));
+    result.put("recipient_document_type", row.get("recipient_document_type"));
+    result.put("recipient_document_number", row.get("recipient_document_number"));
+    result.put("balance_after", row.get("sender_balance_after"));
+    result.put("created_at", ((java.sql.Timestamp) row.get("created_at")).toInstant());
+    result.put("replayed", replayed);
+    result.put("message", "Transferencia realizada");
+    return result;
   }
 
   @Transactional
-  public Map<String, Object> transfer(String auth, String email, long amount, String requestId) {
+  public Map<String, Object> transfer(
+      String auth, String documentType, String documentNumber, long amount, String requestId) {
     var sender = identity.current(auth);
     long senderId = ((Number) sender.get("id")).longValue();
-    String normalized = email.trim().toLowerCase(Locale.ROOT);
+    String normalized = documentType + ":" + documentNumber;
     String fingerprint = VehicleQrService.digest(normalized + ":" + amount);
     var prior = old(senderId, requestId, fingerprint);
     if (prior != null) return prior;
-    var recipients = db.queryForList("SELECT id,email FROM users WHERE email=?", normalized);
+    var recipients =
+        db.queryForList(
+            "SELECT id,email,document_type,document_number FROM users WHERE document_type=? AND"
+                + " document_number=?",
+            documentType,
+            documentNumber);
     if (recipients.isEmpty())
       throw new ApiProblem(
-          404, "RECIPIENT_NOT_FOUND", "No hay un usuario registrado con ese correo.");
+          404, "RECIPIENT_NOT_FOUND", "No hay un usuario registrado con ese documento.");
     long recipientId = ((Number) recipients.getFirst().get("id")).longValue();
     if (senderId == recipientId)
       throw new ApiProblem(
@@ -68,7 +68,8 @@ public class WalletTransferService {
     // Always acquire both wallets in ascending ID order to prevent opposite-transfer deadlocks.
     var wallets =
         db.queryForList(
-            "SELECT id,balance FROM users WHERE id IN (?,?) ORDER BY id FOR UPDATE",
+            "SELECT id,balance,document_type,document_number FROM users WHERE id IN (?,?) ORDER BY"
+                + " id FOR UPDATE",
             senderId,
             recipientId);
     prior = old(senderId, requestId, fingerprint);
@@ -77,7 +78,15 @@ public class WalletTransferService {
     for (var row : wallets) {
       if (((Number) row.get("id")).longValue() == senderId)
         from = ((Number) row.get("balance")).longValue();
-      else to = ((Number) row.get("balance")).longValue();
+      else {
+        if (!documentType.equals(row.get("document_type"))
+            || !documentNumber.equals(row.get("document_number")))
+          throw new ApiProblem(
+              409,
+              "RECIPIENT_CHANGED",
+              "Cambió el documento del destinatario. Confírmalo e intenta otra vez.");
+        to = ((Number) row.get("balance")).longValue();
+      }
     }
     if (wallets.size() != 2)
       throw new ApiProblem(404, "RECIPIENT_NOT_FOUND", "Usuario no disponible.");
@@ -94,9 +103,10 @@ public class WalletTransferService {
     long senderAfter = from - amount;
     db.update("UPDATE users SET balance=? WHERE id=?", senderAfter, senderId);
     db.update("UPDATE users SET balance=? WHERE id=?", recipientAfter, recipientId);
+    String recipientEmail = (String) recipients.getFirst().get("email");
     UUID transferId = UUID.randomUUID();
     long debit =
-        movement(senderId, senderId, "TRANSFERENCIA_ENVIADA", amount, senderAfter, normalized);
+        movement(senderId, senderId, "TRANSFERENCIA_ENVIADA", amount, senderAfter, recipientEmail);
     long credit =
         movement(
             recipientId,
@@ -107,24 +117,30 @@ public class WalletTransferService {
             (String) sender.get("email"));
     var saved =
         db.queryForMap(
-            "INSERT INTO wallet_transfers(id,sender_id,recipient_id,request_id,fingerprint,recipient_email,amount,sender_balance_after,debit_id,credit_id) VALUES(?,?,?,?,?,?,?,?,?,?) RETURNING *",
+            "INSERT INTO"
+                + " wallet_transfers(id,sender_id,recipient_id,request_id,fingerprint,recipient_email,amount,sender_balance_after,debit_id,credit_id,recipient_document_type,recipient_document_number)"
+                + " VALUES(?,?,?,?,?,?,?,?,?,?,?,?) RETURNING *",
             transferId,
             senderId,
             recipientId,
             requestId,
             fingerprint,
-            normalized,
+            recipientEmail,
             amount,
             senderAfter,
             debit,
-            credit);
+            credit,
+            documentType,
+            documentNumber);
     return receipt(saved, false);
   }
 
   private long movement(
       long owner, long sender, String type, long amount, long balance, String counterpart) {
     return db.queryForObject(
-        "INSERT INTO transactions(user_id,operator_id,type,amount,point_name,reference,balance_after,counterpart_email) VALUES(?,?,?,?,'Billetera ParkU',?,?,?) RETURNING id",
+        "INSERT INTO"
+            + " transactions(user_id,operator_id,type,amount,point_name,reference,balance_after,counterpart_email)"
+            + " VALUES(?,?,?,?,'Billetera ParkU',?,?,?) RETURNING id",
         Long.class,
         owner,
         sender,
