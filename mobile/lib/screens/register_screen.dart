@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../services/api_service.dart';
 import '../ui/park_shell.dart';
 import '../ui/park_widgets.dart';
@@ -15,10 +16,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _document = TextEditingController();
+  String _documentType = 'CC';
   bool _busy = false;
   String? _error;
   @override
   void dispose() {
+    _document.dispose();
     _name.dispose();
     _email.dispose();
     _password.dispose();
@@ -29,10 +33,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (_busy) return;
     if (_name.text.trim().isEmpty ||
         _email.text.trim().isEmpty ||
-        _password.text.length < 6) {
+        _password.text.length < 6 ||
+        !RegExp(r'^[0-9]{5,15}$').hasMatch(_document.text.trim())) {
       setState(
         () => _error =
-            'Completa tus datos y usa una contraseña de al menos 6 caracteres.',
+            'Completa tus datos, documento de 5 a 15 dígitos y usa una contraseña de al menos 6 caracteres.',
       );
       return;
     }
@@ -45,6 +50,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'name': _name.text.trim(),
         'email': _email.text.trim(),
         'password': _password.text,
+        'document_type': _documentType,
+        'document_number': _document.text.trim(),
       });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -106,6 +113,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     autofillHints: const [AutofillHints.email],
                     decoration: const InputDecoration(
                       labelText: 'Correo electrónico',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    initialValue: _documentType,
+                    decoration: const InputDecoration(
+                      labelText: 'Tipo de documento',
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'CC',
+                        child: Text('Cédula de ciudadanía'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'TI',
+                        child: Text('Tarjeta de identidad'),
+                      ),
+                    ],
+                    onChanged: _busy
+                        ? null
+                        : (v) => setState(() => _documentType = v!),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _document,
+                    enabled: !_busy,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Número de documento',
+                      hintText: 'Sin puntos ni espacios',
                     ),
                   ),
                   const SizedBox(height: 16),

@@ -20,7 +20,7 @@ class TaquillaReportsScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const ParkHeading(
-          'Cada recarga, bajo control.',
+          'Cada ingreso, bajo control.',
           'Consulta el recaudo registrado por día, semana o mes y busca comprobantes por usuario.',
         ),
         const ParkCard(

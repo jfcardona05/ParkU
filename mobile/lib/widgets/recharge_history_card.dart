@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import 'visitor_receipt.dart';
+
 import 'package:intl/intl.dart';
 
 import '../models/recharge_history.dart';
@@ -129,7 +132,7 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
           runSpacing: 8,
           children: [
             Text(
-              'Historial de recargas',
+              'Historial de ingresos',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             TextButton.icon(
@@ -141,7 +144,7 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Recargas presenciales de todos los usuarios y puntos de taquilla. Hora de Colombia · Semana de lunes a domingo.',
+          'Recargas de usuarios y pases diarios de visitantes, en un mismo registro. Hora de Colombia · Semana de lunes a domingo.',
         ),
         const SizedBox(height: 20),
         Wrap(
@@ -198,7 +201,7 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
           child: TextButton.icon(
             onPressed: _applySearch,
             icon: const Icon(Icons.search),
-            label: const Text('Buscar recargas'),
+            label: const Text('Buscar ingresos'),
           ),
         ),
         const SizedBox(height: 12),
@@ -233,8 +236,8 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
                     children: [
                       Text(
                         _search.isEmpty
-                            ? 'Total recargado en el período'
-                            : 'Total recargado · usuario filtrado',
+                            ? 'Total recaudado en el período'
+                            : 'Total recaudado · usuario filtrado',
                       ),
                       const SizedBox(height: 8),
                       FittedBox(
@@ -247,7 +250,7 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '$range\n${data.count} recargas · ${data.userCount} usuarios',
+                        '$range\n${data.count} ingresos · ${data.userCount} destinatarios',
                       ),
                     ],
                   ),
@@ -260,28 +263,28 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
                     _metric(
                       context,
                       Icons.receipt_long_outlined,
-                      'Recargas registradas',
+                      'Ingresos registrados',
                       '${data.count}',
                     ),
                     _metric(
                       context,
                       Icons.people_outline,
-                      'Usuarios atendidos',
+                      'Destinatarios atendidos',
                       '${data.userCount}',
                     ),
                     _metric(
                       context,
                       Icons.analytics_outlined,
-                      'Promedio por recarga',
+                      'Promedio por ingreso',
                       data.count == 0
-                          ? 'Sin recargas'
+                          ? 'Sin ingresos'
                           : '\$${_money.format(data.totalAmount / data.count)} COP',
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Indicadores del período y búsqueda seleccionados, incluyendo todas las páginas. No incluyen transferencias ni cobros de parqueadero.',
+                  'Indicadores del período y búsqueda seleccionados, incluyendo todas las páginas. Incluyen pases de visitante pagados en efectivo. No incluyen transferencias ni descuentos del saldo.',
                   style: TextStyle(fontSize: 12, color: ParkColors.muted),
                 ),
                 const SizedBox(height: 16),
@@ -289,7 +292,7 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 20),
                     child: Text(
-                      'No hay recargas para los filtros seleccionados.',
+                      'No hay ingresos para los filtros seleccionados.',
                     ),
                   ),
                 for (final record in data.recharges) ...[
@@ -317,7 +320,60 @@ class _RechargeHistoryCardState extends State<RechargeHistoryCard> {
                             ),
                           ],
                         ),
-                        Text(record.userEmail),
+                        Text(
+                          record.incomeType == 'PASE_DIARIO_VISITANTE'
+                              ? 'Pase diario visitante · ${record.plate}'
+                              : 'Recarga usuario · ${record.userEmail}',
+                        ),
+                        if (record.visitorPassId != null)
+                          TextButton.icon(
+                            icon: const Icon(Icons.print_outlined),
+                            label: const Text('Reimprimir pase'),
+                            onPressed: () async {
+                              try {
+                                final data = await widget.api.request(
+                                  'GET',
+                                  '/api/admin/visitor-passes/${record.visitorPassId}',
+                                );
+                                if (!context.mounted) return;
+                                await showDialog<void>(
+                                  context: context,
+                                  builder: (ctx) => Dialog(
+                                    child: ConstrainedBox(
+                                      constraints: const BoxConstraints(
+                                        maxWidth: 520,
+                                      ),
+                                      child: SingleChildScrollView(
+                                        child: Column(
+                                          children: [
+                                            Align(
+                                              alignment: Alignment.centerRight,
+                                              child: IconButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(ctx),
+                                                icon: const Icon(Icons.close),
+                                              ),
+                                            ),
+                                            VisitorReceipt(
+                                              api: widget.api,
+                                              receipt:
+                                                  data['pass']
+                                                      as Map<String, dynamic>,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              } catch (e) {
+                                if (context.mounted)
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(e.toString())),
+                                  );
+                              }
+                            },
+                          ),
                         const SizedBox(height: 8),
                         Text(
                           '${DateFormat('dd/MM/yyyy · HH:mm').format(record.createdAt.subtract(const Duration(hours: 5)))} · Colombia',

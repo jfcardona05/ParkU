@@ -17,14 +17,21 @@ class ApiException implements Exception {
 }
 
 class WalletTransferDraft {
-  final String email;
+  final String documentType;
+  final String documentNumber;
   final int amount;
   final String requestId;
-  const WalletTransferDraft(this.email, this.amount, this.requestId);
+  const WalletTransferDraft(
+    this.documentType,
+    this.documentNumber,
+    this.amount,
+    this.requestId,
+  );
 }
 
 class ApiService {
   WalletTransferDraft? pendingTransfer;
+  Map<String, dynamic>? pendingVisitorSale;
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://localhost:8000',
@@ -113,6 +120,7 @@ class ApiService {
       _token = null;
       _currentUser = null;
       pendingTransfer = null;
+      pendingVisitorSale = null;
     }
   }
 
@@ -188,12 +196,14 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> transfer({
-    required String recipientEmail,
+    required String recipientDocumentType,
+    required String recipientDocumentNumber,
     required int amount,
     required String requestId,
   }) async {
     final data = await _request('POST', '/api/wallet/transfers', {
-      'recipient_email': recipientEmail.trim().toLowerCase(),
+      'recipient_document_type': recipientDocumentType,
+      'recipient_document_number': recipientDocumentNumber.trim(),
       'amount': amount,
       'request_id': requestId,
     });
@@ -221,8 +231,11 @@ class ApiService {
     );
   }
 
-  Future<List<UserModel>> getUsers() async {
-    final data = await _request('GET', '/api/admin/users');
+  Future<List<UserModel>> getUsers({String search = ''}) async {
+    final data = await _request(
+      'GET',
+      '/api/admin/users?${Uri(queryParameters: {'search': search}).query}',
+    );
     return (data['users'] as List)
         .map((e) => UserModel.fromJson(e as Map<String, dynamic>))
         .toList();

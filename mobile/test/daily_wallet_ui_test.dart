@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -58,7 +59,7 @@ Future<void> enterTransfer(WidgetTester tester, ApiService api) async {
     ),
   );
   await tester.pumpAndSettle();
-  await tester.enterText(find.byType(TextFormField).at(0), 'receiver@test.co');
+  await tester.enterText(find.byType(TextFormField).at(0), '900002');
   await tester.enterText(find.byType(TextFormField).at(1), '3000');
 }
 
@@ -191,7 +192,8 @@ void main() {
         return jsonResponse({
           'success': true,
           'transfer_id': 'receipt-1',
-          'recipient_email': 'receiver@test.co',
+          'recipient_document_type': 'CC',
+          'recipient_document_number': '900002',
           'amount': 3000,
           'balance_after': 7000,
         });

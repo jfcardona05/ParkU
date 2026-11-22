@@ -86,7 +86,7 @@ class _CashClosuresCardState extends State<CashClosuresCard> {
                   ),
                 ),
               Text(
-                'Recargas: ${row['recharge_count']}\nObservaciones: ${row['notes'] ?? ""}',
+                'Ingresos: ${row['recharge_count']}\nObservaciones: ${row['notes'] ?? ""}',
               ),
               const SizedBox(height: 12),
               const Text(
