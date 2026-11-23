@@ -355,7 +355,15 @@ class _CashSessionCardState extends State<CashSessionCard> {
   Widget _metric(String label, dynamic value) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label),
+      SizedBox(
+        height: 36,
+        child: Text(
+          label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ),
       const SizedBox(height: 6),
       FittedBox(
         child: Text(

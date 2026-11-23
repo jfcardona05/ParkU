@@ -199,7 +199,11 @@ class ParkShell extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      logo(),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: logo(),
+                      ),
                       const SizedBox(height: 26),
                       if (desktop)
                         Text(
