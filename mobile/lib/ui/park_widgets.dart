@@ -141,23 +141,64 @@ class ParkFeatures extends StatelessWidget {
   final List<(IconData, String, String)> items;
   const ParkFeatures({super.key, required this.items});
   @override
-  Widget build(BuildContext context) => ParkColumns(
-    breakpoint: 650,
-    children: [
-      for (final item in items)
-        ParkCard(
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, size) {
+      if (size.maxWidth < 650) {
+        return ParkCard(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ParkGlyph(item.$1, size: 28),
-              const SizedBox(height: 12),
-              Text(item.$2, style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              Text(item.$3, style: Theme.of(context).textTheme.bodySmall),
+              for (final (i, item) in items.indexed) ...[
+                if (i > 0)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1),
+                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ParkGlyph(item.$1, size: 24),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.$2,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            item.$3,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
-        ),
-    ],
+        );
+      }
+      return ParkColumns(
+        children: [
+          for (final item in items)
+            ParkCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ParkGlyph(item.$1, size: 28),
+                  const SizedBox(height: 12),
+                  Text(item.$2, style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Text(item.$3, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+        ],
+      );
+    },
   );
 }
 

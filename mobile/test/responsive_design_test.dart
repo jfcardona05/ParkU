@@ -262,7 +262,7 @@ void main() {
             breadcrumb: 'Comprobante de visitante',
             child: VisitorReceipt(
               api: api,
-              receipt: {
+              receipt: const {
                 'id': 1,
                 'plate': 'VIS123',
                 'visitor_name': 'Visitante USTA',
