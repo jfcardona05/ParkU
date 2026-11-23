@@ -74,40 +74,46 @@ class _VisitorReceiptState extends State<VisitorReceipt> {
   @override
   Widget build(BuildContext context) {
     final row = widget.receipt;
-    return ParkCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const ParkBadge('Pase diario visitante · Pagado', success: true),
-          const SizedBox(height: 20),
-          Text(
-            '${row['plate']}',
-            style: Theme.of(context).textTheme.headlineMedium,
+    return Align(
+      alignment: Alignment.topLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 560),
+        child: ParkCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const ParkBadge('Pase diario visitante · Pagado', success: true),
+              const SizedBox(height: 20),
+              Text(
+                '${row['plate']}',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              Text(
+                '${row['visitor_name']} · ${row['vehicle_type'] == 'moto' ? 'Moto' : 'Automóvil'}',
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: QrImageView(
+                  data: widget.api.qrScanUrl(row['token'] as String),
+                  size: 220,
+                  backgroundColor: Colors.white,
+                ),
+              ),
+              Text(
+                'Recibido: ${NumberFormat.decimalPattern('es_CO').format(row['amount'])} COP',
+              ),
+              Text('Válido: ${row['service_date']} · Colombia'),
+              Text('Referencia: ${row['reference']}'),
+              const SizedBox(height: 16),
+              if (_error != null) ParkNotice(_error!),
+              FilledButton.icon(
+                onPressed: _busy ? null : _print,
+                icon: const Icon(Icons.print_outlined),
+                label: Text(_busy ? 'Preparando…' : 'Descargar para imprimir'),
+              ),
+            ],
           ),
-          Text(
-            '${row['visitor_name']} · ${row['vehicle_type'] == 'moto' ? 'Moto' : 'Automóvil'}',
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: QrImageView(
-              data: widget.api.qrScanUrl(row['token'] as String),
-              size: 220,
-              backgroundColor: Colors.white,
-            ),
-          ),
-          Text(
-            'Recibido: ${NumberFormat.decimalPattern('es_CO').format(row['amount'])} COP',
-          ),
-          Text('Válido: ${row['service_date']} · Colombia'),
-          Text('Referencia: ${row['reference']}'),
-          const SizedBox(height: 16),
-          if (_error != null) ParkNotice(_error!),
-          FilledButton.icon(
-            onPressed: _busy ? null : _print,
-            icon: const Icon(Icons.print_outlined),
-            label: Text(_busy ? 'Preparando…' : 'Descargar para imprimir'),
-          ),
-        ],
+        ),
       ),
     );
   }

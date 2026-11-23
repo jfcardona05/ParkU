@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/gate_service.dart';
 import '../ui/park_widgets.dart';
+import '../ui/park_theme.dart';
 import 'visitor_receipt.dart';
 
 class VisitorSaleForm extends StatefulWidget {
@@ -126,8 +127,7 @@ class _VisitorSaleFormState extends State<VisitorSaleForm> {
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
+  Widget build(BuildContext context) => ParkColumns(
     children: [
       ParkCard(
         child: Form(
@@ -212,21 +212,47 @@ class _VisitorSaleFormState extends State<VisitorSaleForm> {
           ),
         ),
       ),
-      if (_receipt != null) ...[
-        const SizedBox(height: 20),
-        VisitorReceipt(api: widget.api, receipt: _receipt!),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: _busy
-              ? null
-              : () => setState(() {
-                  _receipt = null;
-                  _name.clear();
-                  _plate.clear();
-                }),
-          child: const Text('Registrar otro visitante'),
+      if (_receipt != null)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            VisitorReceipt(api: widget.api, receipt: _receipt!),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: _busy
+                  ? null
+                  : () => setState(() {
+                      _receipt = null;
+                      _name.clear();
+                      _plate.clear();
+                    }),
+              child: const Text('Registrar otro visitante'),
+            ),
+          ],
+        )
+      else
+        const ParkCard(
+          color: ParkColors.yellowLight,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ParkIcon(Icons.receipt_long_outlined),
+              SizedBox(height: 20),
+              Text(
+                'Una visita.\nTodo listo para entrar.',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Confirma el nombre, la placa y el efectivo recibido. El comprobante aparecerá aquí después de registrar el pago.',
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Entrega el QR impreso al visitante. Portería registra el ingreso y la salida sin cobrar nuevamente.',
+              ),
+            ],
+          ),
         ),
-      ],
     ],
   );
 }
