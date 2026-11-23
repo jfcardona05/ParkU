@@ -20,6 +20,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
   late Future<ParkingHistoryPage> _history;
   final List<Map<String, dynamic>> _moreOperations = [];
   ParkingHistoryPage? _lastPage;
+  bool get _isCashier => widget.apiService.currentUser?.role == 'operador';
   bool _loadingMore = false;
   String? _pageError;
   int _generation = 0;
@@ -34,8 +35,10 @@ class _ParkingScreenState extends State<ParkingScreen> {
   void _startLoad() {
     _generation++;
     _rates = _service.getRates();
-    _vehicles = _service.getVehicles();
-    _history = _service.getHistory();
+    _vehicles = _isCashier ? Future.value([]) : _service.getVehicles();
+    _history = _isCashier
+        ? Future.value(const ParkingHistoryPage([], null))
+        : _service.getHistory();
     _moreOperations.clear();
     _lastPage = null;
     _loadingMore = false;
@@ -135,13 +138,15 @@ class _ParkingScreenState extends State<ParkingScreen> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const ParkHeading(
+        ParkHeading(
           'Así está el parqueadero',
-          'Tarifas, tu pase diario y tus accesos.',
+          _isCashier
+              ? 'Cupos de parqueadero y tarifas vigentes.'
+              : 'Tarifas, tu pase diario y tus accesos.',
         ),
         ParkColumns(
           children: [
-            const ParkAvailabilitySoon(yellow: true),
+            ParkAvailabilitySoon(yellow: true, showDefaultCapacity: _isCashier),
             _section(
               'Tarifas vigentes',
               _rates,
@@ -179,110 +184,113 @@ class _ParkingScreenState extends State<ParkingScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 20),
-        _section('Tus últimos accesos', _history, (page) {
-          final operations = [...page.operations, ..._moreOperations];
-          final cursor = (_lastPage ?? page).nextBeforeId;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (operations.isEmpty) const Text('No hay accesos registrados.'),
-              for (final operation in operations)
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Color(0xFFECECE8)),
+        if (!_isCashier) ...[
+          const SizedBox(height: 20),
+          _section('Tus últimos accesos', _history, (page) {
+            final operations = [...page.operations, ..._moreOperations];
+            final cursor = (_lastPage ?? page).nextBeforeId;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (operations.isEmpty)
+                  const Text('No hay accesos registrados.'),
+                for (final operation in operations)
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Color(0xFFECECE8)),
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${operation['action'] == 'entry' ? 'Ingreso' : 'Salida'} · ${operation['plate']}',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        operation['occurred_at'].toString(),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      if (operation['charge']
-                          case final Map<String, dynamic> charge) ...[
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          'Cobro ${charge['amount']} COP · Saldo posterior ${charge['balance_after']} COP',
+                          '${operation['action'] == 'entry' ? 'Ingreso' : 'Salida'} · ${operation['plate']}',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
+                        const SizedBox(height: 6),
                         Text(
-                          charge['parking_rate_label'].toString(),
+                          operation['occurred_at'].toString(),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
+                        if (operation['charge']
+                            case final Map<String, dynamic> charge) ...[
+                          Text(
+                            'Cobro ${charge['amount']} COP · Saldo posterior ${charge['balance_after']} COP',
+                          ),
+                          Text(
+                            charge['parking_rate_label'].toString(),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              if (_pageError != null) Text(_pageError!),
-              if (cursor != null)
-                TextButton(
-                  onPressed: _loadingMore ? null : () => _loadMore(cursor),
-                  child: Text(
-                    _loadingMore ? 'Cargando…' : 'Cargar más accesos',
+                if (_pageError != null) Text(_pageError!),
+                if (cursor != null)
+                  TextButton(
+                    onPressed: _loadingMore ? null : () => _loadMore(cursor),
+                    child: Text(
+                      _loadingMore ? 'Cargando…' : 'Cargar más accesos',
+                    ),
                   ),
+                const SizedBox(height: 12),
+                Text(
+                  'Solo se muestran tus vehículos y accesos.',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
-              const SizedBox(height: 12),
-              Text(
-                'Solo se muestran tus vehículos y accesos.',
-                style: Theme.of(context).textTheme.bodySmall,
+              ],
+            );
+          }),
+          const SizedBox(height: 20),
+          _section(
+            'Mis vehículos',
+            _vehicles,
+            (vehicles) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (vehicles.isEmpty)
+                  const Text('Aún no tienes vehículos registrados.'),
+                for (final parked in vehicles)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      parked.vehicle.isMoto
+                          ? Icons.two_wheeler_outlined
+                          : Icons.directions_car_outlined,
+                    ),
+                    title: Text(parked.vehicle.plate),
+                    subtitle: Text(
+                      parked.inside
+                          ? 'Dentro del parqueadero'
+                          : 'Fuera del parqueadero',
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const ParkFeatures(
+            items: [
+              (
+                Icons.directions_car_outlined,
+                'Tu vehículo',
+                'Revisa si tienes un ingreso activo.',
+              ),
+              (
+                Icons.local_parking_outlined,
+                'Tarifa vigente',
+                'El cobro se calcula en el servidor.',
+              ),
+              (
+                Icons.history_outlined,
+                'Tus accesos',
+                'Consulta tus ingresos y salidas.',
               ),
             ],
-          );
-        }),
-        const SizedBox(height: 20),
-        _section(
-          'Mis vehículos',
-          _vehicles,
-          (vehicles) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (vehicles.isEmpty)
-                const Text('Aún no tienes vehículos registrados.'),
-              for (final parked in vehicles)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    parked.vehicle.isMoto
-                        ? Icons.two_wheeler_outlined
-                        : Icons.directions_car_outlined,
-                  ),
-                  title: Text(parked.vehicle.plate),
-                  subtitle: Text(
-                    parked.inside
-                        ? 'Dentro del parqueadero'
-                        : 'Fuera del parqueadero',
-                  ),
-                ),
-            ],
           ),
-        ),
-        const SizedBox(height: 20),
-        const ParkFeatures(
-          items: [
-            (
-              Icons.directions_car_outlined,
-              'Tu vehículo',
-              'Revisa si tienes un ingreso activo.',
-            ),
-            (
-              Icons.local_parking_outlined,
-              'Tarifa vigente',
-              'El cobro se calcula en el servidor.',
-            ),
-            (
-              Icons.history_outlined,
-              'Tus accesos',
-              'Consulta tus ingresos y salidas.',
-            ),
-          ],
-        ),
+        ],
       ],
     ),
   );

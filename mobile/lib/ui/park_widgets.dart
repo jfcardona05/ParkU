@@ -257,7 +257,12 @@ class ParkCar extends StatelessWidget {
 
 class ParkAvailabilitySoon extends StatelessWidget {
   final bool yellow;
-  const ParkAvailabilitySoon({super.key, this.yellow = false});
+  final bool showDefaultCapacity;
+  const ParkAvailabilitySoon({
+    super.key,
+    this.yellow = false,
+    this.showDefaultCapacity = false,
+  });
   @override
   Widget build(BuildContext context) => ParkCard(
     color: yellow ? ParkColors.yellow : Colors.white,
@@ -278,10 +283,15 @@ class ParkAvailabilitySoon extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        const ParkBadge('Próximamente'),
+        if (showDefaultCapacity)
+          Text('0/1000', style: Theme.of(context).textTheme.headlineMedium)
+        else
+          const ParkBadge('Próximamente'),
         const SizedBox(height: 10),
         Text(
-          'La disponibilidad estará aquí cuando se habilite el control de ingresos.',
+          showDefaultCapacity
+              ? 'Cupos ocupados / capacidad de referencia'
+              : 'La disponibilidad estará aquí cuando se habilite el control de ingresos.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
