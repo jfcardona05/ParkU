@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'dart:async';
 
@@ -38,6 +39,33 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
   bool _cashBusy = false;
   Map<String, dynamic>? _cashSession;
   bool get _canRecharge => _cashSession?['can_recharge'] == true;
+
+  UserModel? get _selectedUser {
+    for (final user in _users) {
+      if (user.id == _selectedUserId) return user;
+    }
+    return null;
+  }
+
+  void _selectUser(UserModel user) {
+    if (!_canRecharge || _cashBusy || _isSubmitting) return;
+    _debounce?.cancel();
+    _searchVersion++;
+    setState(() {
+      _selectedUserId = user.id;
+      _search.text = user.name;
+    });
+  }
+
+  Widget _recipientField(String label, String value) => Padding(
+    padding: const EdgeInsets.only(top: 12),
+    child: TextFormField(
+      key: ValueKey((label, value)),
+      initialValue: value,
+      readOnly: true,
+      decoration: InputDecoration(labelText: label),
+    ),
+  );
 
   @override
   void initState() {
@@ -305,14 +333,35 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
                                           _cashBusy ||
                                           !_canRecharge
                                       ? null
-                                      : () => setState(
-                                          () => _selectedUserId = user.id,
-                                        ),
+                                      : () => _selectUser(user),
                                 ),
                               ),
                           ],
                         ),
                       ),
+                    if (_selectedUser case final user?) ...[
+                      const SizedBox(height: 18),
+                      Text(
+                        'Datos del usuario seleccionado',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      _recipientField('Nombre del usuario', user.name),
+                      _recipientField('Correo del usuario', user.email),
+                      _recipientField(
+                        'Tipo de documento',
+                        user.documentType ?? 'No registrado',
+                      ),
+                      _recipientField(
+                        'Número de documento',
+                        user.documentNumber ?? 'No registrado',
+                      ),
+                      _recipientField(
+                        'Saldo actual (COP)',
+                        NumberFormat.decimalPattern(
+                          'es_CO',
+                        ).format(user.balance),
+                      ),
+                    ],
                     const SizedBox(height: 18),
                     Text(
                       _canRecharge
