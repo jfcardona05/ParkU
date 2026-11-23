@@ -12,6 +12,9 @@ import 'package:http/testing.dart';
 import 'package:parku_mobile/models/user_model.dart';
 import 'package:parku_mobile/models/vehicle_model.dart';
 import 'package:parku_mobile/screens/login_screen.dart';
+import 'package:parku_mobile/screens/profile_screen.dart';
+import 'package:parku_mobile/widgets/visitor_receipt.dart';
+import 'package:parku_mobile/ui/park_shell.dart';
 import 'package:parku_mobile/screens/transfer_screen.dart';
 import 'package:parku_mobile/screens/register_screen.dart';
 import 'package:parku_mobile/screens/dashboard_screen.dart';
@@ -36,7 +39,7 @@ final vehicle = VehicleModel(
   createdAt: '',
 );
 
-ApiService fixture({String role = 'estudiante'}) {
+ApiService fixture({String role = 'estudiante', bool motorcycle = false}) {
   final api = ApiService(
     client: MockClient((request) async {
       final Object response = switch (request.url.path) {
@@ -46,7 +49,9 @@ ApiService fixture({String role = 'estudiante'}) {
           'has_more': false,
         },
         '/api/vehicles' => {
-          'vehicles': [vehicle.toJson()],
+          'vehicles': [
+            {...vehicle.toJson(), if (motorcycle) 'type': 'moto'},
+          ],
         },
         '/api/vehicles/7/parking' => {
           'vehicle_id': 7,
@@ -213,6 +218,10 @@ void main() {
     for (final page in [
       'login',
       'register',
+      'profile',
+      'motorcycle',
+      'cash-visitor',
+      'cash-receipt',
       'home',
       'vehicles',
       'add-vehicle',
@@ -232,6 +241,7 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
         final api = fixture(
+          motorcycle: page == 'motorcycle',
           role: page.startsWith('cash')
               ? 'operador'
               : page == 'gate'
@@ -244,6 +254,27 @@ void main() {
           'register' => RegisterScreen(apiService: api),
           'home' => DashboardScreen(apiService: api),
           'vehicles' => VehiclesScreen(apiService: api),
+          'motorcycle' => VehiclesScreen(apiService: api),
+          'profile' => ProfileScreen(apiService: api),
+          'cash-receipt' => ParkShell(
+            api: api,
+            selected: 5,
+            breadcrumb: 'Comprobante de visitante',
+            child: VisitorReceipt(
+              api: api,
+              receipt: {
+                'id': 1,
+                'plate': 'VIS123',
+                'visitor_name': 'Visitante USTA',
+                'vehicle_type': 'automovil',
+                'amount': 5000,
+                'service_date': '2026-11-22',
+                'point_name': point,
+                'reference': 'PASE-001',
+                'token': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+              },
+            ),
+          ),
           'add-vehicle' => AddVehicleScreen(apiService: api),
           'qr' => VehicleQrScreen(
             vehicle: vehicle,
@@ -271,12 +302,23 @@ void main() {
           ),
         );
         await tester.runAsync(() async {
-          await precacheImage(
-            const AssetImage('assets/figma/43925.png'),
-            tester.element(find.byType(MaterialApp)),
-          );
+          for (final path in [
+            'assets/vehicles/compact-blue.png',
+            'assets/vehicles/crossover-ivory.png',
+            'assets/vehicles/motorcycle-yellow.png',
+          ]) {
+            await precacheImage(
+              AssetImage(path),
+              tester.element(find.byType(MaterialApp)),
+            );
+          }
         });
         await tester.pumpAndSettle();
+        if (page == 'cash-visitor') {
+          await tester.ensureVisible(find.text('Pase diario visitante'));
+          await tester.tap(find.text('Pase diario visitante'));
+          await tester.pumpAndSettle();
+        }
 
         expect(
           tester.takeException(),
