@@ -233,6 +233,7 @@ void main() {
       'gate',
       'cash',
       'cash-history',
+      'cash-parking',
       'cash-reports',
     ]) {
       testWidgets('responsive $page at ${size.$1}', (tester) async {
@@ -288,7 +289,7 @@ void main() {
             apiService: api,
           ),
           'wallet' => WalletScreen(apiService: api),
-          'parking' => ParkingScreen(apiService: api),
+          'parking' || 'cash-parking' => ParkingScreen(apiService: api),
           'gate' => GateScreen(apiService: api, gateway: ApiGateGateway(api)),
           'cash-reports' => TaquillaReportsScreen(apiService: api),
           'cash-history' => TaquillaReportsScreen(apiService: api),
