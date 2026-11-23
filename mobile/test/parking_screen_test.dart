@@ -21,7 +21,13 @@ void main() {
               client: MockClient((request) async {
                 paths.add(request.url.path);
                 if (request.url.path == '/api/cash/current') {
-                  return http.Response(jsonEncode(cashCurrent()), 200);
+                  return http.Response(
+                    jsonEncode(cashCurrent()),
+                    200,
+                    headers: {
+                      'content-type': 'application/json; charset=utf-8',
+                    },
+                  );
                 }
                 if (request.url.path != '/api/parking/rates') {
                   throw StateError(
@@ -134,6 +140,9 @@ void main() {
                   return http.Response(
                     jsonEncode(cashCurrent(active: false)),
                     200,
+                    headers: {
+                      'content-type': 'application/json; charset=utf-8',
+                    },
                   );
                 }
                 throw StateError(request.url.path);
