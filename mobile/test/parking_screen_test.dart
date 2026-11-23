@@ -5,9 +5,50 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:parku_mobile/screens/parking_screen.dart';
+import 'package:parku_mobile/models/user_model.dart';
 import 'package:parku_mobile/services/api_service.dart';
 
 void main() {
+  testWidgets(
+    'cashier sees reference capacity and rates without personal requests',
+    (tester) async {
+      final paths = <String>[];
+      final api =
+          ApiService(
+              client: MockClient((request) async {
+                paths.add(request.url.path);
+                if (request.url.path != '/api/parking/rates') {
+                  throw StateError(
+                    'Unexpected personal request: ${request.url}',
+                  );
+                }
+                return http.Response(jsonEncode({'rates': []}), 200);
+              }),
+            )
+            ..setToken('cashier')
+            ..setCurrentUser(
+              UserModel(
+                id: 3,
+                name: 'Taquilla',
+                email: 'taquilla@test.co',
+                role: 'operador',
+                balance: 0,
+              ),
+            );
+      await tester.pumpWidget(
+        MaterialApp(home: ParkingScreen(apiService: api)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('0/1000'), findsOneWidget);
+      expect(find.text('Próximamente'), findsNothing);
+      expect(find.text('Tus últimos accesos'), findsNothing);
+      expect(find.text('Mis vehículos'), findsNothing);
+      expect(find.text('Tu vehículo'), findsNothing);
+      expect(find.text('Tarifas vigentes'), findsOneWidget);
+      expect(paths, ['/api/parking/rates']);
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets(
     'occupancy is forthcoming and history pagination retries safely',
     (tester) async {
