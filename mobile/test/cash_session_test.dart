@@ -52,6 +52,103 @@ void main() {
       expect(html, isNot(contains('<script>bad()')));
     },
   );
+  testWidgets('recipient selection fills identity and clears stale details', (
+    tester,
+  ) async {
+    final service = api(
+      MockClient((r) async {
+        if (r.url.path == '/api/cash/current') return json(cashCurrent());
+        if (r.url.path == '/api/admin/users')
+          return json({
+            'users': [
+              {
+                'id': 1,
+                'name': 'Juan',
+                'email': 'juan@test.co',
+                'role': 'estudiante',
+                'balance': 12000,
+                'document_type': 'CC',
+                'document_number': '123456',
+              },
+              {
+                'id': 2,
+                'name': 'Juana',
+                'email': 'juana@test.co',
+                'role': 'estudiante',
+                'balance': 5000,
+              },
+            ],
+          });
+        throw StateError(r.url.path);
+      }),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: parkTheme(),
+        home: TaquillaScreen(apiService: service),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final search = input('Buscar usuario por nombre, documento o correo');
+    await tester.enterText(search, 'Ju');
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    final first = find.widgetWithText(ListTile, 'Juan');
+    await tester.ensureVisible(first);
+    await tester.tap(first);
+    await tester.pumpAndSettle();
+    String? value(String label) => tester
+        .widgetList<TextField>(find.byType(TextField))
+        .singleWhere((field) => field.decoration?.labelText == label)
+        .controller!
+        .text;
+    expect(value('Nombre del usuario'), 'Juan');
+    expect(value('Correo del usuario'), 'juan@test.co');
+    expect(value('Tipo de documento'), 'CC');
+    expect(value('Número de documento'), '123456');
+    expect(value('Saldo actual (COP)'), '12.000');
+    expect(tester.widget<TextField>(search).controller!.text, 'Juan');
+    expect(
+      tester
+          .widget<TextField>(input('Importe recibido en efectivo (COP)'))
+          .controller!
+          .text,
+      isEmpty,
+    );
+    final second = find.widgetWithText(ListTile, 'Juana');
+    await tester.ensureVisible(second);
+    await tester.tap(second);
+    await tester.pumpAndSettle();
+    expect(value('Nombre del usuario'), 'Juana');
+    expect(value('Correo del usuario'), 'juana@test.co');
+    expect(value('Número de documento'), 'No registrado');
+    expect(value('Saldo actual (COP)'), '5.000');
+    expect(
+      tester
+          .widgetList<TextField>(
+            find.descendant(
+              of: find.byType(TextFormField),
+              matching: find.byType(TextField),
+            ),
+          )
+          .every((field) => field.readOnly),
+      isTrue,
+    );
+    await tester.ensureVisible(search);
+    await tester.enterText(search, 'x');
+    await tester.pumpAndSettle();
+    expect(find.text('Datos del usuario seleccionado'), findsNothing);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Registrar abono en taquilla'),
+          )
+          .onPressed,
+      isNull,
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.takeException(), isNull);
+  });
   testWidgets(
     'open, recharge, cancel and close; report history exists only in Reports',
     (tester) async {
