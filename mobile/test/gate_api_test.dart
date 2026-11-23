@@ -141,7 +141,8 @@ void main() {
       await tester.ensureVisible(find.text('Ingresar a ParkU →'));
       await tester.tap(find.text('Ingresar a ParkU →'));
       await tester.pumpAndSettle();
-      expect(find.text('Portería'), findsOneWidget);
+      expect(find.text('Portería'), findsWidgets);
+      expect(find.byTooltip('Portería'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'opaque-token');
       await tester.ensureVisible(find.text('Validar código'));
