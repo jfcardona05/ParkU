@@ -58,7 +58,7 @@ void main() {
     final service = api(
       MockClient((r) async {
         if (r.url.path == '/api/cash/current') return json(cashCurrent());
-        if (r.url.path == '/api/admin/users')
+        if (r.url.path == '/api/admin/users') {
           return json({
             'users': [
               {
@@ -79,6 +79,7 @@ void main() {
               },
             ],
           });
+        }
         throw StateError(r.url.path);
       }),
     );
