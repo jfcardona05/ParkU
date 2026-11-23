@@ -55,6 +55,7 @@ public class ApiErrors {
                 "success",
                 false,
                 "message",
-                "El correo o la placa ya están registrados, o los datos no cumplen las restricciones"));
+                "El correo, documento o la placa ya están registrados, o los datos no cumplen las"
+                    + " restricciones"));
   }
 }

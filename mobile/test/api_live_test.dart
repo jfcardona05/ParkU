@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:parku_mobile/services/api_service.dart';
@@ -15,6 +16,10 @@ void main() {
           'name': 'Prueba de integración',
           'email': email,
           'password': 'pass123',
+          'document_type': 'CC',
+          'document_number': DateTime.now().microsecondsSinceEpoch
+              .toString()
+              .substring(2),
         }),
       );
       expect(registration.statusCode, 201);

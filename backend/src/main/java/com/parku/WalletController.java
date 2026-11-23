@@ -50,20 +50,33 @@ public class WalletController {
         true,
         "transactions",
         db.queryForList(
-            "SELECT id,type,amount,point_name,reference,balance_after,created_at,visit_id,parking_rate_label,counterpart_email FROM transactions WHERE user_id=? ORDER BY id DESC",
+            "SELECT"
+                + " id,type,amount,point_name,reference,balance_after,created_at,visit_id,parking_rate_label,counterpart_email"
+                + " FROM transactions WHERE user_id=? ORDER BY id DESC",
             user.get("id")));
   }
 
   @GetMapping("/admin/users")
   public Map<String, Object> users(
-      @RequestHeader(value = "Authorization", required = false) String auth) {
+      @RequestHeader(value = "Authorization", required = false) String auth,
+      @RequestParam(defaultValue = "") String search) {
     identity.operator(auth);
+    if (search.length() > 200)
+      throw new ApiProblem(400, "INVALID_SEARCH", "Búsqueda demasiado larga");
+    String term = search.trim().toLowerCase(java.util.Locale.ROOT);
     return Map.of(
         "success",
         true,
         "users",
         db.queryForList(
-            "SELECT id,name,email,role,balance FROM users WHERE role IN ('estudiante','docente') ORDER BY name"));
+            "SELECT id,name,email,role,balance,document_type,document_number FROM users WHERE role"
+                + " IN ('estudiante','docente') AND (?='' OR strpos(lower(name),?)>0 OR"
+                + " strpos(lower(email),?)>0 OR strpos(COALESCE(document_number,''),?)>0) ORDER BY"
+                + " name,id LIMIT 50",
+            term,
+            term,
+            term,
+            term));
   }
 
   @PostMapping("/wallet/recharge")
@@ -95,7 +108,10 @@ public class WalletController {
     db.update("UPDATE users SET balance=? WHERE id=?", after, body.user_id());
     var receipt =
         db.queryForMap(
-            "INSERT INTO transactions(user_id,operator_id,type,amount,point_name,reference,balance_after,cash_session_id) VALUES (?,?,'RECARGA_PRESENCIAL',?,?,?,?,?) RETURNING id,type,amount,point_name,reference,balance_after,created_at",
+            "INSERT INTO"
+                + " transactions(user_id,operator_id,type,amount,point_name,reference,balance_after,cash_session_id)"
+                + " VALUES (?,?,'RECARGA_PRESENCIAL',?,?,?,?,?) RETURNING"
+                + " id,type,amount,point_name,reference,balance_after,created_at",
             body.user_id(),
             operator.get("id"),
             body.amount(),

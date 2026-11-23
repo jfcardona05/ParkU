@@ -112,3 +112,33 @@ La CI verifica backend, Flutter y compilación web. Cámara física, APK si se e
 demostración conjunta y acta requieren evidencia separada.
 Los contratos S2 iniciales y los informes de octubre/10 de noviembre son históricos:
 sus cifras de pruebas, QR de 120 segundos y cobro por horas no describen el nuevo flujo diario.
+
+### Pases de visitantes, identidad y perfil
+
+Taquilla registra **Recarga usuario** o **Pase diario visitante** desde Panel de caja.
+Ambos conceptos aparecen juntos en Reportes y suman al recaudo y cierre de la caja
+abierta del operador. Las transferencias y los descuentos del saldo no son efectivo
+recibido y no se suman al cierre. La tarifa del visitante se consulta según moto o
+automóvil y se confirma con el efectivo recibido antes de emitir el pase.
+
+El visitante no necesita cuenta: taquilla registra nombre, placa y vehículo,
+entrega el comprobante con QR (descargar HTML y pulsar Imprimir / Guardar PDF).
+Puede reimprimir el mismo pase desde Reportes. El QR abre una ficha pública
+sin inicio de sesión; portería usa su lector para confirmar ingreso y salida sin
+volver a cobrar. Es un pase para una placa durante el día colombiano de emisión,
+con una entrada y una salida. No se emiten dos pases para la misma placa y fecha.
+Los reintentos con la misma referencia recuperan el original, incluso tras cerrar caja.
+Para escanear desde otro teléfono, la URL pública de la API debe ser accesible por
+ese teléfono; localhost solo funciona en el propio equipo.
+
+El registro solicita CC o TI y número (5–15 dígitos, sin puntos). Las cuentas
+existentes conservan acceso y pueden completar sus datos en **Usuario**.
+La transferencia solicita tipo y número de documento del destinatario, conserva
+su referencia en reintentos y se registra en ambas billeteras. Un documento no
+puede repetirse con el mismo tipo. Esta validación no consulta registros oficiales.
+**Usuario** está disponible para todos los roles salvo taquilla y permite cambiar
+nombre, correo, documento y contraseña con confirmación de la contraseña actual.
+Cambiar correo o contraseña invalida las otras sesiones y conserva la actual.
+
+La migración V10 añade estos datos sin inventar documentos para cuentas antiguas
+ni modificar sus saldos. Los cierres históricos permanecen como fueron registrados.

@@ -117,8 +117,8 @@ jobs:
               ('CI admin','frontend-admin@test.co','pass123'),
               ('CI cash','taquilla@usantotomas.edu.co','caja123'),
           ]
-          for name,email,password in accounts:
-              body=json.dumps(dict(name=name,email=email,password=password)).encode()
+          for i,(name,email,password) in enumerate(accounts):
+              body=json.dumps(dict(name=name,email=email,password=password,document_type="CC",document_number=str(900000+i))).encode()
               request=urllib.request.Request('http://localhost:8000/api/auth/register',data=body,headers={'Content-Type':'application/json'})
               with urllib.request.urlopen(request) as response:
                   assert response.status == 201

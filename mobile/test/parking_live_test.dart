@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:parku_mobile/services/api_service.dart';
@@ -125,6 +126,9 @@ void main() {
         expect((await qr.lookup(vehicle)).qr!.token, first.token);
         final email =
             'receiver-${DateTime.now().microsecondsSinceEpoch}@test.co';
+        final recipientDocument = DateTime.now().microsecondsSinceEpoch
+            .toString()
+            .substring(2);
         final registered = await http.post(
           Uri.parse('${ApiService.baseUrl}/api/auth/register'),
           headers: {'Content-Type': 'application/json'},
@@ -132,18 +136,22 @@ void main() {
             'name': 'Live receiver',
             'email': email,
             'password': 'pass123',
+            'document_type': 'CC',
+            'document_number': recipientDocument,
           }),
         );
         expect(registered.statusCode, 201);
         expect((await receiver.login(email, 'pass123'))['success'], true);
         final key = 'live-${DateTime.now().microsecondsSinceEpoch}';
         final sent = await student.transfer(
-          recipientEmail: email,
+          recipientDocumentType: 'CC',
+          recipientDocumentNumber: recipientDocument,
           amount: 1000,
           requestId: key,
         );
         final retry = await student.transfer(
-          recipientEmail: email,
+          recipientDocumentType: 'CC',
+          recipientDocumentNumber: recipientDocument,
           amount: 1000,
           requestId: key,
         );

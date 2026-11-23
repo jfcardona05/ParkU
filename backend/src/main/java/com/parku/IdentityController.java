@@ -23,7 +23,10 @@ public class IdentityController {
       @NotBlank @Size(max = 120) String name,
       @NotBlank @Email @Size(max = 200) String email,
       @NotBlank @Size(min = 6, max = 72) String password,
-      String role) {}
+      String role,
+      @NotBlank @jakarta.validation.constraints.Pattern(regexp = "CC|TI") String document_type,
+      @NotBlank @jakarta.validation.constraints.Pattern(regexp = "[0-9]{5,15}")
+          String document_number) {}
 
   @PostMapping("/login")
   public Map<String, Object> login(@Valid @RequestBody Login body) {
@@ -33,7 +36,30 @@ public class IdentityController {
   @PostMapping("/register")
   @ResponseStatus(HttpStatus.CREATED)
   public Map<String, Object> register(@Valid @RequestBody Registration body) {
-    return identity.register(body.name(), body.email(), body.password());
+    return identity.register(
+        body.name(), body.email(), body.password(), body.document_type(), body.document_number());
+  }
+
+  public record Profile(
+      @NotBlank @Size(max = 120) String name,
+      @NotBlank @Email @Size(max = 200) String email,
+      @NotBlank @jakarta.validation.constraints.Pattern(regexp = "CC|TI") String document_type,
+      @NotBlank @jakarta.validation.constraints.Pattern(regexp = "[0-9]{5,15}")
+          String document_number,
+      @NotBlank @Size(max = 72) String current_password,
+      @Size(min = 6, max = 72) String new_password) {}
+
+  @GetMapping("/profile")
+  public Map<String, Object> profile(
+      @RequestHeader(value = "Authorization", required = false) String auth) {
+    return Map.of("success", true, "user", identity.current(auth));
+  }
+
+  @PostMapping("/profile")
+  public Map<String, Object> profile(
+      @RequestHeader(value = "Authorization", required = false) String auth,
+      @Valid @RequestBody Profile body) {
+    return identity.updateProfile(auth, body);
   }
 
   @PostMapping("/logout")

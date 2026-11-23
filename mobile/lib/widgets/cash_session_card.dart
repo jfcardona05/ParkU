@@ -134,7 +134,7 @@ class _CashSessionCardState extends State<CashSessionCard> {
         ),
         content: Text(
           closing
-              ? 'Contado: ${_money.format(counted)} COP\nBase para devueltas: ${_money.format(retained)} COP\nA entregar: ${_money.format(counted! - retained!)} COP\nDiferencia: ${_money.format(counted - expected)} COP\n\nEl cierre es definitivo. No podrás registrar más recargas en este punto hoy.'
+              ? 'Contado: ${_money.format(counted)} COP\nBase para devueltas: ${_money.format(retained)} COP\nA entregar: ${_money.format(counted! - retained!)} COP\nDiferencia: ${_money.format(counted - expected)} COP\n\nEl cierre es definitivo. No podrás registrar más ingresos en este punto hoy.'
               : 'Se registrará una base de ${_money.format(base)} COP en $_point.',
         ),
         actions: [
@@ -171,7 +171,7 @@ class _CashSessionCardState extends State<CashSessionCard> {
       if (!mounted) return;
       _notice = closing
           ? 'Cierre registrado. El comprobante está en Reportes.'
-          : 'Caja abierta. Ya puedes registrar recargas.';
+          : 'Caja abierta. Ya puedes registrar recargas y pases de visitante.';
       _showClose = false;
       _counted.clear();
       _retained.clear();
@@ -289,7 +289,7 @@ class _CashSessionCardState extends State<CashSessionCard> {
               const SizedBox(width: 12),
               Expanded(
                 child: _metric(
-                  'Recargas en efectivo',
+                  'Ingresos en efectivo',
                   _session!['recharge_total'],
                 ),
               ),

@@ -10,6 +10,7 @@ import '../screens/gate_screen.dart';
 import '../screens/taquilla_screen.dart';
 import '../screens/taquilla_reports_screen.dart';
 import '../screens/login_screen.dart';
+import '../screens/profile_screen.dart';
 import 'park_theme.dart';
 import 'park_glyph.dart';
 
@@ -40,7 +41,7 @@ class ParkShell extends StatelessWidget {
       return;
     }
     // Cashiers have an operational workspace, never a personal wallet/home.
-    if (api.currentUser?.role == 'operador' && [0, 1, 2].contains(index)) {
+    if (api.currentUser?.role == 'operador' && [0, 1, 2, 7].contains(index)) {
       index = 5;
     }
     final Widget page = switch (index) {
@@ -49,6 +50,7 @@ class ParkShell extends StatelessWidget {
       2 => WalletScreen(apiService: api),
       3 => ParkingScreen(apiService: api),
       4 => GateScreen(apiService: api, gateway: ApiGateGateway(api)),
+      7 => ProfileScreen(apiService: api),
       6 => TaquillaReportsScreen(apiService: api),
       _ => TaquillaScreen(apiService: api),
     };
@@ -90,6 +92,8 @@ class ParkShell extends StatelessWidget {
         (2, Icons.account_balance_wallet_outlined, 'Mi saldo'),
       ],
       (3, Icons.local_parking_outlined, 'Parqueadero'),
+      if (role != null && role != 'operador')
+        (7, Icons.person_outline, 'Usuario'),
       if (role == 'guard' || role == 'admin')
         (4, Icons.sensor_door_outlined, 'Portería'),
     ];

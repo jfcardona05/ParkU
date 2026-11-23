@@ -163,7 +163,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(requests.single.path, '/api/admin/recharges');
-        expect(find.text('Promedio por recarga'), findsOneWidget);
+        expect(find.text('Promedio por ingreso'), findsOneWidget);
         expect(find.text('\$35.000 COP'), findsOneWidget);
         await tapText(tester, 'Mes');
         expect(requests.last.queryParameters['period'], 'month');
@@ -198,6 +198,15 @@ void main() {
       await tester.tap(find.text('Abrir'));
       await tester.pumpAndSettle();
       expect(find.byType(TaquillaScreen), findsOneWidget);
+      expect(requests, isNot(contains('/api/admin/users')));
+      final search = find.widgetWithText(
+        TextField,
+        'Buscar usuario por nombre, documento o correo',
+      );
+      await tester.ensureVisible(search);
+      await tester.enterText(search, 'Juan');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
       expect(requests, contains('/api/admin/users'));
       expect(
         requests.any((p) => p.contains('/wallet') || p.contains('/vehicles')),
@@ -252,7 +261,7 @@ void main() {
       await tapText(tester, 'Mes');
       expect(requests.last.queryParameters['period'], 'month');
       await tester.enterText(find.byType(TextField), 'ronaldo@test.co');
-      await tapText(tester, 'Buscar recargas');
+      await tapText(tester, 'Buscar ingresos');
       expect(requests.last.queryParameters['search'], 'ronaldo@test.co');
       await tapText(tester, 'Siguiente');
       expect(requests.last.queryParameters['page'], '1');
@@ -299,7 +308,7 @@ void main() {
       await tapText(tester, 'Reintentar');
       expect(find.text('\$0 COP'), findsOneWidget);
       expect(
-        find.text('No hay recargas para los filtros seleccionados.'),
+        find.text('No hay ingresos para los filtros seleccionados.'),
         findsOneWidget,
       );
     },
@@ -350,7 +359,19 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(reports, 0);
-      expect(find.text('Historial de recargas'), findsNothing);
+      expect(find.text('Historial de ingresos'), findsNothing);
+      final search = find.widgetWithText(
+        TextField,
+        'Buscar usuario por nombre, documento o correo',
+      );
+      await tester.ensureVisible(search);
+      await tester.enterText(search, 'Juan');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      final recipient = find.widgetWithText(ListTile, 'Juan');
+      await tester.ensureVisible(recipient);
+      await tester.tap(recipient);
+      await tester.pumpAndSettle();
       await tester.enterText(
         find.widgetWithText(TextField, 'Importe recibido en efectivo (COP)'),
         '20000',

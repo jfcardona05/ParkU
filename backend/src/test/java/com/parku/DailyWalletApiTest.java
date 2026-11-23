@@ -71,14 +71,18 @@ class DailyWalletApiTest {
           "unused",
           role);
       db.update(
-          "INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,CURRENT_TIMESTAMP+INTERVAL '1 hour')",
+          "INSERT INTO sessions(token_hash,user_id,expires_at)"
+              + " VALUES(?,?,CURRENT_TIMESTAMP+INTERVAL '1 hour')",
           VehicleQrService.digest("s" + i),
           i);
     }
+    db.update("UPDATE users SET document_type='CC',document_number='10000'||id");
     db.update(
-        "INSERT INTO vehicles(user_id,plate,type) VALUES(1,'CAR123','automovil'),(2,'MOT123','moto'),(1,'ALT123','moto')");
+        "INSERT INTO vehicles(user_id,plate,type)"
+            + " VALUES(1,'CAR123','automovil'),(2,'MOT123','moto'),(1,'ALT123','moto')");
     db.update(
-        "INSERT INTO parking_rates(vehicle_type,amount,block_seconds,minimum_blocks) VALUES('moto',4000,3600,1),('automovil',5000,3600,1)");
+        "INSERT INTO parking_rates(vehicle_type,amount,block_seconds,minimum_blocks)"
+            + " VALUES('moto',4000,3600,1),('automovil',5000,3600,1)");
     db.update("UPDATE parking_settings SET capacity=NULL WHERE id=1");
   }
 
@@ -97,7 +101,17 @@ class DailyWalletApiTest {
     return call(
         HttpMethod.POST,
         "/api/wallet/transfers",
-        Map.of("recipient_email", to, "amount", amount, "request_id", key),
+        Map.of(
+            "recipient_document_type",
+            "CC",
+            "recipient_document_number",
+            to.trim().toLowerCase().matches("user[1-5]@test.co")
+                ? "10000" + to.trim().charAt(4)
+                : to.contains("@") ? "99999999" : "invalid",
+            "amount",
+            amount,
+            "request_id",
+            key),
         from);
   }
 
@@ -134,10 +148,13 @@ class DailyWalletApiTest {
           statement.execute(resource.getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
         }
         statement.execute(
-            "INSERT INTO users(name,email,password_hash,role,balance) VALUES('Historic','historic@test.co','unused','estudiante',9000)");
+            "INSERT INTO users(name,email,password_hash,role,balance)"
+                + " VALUES('Historic','historic@test.co','unused','estudiante',9000)");
         statement.execute("INSERT INTO vehicles(user_id,plate,type) VALUES(1,'OLD123','moto')");
         statement.execute(
-            "INSERT INTO transactions(user_id,operator_id,type,amount,point_name,reference,balance_after) VALUES(1,1,'RECARGA_PRESENCIAL',10000,'Punto histórico','"
+            "INSERT INTO"
+                + " transactions(user_id,operator_id,type,amount,point_name,reference,balance_after)"
+                + " VALUES(1,1,'RECARGA_PRESENCIAL',10000,'Punto histórico','"
                 + UUID.randomUUID()
                 + "',9000)");
         var migration =
@@ -415,8 +432,10 @@ class DailyWalletApiTest {
               HttpMethod.POST,
               "/api/wallet/transfers",
               Map.of(
-                  "recipient_email",
-                  "user2@test.co",
+                  "recipient_document_type",
+                  "CC",
+                  "recipient_document_number",
+                  "100002",
                   "amount",
                   amount,
                   "request_id",
@@ -495,9 +514,11 @@ class DailyWalletApiTest {
   @Test
   void failuresAfterDebitsRollbackEveryChange() {
     db.execute(
-        "CREATE FUNCTION test_reject_daily() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'test rollback'; END $$");
+        "CREATE FUNCTION test_reject_daily() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE"
+            + " EXCEPTION 'test rollback'; END $$");
     db.execute(
-        "CREATE TRIGGER reject_daily BEFORE INSERT ON parking_day_passes FOR EACH ROW EXECUTE FUNCTION test_reject_daily()");
+        "CREATE TRIGGER reject_daily BEFORE INSERT ON parking_day_passes FOR EACH ROW EXECUTE"
+            + " FUNCTION test_reject_daily()");
     try {
       assertThat(issue(1, "s1").getStatusCode().value()).isEqualTo(500);
     } finally {
@@ -508,9 +529,11 @@ class DailyWalletApiTest {
     assertThat(count("vehicle_qr")).isZero();
     assertThat(count("transactions")).isZero();
     db.execute(
-        "CREATE FUNCTION test_reject_transfer() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'test rollback'; END $$");
+        "CREATE FUNCTION test_reject_transfer() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE"
+            + " EXCEPTION 'test rollback'; END $$");
     db.execute(
-        "CREATE TRIGGER reject_transfer BEFORE INSERT ON wallet_transfers FOR EACH ROW EXECUTE FUNCTION test_reject_transfer()");
+        "CREATE TRIGGER reject_transfer BEFORE INSERT ON wallet_transfers FOR EACH ROW EXECUTE"
+            + " FUNCTION test_reject_transfer()");
     try {
       assertThat(transfer("s1", "user2@test.co", 3000, "rollback").getStatusCode().value())
           .isEqualTo(500);

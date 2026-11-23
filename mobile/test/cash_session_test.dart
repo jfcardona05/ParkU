@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,7 @@ import 'package:parku_mobile/services/api_service.dart';
 import 'package:parku_mobile/screens/taquilla_screen.dart';
 import 'package:parku_mobile/ui/park_theme.dart';
 import 'package:parku_mobile/exports/cash_receipt.dart';
+
 import 'support/cash_fixtures.dart';
 
 http.Response json(Object value, [int status = 200]) => http.Response(
@@ -137,7 +139,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Historial de recargas'), findsNothing);
+      expect(find.text('Historial de ingresos'), findsNothing);
       final recharge = find.widgetWithText(
         FilledButton,
         'Registrar abono en taquilla',
@@ -146,6 +148,16 @@ void main() {
       await tester.enterText(input('Base de apertura para devueltas'), '10000');
       await tap(tester, 'Abrir caja');
       await tap(tester, 'Confirmar');
+      await tester.enterText(
+        input('Buscar usuario por nombre, documento o correo'),
+        'Juan',
+      );
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      final recipient = find.widgetWithText(ListTile, 'Juan');
+      await tester.ensureVisible(recipient);
+      await tester.tap(recipient);
+      await tester.pumpAndSettle();
       await tester.enterText(
         input('Importe recibido en efectivo (COP)'),
         '20000',
@@ -162,10 +174,10 @@ void main() {
       await tap(tester, 'Cerrar caja y generar comprobante');
       await tap(tester, 'Confirmar');
       expect(closes, 1);
-      expect(find.text('Historial de recargas'), findsNothing);
+      expect(find.text('Historial de ingresos'), findsNothing);
       await tap(tester, 'Abrir reportes de caja');
       expect(find.text('Cierres de caja'), findsOneWidget);
-      expect(find.text('Historial de recargas'), findsOneWidget);
+      expect(find.text('Historial de ingresos'), findsOneWidget);
       await tap(tester, 'Ver comprobante de cierre');
       expect(find.text('Efectivo a entregar: 22.000 COP'), findsOneWidget);
       expect(tester.takeException(), isNull);

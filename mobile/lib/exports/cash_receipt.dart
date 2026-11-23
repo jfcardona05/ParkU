@@ -18,7 +18,7 @@ String cashReceiptHtml(Map<String, dynamic> row) {
     'Apertura': date(row['opened_at']),
     'Cierre': date(row['closed_at']),
     'Base inicial': amount('opening_amount'),
-    'Recargas registradas': '${row['recharge_count']}',
+    'Ingresos registrados': '${row['recharge_count']}',
     'Recaudo en efectivo': amount('recharge_total'),
     'Efectivo esperado': amount('expected_cash'),
     'Efectivo contado': amount('counted_cash'),
@@ -31,6 +31,6 @@ String cashReceiptHtml(Map<String, dynamic> row) {
 <style>body{font:16px system-ui;color:#171725;max-width:760px;margin:32px auto;padding:20px}h1{border-bottom:8px solid #ffdb4d;padding-bottom:16px}table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:12px;border-bottom:1px solid #ddd;overflow-wrap:anywhere}th{width:48%}p{overflow-wrap:anywhere}button{padding:12px;background:#ffdb4d;border:0;border-radius:10px}@media print{button{display:none}body{margin:0}}</style></head><body>
 <h1>ParkU · Comprobante diario de cierre</h1><p>Referencia: ${esc(row['reference'])}</p><table>${lines.entries.map((e) => '<tr><th>${esc(e.key)}</th><td>${esc(e.value)}</td></tr>').join()}</table>
 <p>Base inicial + recaudo = efectivo esperado. Contado − base retenida = efectivo a entregar.</p>
-<p>La base retenida queda para la próxima apertura del mismo punto. Este reporte incluye únicamente recargas presenciales de esta caja; no incluye transferencias ni cobros al saldo.</p>
+<p>La base retenida queda para la próxima apertura del mismo punto. Este reporte incluye recargas presenciales y pases diarios de visitantes de esta caja; no incluye transferencias ni cobros al saldo.</p>
 <p>Comprobante interno de control de caja. No es una factura electrónica.</p><button onclick="window.print()">Imprimir / Guardar PDF</button></body></html>''';
 }

@@ -18,7 +18,8 @@ class TransferScreen extends StatefulWidget {
 
 class _TransferScreenState extends State<TransferScreen> {
   final _form = GlobalKey<FormState>();
-  final _email = TextEditingController();
+  final _document = TextEditingController();
+  String _documentType = 'CC';
   final _amount = TextEditingController();
   late Future<int> _balance;
   bool _busy = false;
@@ -33,7 +34,8 @@ class _TransferScreenState extends State<TransferScreen> {
     _balance = widget.apiService.getBalance();
     final draft = widget.apiService.pendingTransfer;
     if (draft != null) {
-      _email.text = draft.email;
+      _document.text = draft.documentNumber;
+      _documentType = draft.documentType;
       _amount.text = draft.amount.toString();
       _error =
           'Hay una transferencia pendiente de confirmación. Reintenta para comprobar su resultado sin enviarla dos veces.';
@@ -42,7 +44,7 @@ class _TransferScreenState extends State<TransferScreen> {
 
   @override
   void dispose() {
-    _email.dispose();
+    _document.dispose();
     _amount.dispose();
     super.dispose();
   }
@@ -51,14 +53,14 @@ class _TransferScreenState extends State<TransferScreen> {
     if (_busy) return;
     if (!_pending) {
       if (!_form.currentState!.validate()) return;
-      final email = _email.text.trim().toLowerCase();
+      final document = _document.text.trim();
       final amount = int.parse(_amount.text);
       final accepted = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Confirmar transferencia'),
           content: Text(
-            'Enviar ${_money.format(amount)} COP a $email desde tu saldo ParkU.',
+            'Enviar ${_money.format(amount)} COP a $_documentType $document desde tu saldo ParkU.',
           ),
           actions: [
             TextButton(
@@ -76,7 +78,8 @@ class _TransferScreenState extends State<TransferScreen> {
       final bytes = List.generate(16, (_) => Random.secure().nextInt(256));
       final key = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
       widget.apiService.pendingTransfer = WalletTransferDraft(
-        email,
+        _documentType,
+        document,
         amount,
         key,
       );
@@ -88,7 +91,8 @@ class _TransferScreenState extends State<TransferScreen> {
     });
     try {
       final result = await widget.apiService.transfer(
-        recipientEmail: draft.email,
+        recipientDocumentType: draft.documentType,
+        recipientDocumentNumber: draft.documentNumber,
         amount: draft.amount,
         requestId: draft.requestId,
       );
@@ -130,7 +134,7 @@ class _TransferScreenState extends State<TransferScreen> {
       children: [
         const ParkHeading(
           'Tu saldo, compartido.',
-          'Envía saldo ParkU a otro usuario por su correo.',
+          'Envía saldo ParkU a otro usuario por su documento de identidad.',
         ),
         ParkColumns(
           children: [
@@ -170,7 +174,7 @@ class _TransferScreenState extends State<TransferScreen> {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 16),
-                      Text('Para: ${_receipt!["recipient_email"]}'),
+                      Text('Para: ${_receipt!["recipient_document"]}'),
                       const SizedBox(height: 12),
                       Text(
                         'Referencia: ${_receipt!["transfer_id"]}',
@@ -182,26 +186,57 @@ class _TransferScreenState extends State<TransferScreen> {
                         child: const Text('Volver a mi saldo'),
                       ),
                     ] else ...[
+                      DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        initialValue: _documentType,
+                        decoration: const InputDecoration(
+                          labelText: 'Tipo de documento',
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'CC',
+                            child: Text(
+                              'Cédula de ciudadanía',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'TI',
+                            child: Text(
+                              'Tarjeta de identidad',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                        onChanged: _busy || _pending
+                            ? null
+                            : (v) => setState(() => _documentType = v!),
+                      ),
+                      const SizedBox(height: 20),
                       TextFormField(
-                        controller: _email,
+                        controller: _document,
                         enabled: !_busy && !_pending,
-                        keyboardType: TextInputType.emailAddress,
+                        keyboardType: TextInputType.number,
                         textCapitalization: TextCapitalization.none,
                         decoration: const InputDecoration(
-                          labelText: 'Correo del destinatario',
-                          hintText: 'usuario@correo.com',
+                          labelText: 'Documento del destinatario',
+                          hintText: 'Número sin puntos ni espacios',
                         ),
                         validator: (value) {
-                          final email = value?.trim().toLowerCase() ?? '';
-                          if (!RegExp(
-                            r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                          ).hasMatch(email)) {
-                            return 'Escribe un correo válido.';
+                          final document = value?.trim() ?? '';
+                          if (!RegExp(r'^[0-9]{5,15}$').hasMatch(document)) {
+                            return 'Escribe entre 5 y 15 dígitos.';
                           }
-                          if (email ==
-                              widget.apiService.currentUser?.email
-                                  .toLowerCase()) {
-                            return 'Elige el correo de otro usuario.';
+                          if (document ==
+                                  widget
+                                      .apiService
+                                      .currentUser
+                                      ?.documentNumber &&
+                              _documentType ==
+                                  widget.apiService.currentUser?.documentType) {
+                            return 'Elige el documento de otro usuario.';
                           }
                           return null;
                         },
@@ -263,7 +298,7 @@ class _TransferScreenState extends State<TransferScreen> {
                   ),
                   SizedBox(height: 28),
                   Text(
-                    'El destinatario debe estar registrado en ParkU. Confirma su correo y el importe antes de enviar.',
+                    'El destinatario debe estar registrado en ParkU. Confirma su documento y el importe antes de enviar.',
                   ),
                   SizedBox(height: 20),
                   Text(

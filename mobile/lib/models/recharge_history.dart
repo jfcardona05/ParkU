@@ -1,5 +1,8 @@
 class RechargeRecord {
   final int id;
+  final String incomeType;
+  final String plate;
+  final int? visitorPassId;
   final int amount;
   final String userName;
   final String userEmail;
@@ -8,6 +11,9 @@ class RechargeRecord {
   final String reference;
   final DateTime createdAt;
   const RechargeRecord({
+    this.incomeType = 'RECARGA_USUARIO',
+    this.plate = '',
+    this.visitorPassId,
     required this.id,
     required this.amount,
     required this.userName,
@@ -18,6 +24,9 @@ class RechargeRecord {
     required this.createdAt,
   });
   factory RechargeRecord.fromJson(Map<String, dynamic> json) => RechargeRecord(
+    incomeType: json['income_type'] as String? ?? 'RECARGA_USUARIO',
+    plate: json['plate'] as String? ?? '',
+    visitorPassId: (json['visitor_pass_id'] as num?)?.toInt(),
     id: (json['id'] as num).toInt(),
     amount: (json['amount'] as num).toInt(),
     userName: json['user_name'] as String,

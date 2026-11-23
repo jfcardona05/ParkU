@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'dart:async';
+
+import '../widgets/visitor_sale_form.dart';
 import '../services/api_service.dart';
 import '../widgets/cash_session_card.dart';
 import '../models/user_model.dart';
@@ -23,7 +26,11 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
   String _selectedPoint = 'Punto 1 - Portería Principal USTA';
   int? _selectedUserId;
   List<UserModel> _users = [];
-  bool _isLoadingUsers = true;
+  bool _isLoadingUsers = false;
+  bool _visitor = false;
+  final _search = TextEditingController();
+  Timer? _debounce;
+  int _searchVersion = 0;
   bool _isSubmitting = false;
   String? _errorMessage;
   Map<String, dynamic>? _lastReceipt;
@@ -35,33 +42,44 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUsers();
+    _visitor = widget.apiService.pendingVisitorSale != null;
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _search.dispose();
     _amountController.dispose();
     super.dispose();
   }
 
   Future<void> _fetchUsers() async {
+    final query = _search.text.trim();
+    final version = ++_searchVersion;
+    if (query.length < 2) {
+      setState(() {
+        _users = [];
+        _isLoadingUsers = false;
+      });
+      return;
+    }
     if (!mounted) return;
     setState(() {
       _isLoadingUsers = true;
       _errorMessage = null;
     });
     try {
-      final list = await widget.apiService.getUsers();
-      if (!mounted) return;
+      final list = await widget.apiService.getUsers(search: query);
+      if (!mounted || version != _searchVersion) return;
       setState(() {
         _users = list.where((u) => u.role != 'operador').toList();
         if (!_users.any((u) => u.id == _selectedUserId)) {
-          _selectedUserId = _users.isEmpty ? null : _users.first.id;
+          _selectedUserId = null;
         }
         _isLoadingUsers = false;
       });
     } on ApiException catch (e) {
-      if (!mounted) return;
+      if (!mounted || version != _searchVersion) return;
       setState(() {
         _errorMessage = e.message;
         _isLoadingUsers = false;
@@ -186,153 +204,222 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
               retry: _isSubmitting ? null : _fetchUsers,
             ),
           ),
-        ParkColumns(
-          flex: const [6, 5],
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
           children: [
-            ParkCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const ParkIcon(Icons.point_of_sale_outlined),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Recarga presencial',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 24),
-                  if (_isLoadingUsers)
-                    const Center(child: CircularProgressIndicator())
-                  else if (_users.isEmpty)
-                    const Text('No hay usuarios disponibles.')
-                  else
-                    DropdownButtonFormField<int>(
-                      key: ValueKey(_selectedUserId),
-                      initialValue: _selectedUserId,
-                      isExpanded: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Usuario destinatario',
-                      ),
-                      items: [
-                        for (final user in _users)
-                          DropdownMenuItem(
-                            value: user.id,
-                            child: Text(
-                              '${user.name} · ${user.email}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                      ],
-                      onChanged: _isSubmitting || _cashBusy || !_canRecharge
-                          ? null
-                          : (value) => setState(() => _selectedUserId = value),
-                    ),
-                  const SizedBox(height: 18),
-                  Text(
-                    _canRecharge
-                        ? 'Punto de caja: $_selectedPoint'
-                        : 'Abre una caja para registrar recargas.',
-                  ),
-                  const SizedBox(height: 18),
-                  TextField(
-                    controller: _amountController,
-                    enabled: !_isSubmitting && !_cashBusy && _canRecharge,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Importe recibido en efectivo (COP)',
-                      prefixText: '\$ ',
-                      hintText: '10000',
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final amount in [4000, 5000, 20000])
-                        ActionChip(
-                          label: Text('\$$amount'),
-                          onPressed: _isSubmitting || _cashBusy || !_canRecharge
-                              ? null
-                              : () =>
-                                    _amountController.text = amount.toString(),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed:
-                        _isSubmitting ||
-                            _cashBusy ||
-                            !_canRecharge ||
-                            _isLoadingUsers ||
-                            _users.isEmpty
-                        ? null
-                        : _handleRecharge,
-                    child: Text(
-                      _isSubmitting
-                          ? 'Registrando…'
-                          : 'Registrar abono en taquilla',
-                    ),
-                  ),
-                ],
-              ),
+            ChoiceChip(
+              label: const Text('Recarga usuario'),
+              selected: !_visitor,
+              onSelected:
+                  _isSubmitting ||
+                      _cashBusy ||
+                      widget.apiService.pendingVisitorSale != null
+                  ? null
+                  : (v) => setState(() => _visitor = false),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const ParkCard(
-                  color: ParkColors.yellow,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ParkIcon(Icons.account_balance_wallet_outlined),
-                      SizedBox(height: 24),
-                      Text(
-                        'Cada abono,\ncon su comprobante.',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Text(
-                        'Confirma el destinatario y el efectivo recibido. La recarga se refleja en el saldo y los movimientos del usuario.',
-                      ),
-                      SizedBox(height: 24),
-                      ParkBadge('Solo operador autorizado'),
-                    ],
-                  ),
-                ),
-                if (_lastReceipt != null) ...[
-                  const SizedBox(height: 20),
-                  ParkCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const ParkBadge('Recarga registrada', success: true),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Comprobante de recarga',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 16),
-                        Text('Importe: +\$${_lastReceipt!['amount']} COP'),
-                        Text(
-                          'Saldo posterior: \$${_lastReceipt!['balance_after']} COP',
-                        ),
-                        const SizedBox(height: 12),
-                        Text('Punto: ${_lastReceipt!['point_name']}'),
-                        Text('Referencia: ${_lastReceipt!['reference']}'),
-                        Text('Fecha: ${_lastReceipt!['created_at']}'),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
+            ChoiceChip(
+              label: const Text('Pase diario visitante'),
+              selected: _visitor,
+              onSelected: _isSubmitting || _cashBusy
+                  ? null
+                  : (v) => setState(() => _visitor = true),
             ),
           ],
         ),
+        const SizedBox(height: 20),
+        if (_visitor)
+          VisitorSaleForm(
+            api: widget.apiService,
+            enabled: _canRecharge && !_cashBusy,
+            pointName: _selectedPoint,
+            onBusy: (v) => setState(() => _isSubmitting = v),
+            onSold: () => setState(() => _cashVersion++),
+          )
+        else
+          ParkColumns(
+            flex: const [6, 5],
+            children: [
+              ParkCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const ParkIcon(Icons.point_of_sale_outlined),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Recarga presencial',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: _search,
+                      enabled: !_isSubmitting && !_cashBusy,
+                      decoration: const InputDecoration(
+                        labelText:
+                            'Buscar usuario por nombre, documento o correo',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: (value) {
+                        _debounce?.cancel();
+                        _searchVersion++;
+                        setState(() {
+                          _selectedUserId = null;
+                          _users = [];
+                          _isLoadingUsers = false;
+                        });
+                        _debounce = Timer(
+                          const Duration(milliseconds: 350),
+                          _fetchUsers,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    if (_isLoadingUsers)
+                      const LinearProgressIndicator()
+                    else if (_search.text.trim().length < 2)
+                      const Text('Escribe al menos 2 caracteres para buscar.')
+                    else if (_users.isEmpty)
+                      const Text('No se encontraron usuarios.')
+                    else
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 260),
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: [
+                            for (final user in _users)
+                              Material(
+                                color: Colors.transparent,
+                                child: ListTile(
+                                  selected: _selectedUserId == user.id,
+                                  selectedTileColor: ParkColors.yellow
+                                      .withValues(alpha: .25),
+                                  title: Text(user.name),
+                                  subtitle: Text(
+                                    '${user.email}${user.documentNumber == null ? '' : ' · ${user.documentType} ${user.documentNumber}'}',
+                                  ),
+                                  trailing: _selectedUserId == user.id
+                                      ? const Icon(Icons.check_circle_outline)
+                                      : null,
+                                  onTap:
+                                      _isSubmitting ||
+                                          _cashBusy ||
+                                          !_canRecharge
+                                      ? null
+                                      : () => setState(
+                                          () => _selectedUserId = user.id,
+                                        ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 18),
+                    Text(
+                      _canRecharge
+                          ? 'Punto de caja: $_selectedPoint'
+                          : 'Abre una caja para registrar recargas.',
+                    ),
+                    const SizedBox(height: 18),
+                    TextField(
+                      controller: _amountController,
+                      enabled: !_isSubmitting && !_cashBusy && _canRecharge,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Importe recibido en efectivo (COP)',
+                        prefixText: '\$ ',
+                        hintText: '10000',
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final amount in [4000, 5000, 20000])
+                          ActionChip(
+                            label: Text('\$$amount'),
+                            onPressed:
+                                _isSubmitting || _cashBusy || !_canRecharge
+                                ? null
+                                : () => _amountController.text = amount
+                                      .toString(),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton(
+                      onPressed:
+                          _isSubmitting ||
+                              _cashBusy ||
+                              !_canRecharge ||
+                              _isLoadingUsers ||
+                              _selectedUserId == null
+                          ? null
+                          : _handleRecharge,
+                      child: Text(
+                        _isSubmitting
+                            ? 'Registrando…'
+                            : 'Registrar abono en taquilla',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const ParkCard(
+                    color: ParkColors.yellow,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ParkIcon(Icons.account_balance_wallet_outlined),
+                        SizedBox(height: 24),
+                        Text(
+                          'Cada abono,\ncon su comprobante.',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          'Confirma el destinatario y el efectivo recibido. La recarga se refleja en el saldo y los movimientos del usuario.',
+                        ),
+                        SizedBox(height: 24),
+                        ParkBadge('Solo operador autorizado'),
+                      ],
+                    ),
+                  ),
+                  if (_lastReceipt != null) ...[
+                    const SizedBox(height: 20),
+                    ParkCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const ParkBadge('Recarga registrada', success: true),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Comprobante de recarga',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 16),
+                          Text('Importe: +\$${_lastReceipt!['amount']} COP'),
+                          Text(
+                            'Saldo posterior: \$${_lastReceipt!['balance_after']} COP',
+                          ),
+                          const SizedBox(height: 12),
+                          Text('Punto: ${_lastReceipt!['point_name']}'),
+                          Text('Referencia: ${_lastReceipt!['reference']}'),
+                          Text('Fecha: ${_lastReceipt!['created_at']}'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
       ],
     ),
   );

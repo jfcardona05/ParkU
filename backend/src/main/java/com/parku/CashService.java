@@ -36,7 +36,8 @@ public class CashService {
 
   private Map<String, Object> totals(long id) {
     return db.queryForMap(
-        "SELECT COALESCE(SUM(amount),0)::bigint AS collected,COUNT(*) AS count FROM transactions WHERE cash_session_id=? AND type='RECARGA_PRESENCIAL'",
+        "SELECT COALESCE(SUM(amount),0)::bigint AS collected,COUNT(*) AS count FROM cash_income"
+            + " WHERE cash_session_id=?",
         id);
   }
 
@@ -65,7 +66,8 @@ public class CashService {
     for (var point : POINTS) {
       var last =
           db.queryForList(
-              "SELECT * FROM cash_sessions WHERE point_name=? ORDER BY business_date DESC,id DESC LIMIT 1",
+              "SELECT * FROM cash_sessions WHERE point_name=? ORDER BY business_date DESC,id DESC"
+                  + " LIMIT 1",
               point);
       var info = new LinkedHashMap<String, Object>();
       info.put("point_name", point);
@@ -106,7 +108,8 @@ public class CashService {
     }
     var last =
         db.queryForList(
-            "SELECT * FROM cash_sessions WHERE point_name=? ORDER BY business_date DESC,id DESC LIMIT 1",
+            "SELECT * FROM cash_sessions WHERE point_name=? ORDER BY business_date DESC,id DESC"
+                + " LIMIT 1",
             point);
     Long previous = null;
     if (!last.isEmpty()) {
@@ -123,12 +126,15 @@ public class CashService {
         throw new ApiProblem(
             409,
             "BASE_CHANGED",
-            "La base debe coincidir con el efectivo retenido en el último cierre. Actualiza el panel.");
+            "La base debe coincidir con el efectivo retenido en el último cierre. Actualiza el"
+                + " panel.");
       previous = number(row, "id");
     }
     var row =
         db.queryForMap(
-            "INSERT INTO cash_sessions(operator_id,point_name,business_date,opening_amount,previous_session_id,reference,opened_at) VALUES(?,?,?,?,?,?,?) RETURNING *",
+            "INSERT INTO"
+                + " cash_sessions(operator_id,point_name,business_date,opening_amount,previous_session_id,reference,opened_at)"
+                + " VALUES(?,?,?,?,?,?,?) RETURNING *",
             user.get("id"),
             point,
             today(),
@@ -143,7 +149,8 @@ public class CashService {
   public long lockForRecharge(long operator, String point, long amount) {
     var rows =
         db.queryForList(
-            "SELECT * FROM cash_sessions WHERE operator_id=? AND point_name=? AND status='OPEN' FOR UPDATE",
+            "SELECT * FROM cash_sessions WHERE operator_id=? AND point_name=? AND status='OPEN' FOR"
+                + " UPDATE",
             operator,
             point);
     if (rows.isEmpty())
@@ -193,7 +200,9 @@ public class CashService {
           400, "DIFFERENCE_REASON", "Explica el faltante o sobrante antes de cerrar.");
     row =
         db.queryForMap(
-            "UPDATE cash_sessions SET status='CLOSED',closed_at=?,recharge_total=?,recharge_count=?,expected_cash=?,counted_cash=?,retained_cash=?,remitted_cash=?,difference=?,notes=? WHERE id=? RETURNING *",
+            "UPDATE cash_sessions SET"
+                + " status='CLOSED',closed_at=?,recharge_total=?,recharge_count=?,expected_cash=?,counted_cash=?,retained_cash=?,remitted_cash=?,difference=?,notes=?"
+                + " WHERE id=? RETURNING *",
             OffsetDateTime.now(clock),
             collected,
             total.get("count"),
@@ -220,7 +229,10 @@ public class CashService {
     }
     var rows =
         db.queryForList(
-            "SELECT c.*,u.name AS operator_name FROM cash_sessions c JOIN users u ON u.id=c.operator_id WHERE c.status='CLOSED' AND (?::date IS NULL OR c.business_date=?::date) ORDER BY c.business_date DESC,c.id DESC LIMIT 21 OFFSET ?",
+            "SELECT c.*,u.name AS operator_name FROM cash_sessions c JOIN users u ON"
+                + " u.id=c.operator_id WHERE c.status='CLOSED' AND (?::date IS NULL OR"
+                + " c.business_date=?::date) ORDER BY c.business_date DESC,c.id DESC LIMIT 21"
+                + " OFFSET ?",
             date,
             date,
             page * 20L);
