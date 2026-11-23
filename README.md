@@ -142,3 +142,20 @@ Cambiar correo o contraseña invalida las otras sesiones y conserva la actual.
 
 La migración V10 añade estos datos sin inventar documentos para cuentas antiguas
 ni modificar sus saldos. Los cierres históricos permanecen como fueron registrados.
+
+### Renovación visual responsive
+
+Inicio prioriza el acceso al QR y el saldo antes de la disponibilidad futura.
+El menú de tableta muestra iconos y nombres; los paneles se distribuyen en dos
+columnas a partir de 600 px útiles de contenido. En móvil, los botones y campos
+conservan tamaño táctil y la navegación resalta la sección activa. El acceso y
+registro no muestran navegación de una cuenta que aún no inició sesión.
+
+Las ilustraciones locales incluyen un compacto azul, un crossover marfil y una
+moto amarilla. Se usan según el contexto y el tipo de vehículo y se identifican
+como ilustraciones de referencia en las tarjetas personales. QR y otras vistas
+operativas evitan repetir imágenes decorativas. Los formularios y la caja
+mantienen las mismas API, permisos, validaciones y confirmaciones de cobro.
+
+La validación visual incluye perfil, motos, pases visitantes y comprobantes,
+además de las pantallas principales, en 390, 834 y 1440 px.

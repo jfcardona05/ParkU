@@ -156,7 +156,7 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
       children: [
         const ParkHeading(
           'Centro de operaciones',
-          'Gestiona recargas presenciales y consulta la actividad de taquilla.',
+          'Recargas y pases diarios, en un solo lugar.',
         ),
         CashSessionCard(
           api: widget.apiService,
@@ -170,7 +170,7 @@ class _TaquillaScreenState extends State<TaquillaScreen> {
             }
           }),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 14),
         Align(
           alignment: Alignment.centerLeft,
           child: OutlinedButton.icon(

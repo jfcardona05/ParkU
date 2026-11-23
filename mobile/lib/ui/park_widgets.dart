@@ -11,7 +11,7 @@ class ParkCard extends StatelessWidget {
     super.key,
     required this.child,
     this.color = Colors.white,
-    this.padding = const EdgeInsets.all(24),
+    this.padding = const EdgeInsets.all(22),
   });
   @override
   Widget build(BuildContext context) => Container(
@@ -20,6 +20,11 @@ class ParkCard extends StatelessWidget {
     decoration: BoxDecoration(
       color: color,
       borderRadius: BorderRadius.circular(24),
+      border: Border.all(
+        color: color == Colors.white
+            ? const Color(0xFFE8EBE4)
+            : Colors.transparent,
+      ),
     ),
     child: child,
   );
@@ -34,8 +39,8 @@ class ParkColumns extends StatelessWidget {
     super.key,
     required this.children,
     this.flex,
-    this.breakpoint = 720,
-    this.gap = 24,
+    this.breakpoint = 600,
+    this.gap = 20,
   });
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -82,10 +87,10 @@ class ParkHeading extends StatelessWidget {
               Text(
                 title,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontSize: MediaQuery.sizeOf(context).width < 760 ? 28 : 36,
+                  fontSize: MediaQuery.sizeOf(context).width < 760 ? 28 : 34,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
@@ -136,28 +141,64 @@ class ParkFeatures extends StatelessWidget {
   final List<(IconData, String, String)> items;
   const ParkFeatures({super.key, required this.items});
   @override
-  Widget build(BuildContext context) => ParkColumns(
-    breakpoint: 650,
-    children: [
-      for (final (index, item) in items.indexed)
-        ParkCard(
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, size) {
+      if (size.maxWidth < 650) {
+        return ParkCard(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ParkGlyph(
-                index == 0
-                    ? Icons.directions_car_outlined
-                    : Icons.local_parking_outlined,
-                size: 28,
-              ),
-              const SizedBox(height: 12),
-              Text(item.$2, style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              Text(item.$3, style: Theme.of(context).textTheme.bodySmall),
+              for (final (i, item) in items.indexed) ...[
+                if (i > 0)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1),
+                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ParkGlyph(item.$1, size: 24),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.$2,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            item.$3,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
-        ),
-    ],
+        );
+      }
+      return ParkColumns(
+        children: [
+          for (final item in items)
+            ParkCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ParkGlyph(item.$1, size: 28),
+                  const SizedBox(height: 12),
+                  Text(item.$2, style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Text(item.$3, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+        ],
+      );
+    },
   );
 }
 
@@ -180,23 +221,34 @@ class ParkNotice extends StatelessWidget {
   );
 }
 
-/// Original Figma car, bundled locally in its design slot without stretching.
+/// Illustrative vehicles, bundled locally; never a photograph of the user's actual vehicle.
 class ParkCar extends StatelessWidget {
   final bool motorcycle;
   final double maxWidth;
-  const ParkCar({super.key, this.motorcycle = false, this.maxWidth = 350});
+  final bool crossover;
+  const ParkCar({
+    super.key,
+    this.motorcycle = false,
+    this.maxWidth = 350,
+    this.crossover = false,
+  });
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: Align(
-      alignment: Alignment.centerLeft,
-      heightFactor: 1,
+      alignment: Alignment.center,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: AspectRatio(
-          aspectRatio: 490 / 213.15,
-          child: motorcycle
-              ? const Center(child: Icon(Icons.two_wheeler_outlined, size: 88))
-              : Image.asset('assets/figma/43925.png', fit: BoxFit.contain),
+          aspectRatio: 1.95,
+          child: Image.asset(
+            motorcycle
+                ? 'assets/vehicles/motorcycle-yellow.png'
+                : crossover
+                ? 'assets/vehicles/crossover-ivory.png'
+                : 'assets/vehicles/compact-blue.png',
+            fit: BoxFit.contain,
+            cacheWidth: 1000,
+          ),
         ),
       ),
     ),
@@ -209,18 +261,25 @@ class ParkAvailabilitySoon extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ParkCard(
     color: yellow ? ParkColors.yellow : Colors.white,
+    padding: const EdgeInsets.all(20),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const ParkIcon(Icons.local_parking_outlined),
-        const SizedBox(height: 18),
-        Text(
-          'Cupos de parqueadero',
-          style: Theme.of(context).textTheme.titleMedium,
+        Row(
+          children: [
+            const Icon(Icons.local_parking_outlined, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Cupos de parqueadero',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 24),
-        Text('Próximamente', style: Theme.of(context).textTheme.headlineMedium),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
+        const ParkBadge('Próximamente'),
+        const SizedBox(height: 10),
         Text(
           'La disponibilidad estará aquí cuando se habilite el control de ingresos.',
           style: Theme.of(context).textTheme.bodySmall,

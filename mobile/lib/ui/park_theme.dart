@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 abstract final class ParkColors {
   static const ink = Color(0xFF171725);
-  static const muted = Color(0xFF777783);
-  static const background = Color(0xFFF7F7F4);
+  static const muted = Color(0xFF626572);
+  static const background = Color(0xFFF6F7F4);
   static const yellow = Color(0xFFFFDB4D);
+  static const yellowLight = Color(0xFFFFF3C4);
   static const green = Color(0xFF227654);
   static const greenLight = Color(0xFFEAF5EE);
 }
@@ -46,7 +47,7 @@ ThemeData parkTheme() => ThemeData(
       color: ParkColors.ink,
     ),
     bodyLarge: TextStyle(fontSize: 15, height: 1.5, color: ParkColors.ink),
-    bodyMedium: TextStyle(fontSize: 13, height: 1.5, color: ParkColors.ink),
+    bodyMedium: TextStyle(fontSize: 14, height: 1.5, color: ParkColors.ink),
     bodySmall: TextStyle(fontSize: 12, height: 1.5, color: ParkColors.muted),
   ),
   appBarTheme: const AppBarTheme(
@@ -58,8 +59,8 @@ ThemeData parkTheme() => ThemeData(
     style: FilledButton.styleFrom(
       backgroundColor: ParkColors.yellow,
       foregroundColor: ParkColors.ink,
-      minimumSize: const Size(48, 74),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      minimumSize: const Size(48, 54),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       textStyle: const TextStyle(
         fontFamily: 'Manrope',
@@ -73,7 +74,7 @@ ThemeData parkTheme() => ThemeData(
       backgroundColor: ParkColors.yellow,
       foregroundColor: ParkColors.ink,
       elevation: 0,
-      minimumSize: const Size(48, 74),
+      minimumSize: const Size(48, 54),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
   ),
@@ -96,6 +97,19 @@ ThemeData parkTheme() => ThemeData(
       borderRadius: BorderRadius.circular(12),
       borderSide: const BorderSide(color: ParkColors.ink, width: 1.5),
     ),
+  ),
+  chipTheme: ChipThemeData(
+    backgroundColor: Colors.white,
+    selectedColor: ParkColors.yellow,
+    side: const BorderSide(color: Color(0xFFE5E7E1)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    labelStyle: const TextStyle(
+      fontFamily: 'Manrope',
+      fontSize: 12,
+      color: ParkColors.ink,
+      fontWeight: FontWeight.w600,
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
   ),
   dividerColor: const Color(0xFFECECE8),
   progressIndicatorTheme: const ProgressIndicatorThemeData(

@@ -178,19 +178,15 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      widget.vehicle.plate,
+                      'QR · ${widget.vehicle.plate}',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'QR · ${widget.vehicle.plate}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    Text(
                       widget.vehicle.isMoto ? 'Moto' : 'Automóvil',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 18),
                     if (_loading)
                       const Padding(
                         padding: EdgeInsets.all(50),
@@ -217,7 +213,6 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 12),
-                      const Text('Presenta este QR en portería.'),
                       if (_qr!.daily) ...[
                         const SizedBox(height: 12),
                         Text(
@@ -225,10 +220,6 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 12),
-                        const Text(
-                          'Al escanearlo se muestran tu nombre, placa y tipo de vehículo.',
-                          textAlign: TextAlign.center,
-                        ),
                       ],
                     ],
                     if (_daily &&
@@ -245,7 +236,7 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
                         textAlign: TextAlign.center,
                       ),
                     ],
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 18),
                     if (widget.source.isDemo)
                       const Text(
                         'DEMOSTRACIÓN · No autoriza acceso real',
@@ -287,7 +278,7 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: 32),
+                    SizedBox(height: 20),
                     Text(
                       'Un pase por usuario y día. Se cobra al generar el QR según tu vehículo. Podrás consultar el mismo código hasta medianoche, sin volver a pagar.',
                     ),
@@ -300,7 +291,11 @@ class _VehicleQrScreenState extends State<VehicleQrScreen> {
                       ),
                     ),
                     SizedBox(height: 24),
-                    ParkCar(),
+                    Icon(
+                      Icons.verified_user_outlined,
+                      size: 72,
+                      color: ParkColors.ink,
+                    ),
                   ],
                 ),
               ),

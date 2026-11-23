@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
               'MENOS VUELTAS. MÁS TIEMPO.',
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
             ),
-          SizedBox(height: mobile ? 0 : 16),
+          SizedBox(height: mobile ? 0 : 14),
           Text(
             'Tu parqueadero,\nmás fácil.',
             style: mobile
@@ -108,9 +108,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ).textTheme.headlineMedium?.copyWith(fontSize: 28)
                 : Theme.of(
                     context,
-                  ).textTheme.headlineLarge?.copyWith(fontSize: 55),
+                  ).textTheme.headlineLarge?.copyWith(fontSize: 46),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
           Text(
             mobile
                 ? 'Bienvenido a ParkU'
@@ -119,9 +119,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? Theme.of(context).textTheme.bodySmall
                 : Theme.of(context).textTheme.bodyLarge,
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
           ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: mobile ? 300 : 490),
+            constraints: BoxConstraints(maxWidth: mobile ? 250 : 490),
             child: const ParkCar(maxWidth: 490),
           ),
         ],
@@ -220,8 +220,8 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           ParkColumns(
             flex: const [600, 492],
-            gap: 40,
-            breakpoint: 760,
+            gap: 24,
+            breakpoint: 700,
             children: [intro, form],
           ),
           if (!mobile) ...[

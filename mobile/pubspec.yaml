@@ -25,6 +25,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/figma/
+    - assets/vehicles/
   fonts:
     - family: Manrope
       fonts:
