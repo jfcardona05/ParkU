@@ -7,6 +7,9 @@ import 'package:http/testing.dart';
 import 'package:parku_mobile/screens/parking_screen.dart';
 import 'package:parku_mobile/models/user_model.dart';
 import 'package:parku_mobile/services/api_service.dart';
+import 'package:parku_mobile/widgets/cashier_parking_overview.dart';
+
+import 'support/cash_fixtures.dart';
 
 void main() {
   testWidgets(
@@ -17,6 +20,9 @@ void main() {
           ApiService(
               client: MockClient((request) async {
                 paths.add(request.url.path);
+                if (request.url.path == '/api/cash/current') {
+                  return http.Response(jsonEncode(cashCurrent()), 200);
+                }
                 if (request.url.path != '/api/parking/rates') {
                   throw StateError(
                     'Unexpected personal request: ${request.url}',
@@ -45,7 +51,117 @@ void main() {
       expect(find.text('Mis vehículos'), findsNothing);
       expect(find.text('Tu vehículo'), findsNothing);
       expect(find.text('Tarifas vigentes'), findsOneWidget);
-      expect(paths, ['/api/parking/rates']);
+      expect(find.text('Resumen de tu caja'), findsOneWidget);
+      expect(find.text('Caja abierta'), findsOneWidget);
+      expect(find.text('20.000 COP'), findsOneWidget);
+      expect(find.text('10.000 COP'), findsOneWidget);
+      expect(find.text('30.000 COP'), findsOneWidget);
+      expect(find.text('Ir al panel de caja'), findsOneWidget);
+      expect(find.text('Consultar reportes'), findsOneWidget);
+      expect(
+        paths,
+        unorderedEquals(['/api/parking/rates', '/api/cash/current']),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'cash summary is responsive and distinguishes no session and stale turn',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      for (final width in [390.0, 1440.0]) {
+        tester.view.physicalSize = Size(width, 900);
+        for (final mode in ['closed', 'open', 'stale']) {
+          final data = cashCurrent(active: mode != 'closed');
+          if (mode == 'stale') {
+            (data['session'] as Map<String, dynamic>)['can_recharge'] = false;
+          }
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: CashierParkingSummary(data: data),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(
+            find.text(
+              mode == 'closed'
+                  ? 'Sin caja abierta'
+                  : mode == 'open'
+                  ? 'Caja abierta'
+                  : 'Cierre pendiente',
+            ),
+            findsOneWidget,
+          );
+          expect(
+            find.text('20.000 COP'),
+            mode == 'closed' ? findsNothing : findsOneWidget,
+          );
+          expect(tester.takeException(), isNull);
+        }
+      }
+    },
+  );
+
+  testWidgets(
+    'cash error can retry without hiding rates or inventing amounts',
+    (tester) async {
+      var fail = true;
+      final api =
+          ApiService(
+              client: MockClient((request) async {
+                if (request.url.path == '/api/parking/rates') {
+                  return http.Response(jsonEncode({'rates': []}), 200);
+                }
+                if (request.url.path == '/api/cash/current') {
+                  if (fail) {
+                    return http.Response(
+                      '{"message":"Caja sin conexión"}',
+                      503,
+                      headers: {
+                        'content-type': 'application/json; charset=utf-8',
+                      },
+                    );
+                  }
+                  return http.Response(
+                    jsonEncode(cashCurrent(active: false)),
+                    200,
+                  );
+                }
+                throw StateError(request.url.path);
+              }),
+            )
+            ..setToken('cashier')
+            ..setCurrentUser(
+              UserModel(
+                id: 3,
+                name: 'Caja',
+                email: 'caja@test.co',
+                role: 'operador',
+                balance: 0,
+              ),
+            );
+      await tester.pumpWidget(
+        MaterialApp(home: ParkingScreen(apiService: api)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Tarifas vigentes'), findsOneWidget);
+      expect(find.text('Caja sin conexión'), findsOneWidget);
+      expect(find.text('0 COP'), findsNothing);
+      fail = false;
+      await tester.ensureVisible(find.text('Reintentar'));
+      await tester.tap(find.text('Reintentar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Sin caja abierta'), findsOneWidget);
+      expect(find.text('Caja sin conexión'), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );

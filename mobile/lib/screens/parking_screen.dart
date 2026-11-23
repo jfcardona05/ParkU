@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
+import '../widgets/cashier_parking_overview.dart';
 import '../services/parking_service.dart';
 import '../ui/park_shell.dart';
 import '../ui/park_widgets.dart';
@@ -18,6 +19,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
   late Future<List<Map<String, dynamic>>> _rates;
   late Future<List<ParkedVehicle>> _vehicles;
   late Future<ParkingHistoryPage> _history;
+  late Future<Map<String, dynamic>> _cash;
   final List<Map<String, dynamic>> _moreOperations = [];
   ParkingHistoryPage? _lastPage;
   bool get _isCashier => widget.apiService.currentUser?.role == 'operador';
@@ -35,6 +37,9 @@ class _ParkingScreenState extends State<ParkingScreen> {
   void _startLoad() {
     _generation++;
     _rates = _service.getRates();
+    _cash = _isCashier
+        ? widget.apiService.request('GET', '/api/cash/current')
+        : Future.value({});
     _vehicles = _isCashier ? Future.value([]) : _service.getVehicles();
     _history = _isCashier
         ? Future.value(const ParkingHistoryPage([], null))
@@ -45,6 +50,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
     _pageError = null;
     // Each section displays its own error, even when another section is loading.
     _rates.ignore();
+    _cash.ignore();
     _vehicles.ignore();
     _history.ignore();
   }
@@ -53,6 +59,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
     setState(_startLoad);
     await Future.wait([
       _rates.then<void>((_) {}, onError: (_) {}),
+      _cash.then<void>((_) {}, onError: (_) {}),
       _vehicles.then<void>((_) {}, onError: (_) {}),
       _history.then<void>((_) {}, onError: (_) {}),
     ]);
@@ -184,6 +191,16 @@ class _ParkingScreenState extends State<ParkingScreen> {
             ),
           ],
         ),
+        if (_isCashier) ...[
+          const SizedBox(height: 20),
+          _section(
+            'Resumen de tu caja',
+            _cash,
+            (data) => CashierParkingSummary(data: data),
+          ),
+          const SizedBox(height: 20),
+          CashierParkingActions(api: widget.apiService),
+        ],
         if (!_isCashier) ...[
           const SizedBox(height: 20),
           _section('Tus últimos accesos', _history, (page) {
