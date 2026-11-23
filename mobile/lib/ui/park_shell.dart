@@ -74,8 +74,8 @@ class ParkShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final desktop = width >= 1100;
-    final rail = width >= 768;
     final role = api?.currentUser?.role;
+    final rail = width >= 768 && role != null;
     final roleName = switch (role) {
       'guard' => 'Portería',
       'admin' => 'Administración',
@@ -130,9 +130,9 @@ class ParkShell extends StatelessWidget {
       ],
     );
     Widget nav((int, IconData, String) item, {bool compact = false}) => Padding(
-      padding: const EdgeInsets.only(bottom: 26),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Tooltip(
-        message: compact ? item.$3 : '',
+        message: item.$3,
         child: Material(
           color: selected == item.$1 ? ParkColors.yellow : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
@@ -142,18 +142,23 @@ class ParkShell extends StatelessWidget {
                 ? null
                 : () => open(context, api!, item.$1),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ParkGlyph(item.$2, size: 22),
                   if (!compact) ...[
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     Flexible(
                       child: Text(
                         item.$3,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 14),
+                        style: TextStyle(
+                          fontSize: desktop ? 13 : 12,
+                          fontWeight: selected == item.$1
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -184,28 +189,17 @@ class ParkShell extends StatelessWidget {
           children: [
             if (rail)
               Container(
-                width: desktop ? 236 : 88,
+                width: desktop ? 224 : 168,
                 color: Colors.white,
                 padding: EdgeInsets.symmetric(
-                  horizontal: desktop ? 24 : 16,
+                  horizontal: desktop ? 20 : 12,
                   vertical: 24,
                 ),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (desktop)
-                        logo()
-                      else
-                        const Center(
-                          child: Text(
-                            'P',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 26,
-                            ),
-                          ),
-                        ),
+                      logo(),
                       const SizedBox(height: 26),
                       if (desktop)
                         Text(
@@ -221,7 +215,7 @@ class ParkShell extends StatelessWidget {
                       for (final item in items)
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: nav(item, compact: !desktop),
+                          child: nav(item),
                         ),
                       if (desktop)
                         Container(
@@ -354,14 +348,14 @@ class ParkShell extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: rail
+      bottomNavigationBar: rail || role == null
           ? null
           : SafeArea(
               top: false,
               child: Material(
                 color: Colors.white,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
                       for (final item in items)
@@ -370,7 +364,15 @@ class ParkShell extends StatelessWidget {
                             onTap: busy || api == null
                                 ? null
                                 : () => open(context, api!, item.$1),
-                            child: Padding(
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 160),
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
+                              decoration: BoxDecoration(
+                                color: selected == item.$1
+                                    ? ParkColors.yellowLight
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
                               padding: const EdgeInsets.symmetric(
                                 vertical: 8,
                                 horizontal: 1,
@@ -386,17 +388,20 @@ class ParkShell extends StatelessWidget {
                                         : ParkColors.muted,
                                   ),
                                   const SizedBox(height: 5),
-                                  Text(
-                                    item.$3,
-                                    maxLines: 1,
-                                    style: TextStyle(
-                                      fontSize: 9,
-                                      color: selected == item.$1
-                                          ? ParkColors.ink
-                                          : ParkColors.muted,
-                                      fontWeight: selected == item.$1
-                                          ? FontWeight.w700
-                                          : FontWeight.w400,
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      item.$3,
+                                      maxLines: 1,
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        color: selected == item.$1
+                                            ? ParkColors.ink
+                                            : ParkColors.muted,
+                                        fontWeight: selected == item.$1
+                                            ? FontWeight.w700
+                                            : FontWeight.w400,
+                                      ),
                                     ),
                                   ),
                                 ],

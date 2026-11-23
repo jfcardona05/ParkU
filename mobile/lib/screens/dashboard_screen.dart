@@ -76,7 +76,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ParkHeading('Hola, $name 👋', 'Todo listo para tu próxima entrada.'),
+          ParkHeading(
+            'Hola, $name',
+            'Todo listo para tu próxima entrada.',
+            action: const Padding(
+              padding: EdgeInsets.only(top: 5),
+              child: Icon(
+                Icons.waving_hand_outlined,
+                color: ParkColors.ink,
+                size: 26,
+              ),
+            ),
+          ),
           FutureBuilder(
             future: _data,
             builder: (context, snapshot) {
@@ -92,41 +103,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               }
               final (balance, vehicles, history) = snapshot.requireData;
-              final narrow = MediaQuery.sizeOf(context).width < 760;
-              final balanceAndSpaces = ParkColumns(
-                breakpoint: 480,
-                children: [
-                  BalanceCard(balance: balance),
-                  const ParkAvailabilitySoon(),
-                ],
-              );
               final hero = ParkCard(
                 color: ParkColors.yellow,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const ParkIcon(Icons.directions_car_outlined),
-                    const SizedBox(height: 18),
-                    const Text(
-                      'LLEGA. ESCANEA. PARQUEA.',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ParkColumns(
-                      breakpoint: 430,
-                      children: [
-                        Column(
+                child: LayoutBuilder(
+                  builder: (context, size) => Row(
+                    children: [
+                      Expanded(
+                        flex: 7,
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const Text(
+                              'TU PRÓXIMA ENTRADA',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.1,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
                             Text(
                               'Tu lugar empieza\ncon un QR.',
-                              style: Theme.of(context).textTheme.headlineMedium,
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(
+                                    fontSize: size.maxWidth < 420 ? 26 : 34,
+                                  ),
                             ),
                             const SizedBox(height: 18),
-                            FilledButton(
+                            FilledButton.icon(
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.white,
                               ),
@@ -137,36 +141,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       1,
                                     )
                                   : () => _qr(vehicles.first),
-                              child: Text(
+                              icon: const Icon(Icons.qr_code_2, size: 19),
+                              label: Text(
                                 vehicles.isEmpty
-                                    ? 'Registrar vehículo →'
+                                    ? 'Registrar vehículo'
                                     : 'Ver mi QR →',
                               ),
                             ),
                           ],
                         ),
-                        const ParkCar(maxWidth: 285),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        flex: 3,
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: .6),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: const FittedBox(
+                              child: Padding(
+                                padding: EdgeInsets.all(12),
+                                child: Icon(Icons.qr_code_2, size: 88),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (narrow) ...[balanceAndSpaces, const SizedBox(height: 20)],
                   ParkColumns(
                     flex: const [7, 4],
                     children: [
-                      Column(
-                        children: [
-                          hero,
-                          if (!narrow) ...[
-                            const SizedBox(height: 20),
-                            balanceAndSpaces,
-                          ],
-                        ],
-                      ),
+                      hero,
+                      BalanceCard(balance: balance),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  ParkColumns(
+                    flex: const [7, 4],
+                    children: [
                       if (vehicles.isEmpty)
                         const ParkNotice(
                           'Registra tu primer vehículo para generar un QR.',
@@ -178,6 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           api: widget.apiService,
                           onQr: () => _qr(vehicles.first),
                         ),
+                      const ParkAvailabilitySoon(),
                     ],
                   ),
                   const SizedBox(height: 20),

@@ -14,14 +14,14 @@ class BalanceCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Tu saldo disponible', style: TextStyle(fontSize: 12)),
-        const SizedBox(height: 32),
+        const SizedBox(height: 20),
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: Text(
             '\$${NumberFormat.decimalPattern('es_CO').format(balance)}',
             style: const TextStyle(
-              fontSize: 40,
+              fontSize: 36,
               fontWeight: FontWeight.w800,
               height: 1.2,
             ),
@@ -29,7 +29,7 @@ class BalanceCard extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         const Text('COP · Billetera ParkU', style: TextStyle(fontSize: 11)),
-        const SizedBox(height: 24),
+        const SizedBox(height: 14),
         const Divider(color: Color(0x66FFFFFF)),
         const SizedBox(height: 8),
         if (onRechargePressed != null)

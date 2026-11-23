@@ -221,7 +221,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const ParkCard(
-              color: ParkColors.yellow,
+              color: ParkColors.yellowLight,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

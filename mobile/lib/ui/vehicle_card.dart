@@ -67,9 +67,18 @@ class _ParkVehicleCardState extends State<ParkVehicleCard> {
                   : ' · ${widget.vehicle.brandModel}'),
           style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(height: 20),
-        ParkCar(motorcycle: widget.vehicle.isMoto, maxWidth: 270),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
+        ParkCar(
+          motorcycle: widget.vehicle.isMoto,
+          crossover: widget.vehicle.id.isEven,
+          maxWidth: 280,
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Ilustración de referencia',
+          style: TextStyle(fontSize: 10, color: Color(0xFF626572)),
+        ),
+        const SizedBox(height: 12),
         FutureBuilder<Map<String, dynamic>>(
           future: _status,
           builder: (context, snapshot) => ParkBadge(

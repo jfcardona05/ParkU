@@ -181,7 +181,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             const ParkCard(
-              color: ParkColors.yellow,
+              color: ParkColors.yellowLight,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -196,7 +196,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     'Registra tu vehículo y consulta tu saldo con una sola cuenta.',
                   ),
                   SizedBox(height: 24),
-                  ParkCar(),
+                  ParkCar(motorcycle: true),
                 ],
               ),
             ),

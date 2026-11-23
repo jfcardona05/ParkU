@@ -286,7 +286,7 @@ class _TransferScreenState extends State<TransferScreen> {
               ),
             ),
             const ParkCard(
-              color: ParkColors.yellow,
+              color: ParkColors.yellowLight,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

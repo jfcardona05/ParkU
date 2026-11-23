@@ -177,7 +177,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     'Tu QR es personal, temporal y de un solo uso. Genéralo antes de llegar a portería.',
                   ),
                   const SizedBox(height: 24),
-                  ParkCar(motorcycle: _selectedType == 'moto'),
+                  ParkCar(motorcycle: _selectedType == 'moto', crossover: true),
                 ],
               ),
             ),

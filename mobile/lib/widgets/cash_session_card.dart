@@ -194,6 +194,7 @@ class _CashSessionCardState extends State<CashSessionCard> {
 
   @override
   Widget build(BuildContext context) => ParkCard(
+    padding: EdgeInsets.all(_session == null ? 22 : 18),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -202,8 +203,8 @@ class _CashSessionCardState extends State<CashSessionCard> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
-              'Apertura y cierre de caja',
-              style: Theme.of(context).textTheme.titleLarge,
+              _session == null ? 'Apertura y cierre de caja' : 'Caja de hoy',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             TextButton.icon(
               onPressed: _busy || widget.disabled ? null : _load,
@@ -225,7 +226,7 @@ class _CashSessionCardState extends State<CashSessionCard> {
           ),
         if (!_loading && _session == null) ...[
           const Text('Caja cerrada · Abre el día antes de recibir efectivo.'),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           DropdownButtonFormField<String>(
             initialValue: _point,
             isExpanded: true,
@@ -245,7 +246,7 @@ class _CashSessionCardState extends State<CashSessionCard> {
                     _setBase();
                   }),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           if (_selected?['available'] == true) ...[
             _amount(
               _base,
@@ -258,7 +259,7 @@ class _CashSessionCardState extends State<CashSessionCard> {
                   ? 'Base heredada del último cierre de este punto.'
                   : 'Primera apertura: registra el efectivo inicial para devueltas.',
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             FilledButton.icon(
               onPressed: _busy || widget.disabled ? null : () => _submit(false),
               icon: const Icon(Icons.lock_open),
@@ -277,9 +278,12 @@ class _CashSessionCardState extends State<CashSessionCard> {
             'Caja abierta · ${_session!['business_date']}',
             success: true,
           ),
-          const SizedBox(height: 16),
-          Text('${_session!['point_name']}'),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
+          Text(
+            '${_session!['point_name']}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -299,7 +303,7 @@ class _CashSessionCardState extends State<CashSessionCard> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           if (_session!['can_recharge'] != true)
             const ParkNotice(
               'Esta caja corresponde al día anterior. Ciérrala y abre la de hoy para seguir recargando.',
@@ -317,14 +321,14 @@ class _CashSessionCardState extends State<CashSessionCard> {
             const Text(
               'Al finalizar, cuenta todo el efectivo, incluida la base inicial. El dinero para devueltas quedará reservado para la siguiente apertura.',
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             ParkColumns(
               children: [
                 _amount(_counted, 'Efectivo total contado'),
                 _amount(_retained, 'Base que queda para devueltas'),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             TextField(
               controller: _notes,
               enabled: !_busy && !widget.disabled,
@@ -334,7 +338,7 @@ class _CashSessionCardState extends State<CashSessionCard> {
                 labelText: 'Observaciones / motivo de diferencia',
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(foregroundColor: ParkColors.ink),
               onPressed: _busy || widget.disabled ? null : () => _submit(true),

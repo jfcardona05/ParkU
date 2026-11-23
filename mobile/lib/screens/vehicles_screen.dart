@@ -142,14 +142,22 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const ParkHeading('Tus vehículos', 'Tu QR seguro, siempre a mano.'),
+        ParkHeading(
+          'Tus vehículos',
+          'Tu QR seguro, siempre a mano.',
+          action: IconButton(
+            onPressed: _openAddVehicle,
+            tooltip: 'Agregar vehículo',
+            icon: const Icon(Icons.add_circle_outline),
+          ),
+        ),
         if (_isLoading)
           const Center(child: CircularProgressIndicator())
         else if (_loadError != null)
           LoadError(message: _loadError!, retry: _fetchVehicles)
         else ...[
           ParkColumns(
-            flex: const [4, 7],
+            flex: const [6, 5],
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -193,7 +201,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                       child: const Text('+ Agregar vehículo'),
                     ),
                     const SizedBox(height: 28),
-                    const ParkCar(),
+                    const ParkCar(crossover: true),
                   ],
                 ),
               ),
